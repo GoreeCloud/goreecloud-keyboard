@@ -7,16 +7,31 @@ import android.view.inputmethod.EditorInfo
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var shifted = false
+    private var keyboardView: KeyboardView? = null
 
-    override fun onCreateInputView(): View = KeyboardView(this).also {
-        it.listener = this
-        it.setShifted(shifted)
+    override fun onCreateInputView(): View {
+        return KeyboardView(this).also { view ->
+            keyboardView = view
+            view.listener = this
+            view.setShifted(shifted)
+        }
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         shifted = false
-        (inputView as? KeyboardView)?.setShifted(false)
+        keyboardView?.setShifted(false)
+    }
+
+    override fun onFinishInputView(finishingInput: Boolean) {
+        super.onFinishInputView(finishingInput)
+        shifted = false
+        keyboardView?.setShifted(false)
+    }
+
+    override fun onDestroy() {
+        keyboardView = null
+        super.onDestroy()
     }
 
     override fun onCharacter(value: Char) {
@@ -24,7 +39,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         currentInputConnection?.commitText(output.toString(), 1)
         if (shifted) {
             shifted = false
-            (inputView as? KeyboardView)?.setShifted(false)
+            keyboardView?.setShifted(false)
         }
     }
 
@@ -37,12 +52,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onEnter() {
-        currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
-        currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+        val connection = currentInputConnection ?: return
+        connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+        connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
     }
 
     override fun onShift() {
         shifted = !shifted
-        (inputView as? KeyboardView)?.setShifted(shifted)
+        keyboardView?.setShifted(shifted)
     }
 }
