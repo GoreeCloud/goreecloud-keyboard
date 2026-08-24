@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -41,13 +42,13 @@ class KeyboardView @JvmOverloads constructor(
         color = 0xFF172033.toInt()
         textAlign = Paint.Align.CENTER
         textSize = 20f * resources.displayMetrics.scaledDensity
-        typeface = android.graphics.Typeface.create("sans", android.graphics.Typeface.NORMAL)
+        typeface = Typeface.create("sans", Typeface.NORMAL)
     }
     private val suggestionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF334155.toInt()
         textAlign = Paint.Align.CENTER
         textSize = 14f * resources.displayMetrics.scaledDensity
-        typeface = android.graphics.Typeface.create("sans", android.graphics.Typeface.MEDIUM)
+        typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     }
     private val suggestionHintPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF64748B.toInt()
