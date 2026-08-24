@@ -7,6 +7,7 @@ import android.view.inputmethod.EditorInfo
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var shifted = false
+    private var sensitiveInput = false
     private var keyboardView: KeyboardView? = null
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
@@ -30,6 +31,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         shifted = false
+        sensitiveInput = InputPrivacyClassifier.isSensitive(info?.inputType ?: 0)
         composingWord.clear()
         keyboardView?.setShifted(false)
         updateSuggestions()
@@ -38,12 +40,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
         shifted = false
+        sensitiveInput = false
         composingWord.clear()
         keyboardView?.setShifted(false)
         updateSuggestions()
     }
 
     override fun onDestroy() {
+        composingWord.clear()
         keyboardView = null
         super.onDestroy()
     }
@@ -51,7 +55,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onCharacter(value: Char) {
         val output = if (shifted) value.uppercaseChar() else value
         currentInputConnection?.commitText(output.toString(), 1)
-        composingWord.append(output.lowercaseChar())
+        if (!sensitiveInput) {
+            composingWord.append(output.lowercaseChar())
+        }
         updateSuggestions()
 
         if (shifted) {
@@ -69,7 +75,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onBackspace() {
         val connection = currentInputConnection ?: return
         connection.deleteSurroundingText(1, 0)
-        if (composingWord.isNotEmpty()) {
+        if (!sensitiveInput && composingWord.isNotEmpty()) {
             composingWord.deleteCharAt(composingWord.lastIndex)
         }
         updateSuggestions()
@@ -89,6 +95,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onSuggestion(value: String) {
+        if (sensitiveInput) return
         val connection = currentInputConnection ?: return
         val prefixLength = composingWord.length
         if (prefixLength > 0) {
@@ -102,6 +109,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun updateSuggestions() {
+        if (sensitiveInput) {
+            keyboardView?.setSuggestions(emptyList())
+            return
+        }
         val suggestions = suggestionEngine.suggest(
             prefix = composingWord.toString(),
             dictionary = bootstrapDictionary
