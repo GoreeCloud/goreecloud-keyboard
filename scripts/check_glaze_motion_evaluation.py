@@ -53,7 +53,7 @@ def main() -> None:
         f'const val REFERENCE_REVISION = "{REFERENCE_REVISION}"',
         'const val VERSION = "0.5.0"',
         'const val RUNTIME_BASELINE = "0.4.0"',
-        "ValueAnimator.areAnimatorsEnabled()",
+        "Settings.Global.ANIMATOR_DURATION_SCALE",
         "allowsOptionalSettling(",
         "KeyboardView(context)",
         "dispatchTouchEvent(event)",
