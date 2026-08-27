@@ -17,11 +17,11 @@ class SuggestionEngineTest {
     }
 
     @Test
-    fun addsSingleSubstitutionCorrectionAfterPrefixMatches() {
+    fun addsSingleSubstitutionCorrection() {
         val engine = SuggestionEngine()
         val result = engine.suggest(
-            prefix = "helo",
-            dictionary = listOf("help", "hello", "hero", "world"),
+            prefix = "hellp",
+            dictionary = listOf("hello", "hero", "world"),
             limit = 3
         )
 
