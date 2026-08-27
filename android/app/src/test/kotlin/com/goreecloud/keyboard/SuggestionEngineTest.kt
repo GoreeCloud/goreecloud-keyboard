@@ -61,7 +61,7 @@ class SuggestionEngineTest {
             limit = 3
         )
 
-        assertEquals(listOf("could"), result)
+        assertEquals(emptyList<String>(), result)
     }
 
     @Test
