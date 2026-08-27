@@ -15,4 +15,58 @@ class SuggestionEngineTest {
 
         assertEquals(listOf("goal", "good"), result)
     }
+
+    @Test
+    fun addsSingleSubstitutionCorrectionAfterPrefixMatches() {
+        val engine = SuggestionEngine()
+        val result = engine.suggest(
+            prefix = "helo",
+            dictionary = listOf("help", "hello", "hero", "world"),
+            limit = 3
+        )
+
+        assertEquals(listOf("hello"), result)
+    }
+
+    @Test
+    fun recognizesAdjacentTranspositionLocally() {
+        val engine = SuggestionEngine()
+        val result = engine.suggest(
+            prefix = "teh",
+            dictionary = listOf("the", "then", "them"),
+            limit = 3
+        )
+
+        assertEquals(listOf("the"), result)
+    }
+
+    @Test
+    fun doesNotRunCorrectionPassForVeryShortInput() {
+        val engine = SuggestionEngine()
+        val result = engine.suggest(
+            prefix = "gi",
+            dictionary = listOf("go", "hi", "git"),
+            limit = 3
+        )
+
+        assertEquals(listOf("git"), result)
+    }
+
+    @Test
+    fun rejectsCorrectionsMoreThanOneEditAway() {
+        val engine = SuggestionEngine()
+        val result = engine.suggest(
+            prefix = "cloud",
+            dictionary = listOf("clown", "could", "goreecloud"),
+            limit = 3
+        )
+
+        assertEquals(listOf("could"), result)
+    }
+
+    @Test
+    fun returnsNothingForNonPositiveLimit() {
+        val engine = SuggestionEngine()
+        assertEquals(emptyList<String>(), engine.suggest("go", listOf("good"), limit = 0))
+    }
 }
