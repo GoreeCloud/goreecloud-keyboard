@@ -1,8 +1,8 @@
 package com.goreecloud.keyboard
 
-import android.animation.ValueAnimator
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.provider.Settings
 import android.view.MotionEvent
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
@@ -33,9 +33,20 @@ private object GlazeMotionExperimental {
 class GlazeMotionExperimentalKeyboardRuntimeTest {
     @Test
     fun disabledPlatformAnimationsCollapseOptionalMotionWithoutBlockingKeyCommit() {
-        assertFalse(ValueAnimator.areAnimatorsEnabled())
-        assertEquals(0L, GlazeMotionExperimental.durationMs(reducedMotion = true))
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val animatorScale = Settings.Global.getFloat(
+            context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f
+        )
+        assertEquals("CI must disable the Android animator duration scale", 0f, animatorScale, 0f)
+        assertEquals(
+            "Reduced-motion semantic duration must collapse",
+            0L,
+            GlazeMotionExperimental.durationMs(reducedMotion = true)
+        )
         assertFalse(
+            "Optional settling must be rejected under reduced motion",
             GlazeMotionExperimental.allowsOptionalSettling(
                 reducedMotion = true,
                 activeSettling = 0
@@ -53,9 +64,9 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         val y = keyboardTop + rowHeight / 2f
 
         dispatch(view, MotionEvent.ACTION_DOWN, x, y)
-        assertTrue(events.isEmpty())
+        assertTrue("Press-down must not commit semantic input", events.isEmpty())
         dispatch(view, MotionEvent.ACTION_UP, x, y)
-        assertEquals(listOf("q"), events)
+        assertEquals("Release must commit the real q key exactly once", listOf("q"), events)
     }
 
     @Test
@@ -69,7 +80,7 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         val cellWidth = (view.width - horizontalPadding * 2f) / 3f
         dispatch(view, MotionEvent.ACTION_UP, horizontalPadding + cellWidth / 2f, 21f * density)
 
-        assertEquals(listOf("hello"), selected)
+        assertEquals("Suggestion hit-testing must remain authoritative", listOf("hello"), selected)
         assertEquals("0.5.0", GlazeMotionExperimental.VERSION)
         assertEquals("0.4.0", GlazeMotionExperimental.RUNTIME_BASELINE)
         assertEquals(90L, GlazeMotionExperimental.durationMs(reducedMotion = false))
