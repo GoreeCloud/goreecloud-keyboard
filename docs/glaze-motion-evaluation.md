@@ -8,7 +8,7 @@ Production dependency: **no**
 
 ## Purpose
 
-This evaluation maps Glaze Motion 0.5 Motion Core semantics to GoreeCloud Keyboard's real first-party Android `KeyboardView` interaction surface without importing or activating Experimental Motion in production source.
+This historical evaluation maps Glaze Motion 0.5 Motion Core semantics to GoreeCloud Keyboard's real first-party Android `KeyboardView` interaction surface without importing or activating Experimental Motion in production source.
 
 The bounded evaluation checks actual key and suggestion activation behavior under an Android emulator with platform animations disabled, then applies the 0.5 test-only semantic policy for press timing and optional settling.
 
@@ -22,4 +22,4 @@ The bounded evaluation checks actual key and suggestion activation behavior unde
 
 ## Boundary
 
-Glaze UI 1.6 Stable remains the production design-system authority. This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or switch-access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for Candidate promotion by itself.
+Glaze UI 2.0 Stable is the production design-system authority. This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or switch-access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for Candidate promotion by itself and does not establish adoption of a later Glaze Motion revision.
