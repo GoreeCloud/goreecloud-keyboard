@@ -22,4 +22,4 @@ The bounded evaluation checks actual key and suggestion activation behavior unde
 
 ## Boundary
 
-Glaze UI 1.5 Stable remains the production design-system authority. This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or switch-access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for Candidate promotion by itself.
+Glaze UI 1.6 Stable remains the production design-system authority. This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or switch-access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for Candidate promotion by itself.
