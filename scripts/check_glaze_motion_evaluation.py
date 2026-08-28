@@ -9,7 +9,7 @@ MAIN = ROOT / "android/app/src/main"
 KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-STABLE_REVISION = "ff3fff4306bd53ea9c0715a7c0d64265bb038617"
+STABLE_REVISION = "d19c576336881e44c4795d687d768b3cbb7bdf45"
 MARKER = "GlazeMotionExperimental"
 
 
@@ -48,6 +48,9 @@ def main() -> None:
         f"Reviewed canonical Stable revision: `{STABLE_REVISION}`",
         "Production eligible on the Glaze UI gate: **no**",
         "48 dp general interaction floor",
+        "14 dp `radius.md` token",
+        "Dark maps the canonical canvas",
+        "Deep Dark remains unimplemented",
         "Glaze UI 2.0 Stable is the production design-system authority.",
         "Experimental Glaze Motion remains test-only and is not a production dependency.",
     ]
@@ -60,20 +63,26 @@ def main() -> None:
         "Glaze UI 1.6 Stable remains the production design-system authority.",
         "Required Stable baseline: **Glaze UI 1.5.0**",
         "Glaze UI 1.5 Stable remains the production design-system authority.",
+        "12 dp medium utility radius",
     ):
         if stale in adoption_text or stale in doc_text:
             fail(f"stale Stable adoption boundary remains active: `{stale}`")
 
     required_tokens = [
+        "enum class Appearance { LIGHT, DARK }",
         "const val Space1Dp = 4f",
         "const val Space2Dp = 8f",
-        "const val RadiusMediumDp = 12f",
+        "const val RadiusMediumDp = 14f",
         "const val GeneralInteractionFloorDp = 48f",
         "const val SuggestionStripHeightDp = GeneralInteractionFloorDp",
         "0xFFEEF3F9",
         "0xC2FFFFFF",
         "0xFF172033",
         "0xFF67748A",
+        "0xFF0D1119",
+        "0xC719202D",
+        "0xFFF3F6FB",
+        "0xFFA1AEC0",
     ]
     for evidence in required_tokens:
         if evidence not in token_text:
@@ -94,8 +103,10 @@ def main() -> None:
 
     required_consumer = [
         "class KeyboardView",
-        "GlazeKeyboardTokens.LightCanvasArgb",
-        "GlazeKeyboardTokens.LightSurfaceArgb",
+        "Configuration.UI_MODE_NIGHT_MASK",
+        "GlazeKeyboardTokens.Appearance.DARK",
+        "GlazeKeyboardTokens.Appearance.LIGHT",
+        "GlazeKeyboardTokens.palette(appearance)",
         "GlazeKeyboardTokens.SuggestionStripHeightDp",
         "GlazeKeyboardTokens.RadiusMediumDp",
         "override fun onTouchEvent(event: MotionEvent)",
@@ -119,7 +130,7 @@ def main() -> None:
 
     print(
         "Glaze UI 2.0 Keyboard Adoption Candidate + Glaze Motion 0.5 test-only boundary passed: "
-        "current Stable source/evidence mapping validated and Experimental Motion remains quarantined."
+        "current Stable Light/Dark source mapping validated and Experimental Motion remains quarantined."
     )
 
 
