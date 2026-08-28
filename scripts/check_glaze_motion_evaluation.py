@@ -8,7 +8,7 @@ TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeM
 MAIN = ROOT / "android/app/src/main"
 KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-STABLE_REVISION = "2e1618397f6ebcdd254a76bfdd7e98846f2c5aa3"
+STABLE_REVISION = "9dcd39dad0ade79fb01dfb1b6b39f6bf2c167471"
 MARKER = "GlazeMotionExperimental"
 
 
@@ -32,6 +32,7 @@ def main() -> None:
         "Runtime compatibility baseline: **0.4.0**",
         "Evaluation mode: **native Android interaction mapping, test-only**",
         "Production dependency: **no**",
+        "Glaze UI 1.6 Stable remains the production design-system authority.",
         "insufficient for Candidate promotion by itself",
     ]
     for evidence in required_doc:
@@ -39,15 +40,25 @@ def main() -> None:
             fail(f"missing lifecycle or evidence boundary `{evidence}`")
 
     required_adoption = [
+        "# Glaze UI 1.6 Adoption Candidate — GoreeCloud Keyboard",
         "Status: **Adoption Candidate**",
-        "Required Stable baseline: **Glaze UI 1.5.0**",
+        "Required Stable baseline: **Glaze UI 1.6.0**",
         f"Reviewed canonical Stable revision: `{STABLE_REVISION}`",
         "Production eligible on the Glaze UI gate: **no**",
+        "1.6 Adaptive Workspace acceptance where applicable",
+        "Glaze UI 1.6 Stable remains the production design-system authority.",
         "Experimental Glaze Motion is not a production dependency.",
     ]
     for evidence in required_adoption:
         if evidence not in adoption_text:
             fail(f"missing Glaze UI adoption boundary `{evidence}`")
+
+    for stale in (
+        "Required Stable baseline: **Glaze UI 1.5.0**",
+        "Glaze UI 1.5 Stable remains the production design-system authority.",
+    ):
+        if stale in adoption_text or stale in doc_text:
+            fail(f"stale Stable adoption boundary remains active: `{stale}`")
 
     required_test = [
         f'const val REFERENCE_REVISION = "{REFERENCE_REVISION}"',
@@ -84,8 +95,8 @@ def main() -> None:
         )
 
     print(
-        "Glaze Motion 0.5 Keyboard test-only evaluation boundary passed: "
-        "native interaction surface mapped, production source remains quarantined."
+        "Glaze UI 1.6 Keyboard Adoption Candidate + Glaze Motion 0.5 test-only boundary passed: "
+        "current Stable adoption evidence validated and Experimental Motion remains quarantined."
     )
 
 
