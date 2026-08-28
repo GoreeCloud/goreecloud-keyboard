@@ -31,27 +31,31 @@ class KeyboardView @JvmOverloads constructor(
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
 
-    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFF6F8FC.toInt() }
-    private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt() }
+    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = GlazeKeyboardTokens.LightCanvasArgb
+    }
+    private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = GlazeKeyboardTokens.LightSurfaceArgb
+    }
     private val keyStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x1F0F172A
+        color = 0x1F172033
         style = Paint.Style.STROKE
         strokeWidth = resources.displayMetrics.density
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF172033.toInt()
+        color = GlazeKeyboardTokens.LightOnSurfaceArgb
         textAlign = Paint.Align.CENTER
         textSize = 20f * resources.displayMetrics.scaledDensity
         typeface = Typeface.create("sans", Typeface.NORMAL)
     }
     private val suggestionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF334155.toInt()
+        color = GlazeKeyboardTokens.LightOnSurfaceArgb
         textAlign = Paint.Align.CENTER
         textSize = 14f * resources.displayMetrics.scaledDensity
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     }
     private val suggestionHintPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF64748B.toInt()
+        color = GlazeKeyboardTokens.LightOnSurfaceMutedArgb
         textAlign = Paint.Align.CENTER
         textSize = 13f * resources.displayMetrics.scaledDensity
     }
@@ -97,11 +101,12 @@ class KeyboardView @JvmOverloads constructor(
         hitSuggestions.clear()
 
         val density = resources.displayMetrics.density
-        val horizontalPadding = 6f * density
-        val gap = 5f * density
-        val topArea = 42f * density
-        val keyboardTop = topArea + 4f * density
+        val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
+        val gap = GlazeKeyboardTokens.Space1Dp * density
+        val topArea = GlazeKeyboardTokens.SuggestionStripHeightDp * density
+        val keyboardTop = topArea + GlazeKeyboardTokens.Space2Dp * density
         val rowHeight = max(1f, (height - keyboardTop - gap * 5) / rows.size)
+        val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density
 
         drawSuggestionStrip(canvas, horizontalPadding, topArea, density)
 
@@ -114,8 +119,8 @@ class KeyboardView @JvmOverloads constructor(
             row.forEach { key ->
                 val keyWidth = availableWidth * (key.weight / totalWeight)
                 val bounds = RectF(left, top, left + keyWidth, top + rowHeight)
-                canvas.drawRoundRect(bounds, 12f * density, 12f * density, keyPaint)
-                canvas.drawRoundRect(bounds, 12f * density, 12f * density, keyStrokePaint)
+                canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyPaint)
+                canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyStrokePaint)
 
                 val label = if (key.action == Action.CHARACTER && shifted) {
                     key.label.uppercase()
@@ -130,10 +135,11 @@ class KeyboardView @JvmOverloads constructor(
 
     private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float, density: Float) {
         if (suggestions.isEmpty()) {
+            val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(
                 "Quill suggestions stay on-device",
                 width / 2f,
-                26f * density,
+                baseline,
                 suggestionHintPaint
             )
             return
