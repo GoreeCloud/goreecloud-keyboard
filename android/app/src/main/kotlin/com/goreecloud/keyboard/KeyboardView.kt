@@ -1,6 +1,7 @@
 package com.goreecloud.keyboard
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
@@ -31,31 +32,23 @@ class KeyboardView @JvmOverloads constructor(
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
 
-    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = GlazeKeyboardTokens.LightCanvasArgb
-    }
-    private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = GlazeKeyboardTokens.LightSurfaceArgb
-    }
+    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x1F172033
         style = Paint.Style.STROKE
         strokeWidth = resources.displayMetrics.density
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = GlazeKeyboardTokens.LightOnSurfaceArgb
         textAlign = Paint.Align.CENTER
         textSize = 20f * resources.displayMetrics.scaledDensity
         typeface = Typeface.create("sans", Typeface.NORMAL)
     }
     private val suggestionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = GlazeKeyboardTokens.LightOnSurfaceArgb
         textAlign = Paint.Align.CENTER
         textSize = 14f * resources.displayMetrics.scaledDensity
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     }
     private val suggestionHintPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = GlazeKeyboardTokens.LightOnSurfaceMutedArgb
         textAlign = Paint.Align.CENTER
         textSize = 13f * resources.displayMetrics.scaledDensity
     }
@@ -96,6 +89,7 @@ class KeyboardView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        applyCurrentAppearance()
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
         hitKeys.clear()
         hitSuggestions.clear()
@@ -108,7 +102,7 @@ class KeyboardView @JvmOverloads constructor(
         val rowHeight = max(1f, (height - keyboardTop - gap * 5) / rows.size)
         val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density
 
-        drawSuggestionStrip(canvas, horizontalPadding, topArea, density)
+        drawSuggestionStrip(canvas, horizontalPadding, topArea)
 
         rows.forEachIndexed { rowIndex, row ->
             val totalWeight = row.sumOf { it.weight.toDouble() }.toFloat()
@@ -133,7 +127,23 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
-    private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float, density: Float) {
+    private fun applyCurrentAppearance() {
+        val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val appearance = if (nightMode == Configuration.UI_MODE_NIGHT_YES) {
+            GlazeKeyboardTokens.Appearance.DARK
+        } else {
+            GlazeKeyboardTokens.Appearance.LIGHT
+        }
+        val palette = GlazeKeyboardTokens.palette(appearance)
+        backgroundPaint.color = palette.canvasArgb
+        keyPaint.color = palette.surfaceArgb
+        keyStrokePaint.color = palette.lineArgb
+        textPaint.color = palette.onSurfaceArgb
+        suggestionPaint.color = palette.onSurfaceArgb
+        suggestionHintPaint.color = palette.onSurfaceMutedArgb
+    }
+
+    private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
         if (suggestions.isEmpty()) {
             val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(
