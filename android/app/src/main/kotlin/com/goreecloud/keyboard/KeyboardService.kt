@@ -23,6 +23,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         return KeyboardView(this).also { view ->
             keyboardView = view
             view.listener = this
+            view.setLayer(KeyboardLayer.LETTERS)
             view.setShifted(shifted)
             updateSuggestions()
         }
@@ -33,6 +34,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         shifted = false
         sensitiveInput = InputPrivacyClassifier.isSensitive(info?.inputType ?: 0)
         composingWord.clear()
+        keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         updateSuggestions()
     }
@@ -42,6 +44,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         shifted = false
         sensitiveInput = false
         composingWord.clear()
+        keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         updateSuggestions()
     }
@@ -53,10 +56,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onCharacter(value: Char) {
-        val output = if (shifted) value.uppercaseChar() else value
+        val output = if (shifted && value.isLetter()) value.uppercaseChar() else value
         currentInputConnection?.commitText(output.toString(), 1)
         if (!sensitiveInput) {
-            composingWord.append(output.lowercaseChar())
+            if (output.isLetter()) {
+                composingWord.append(output.lowercaseChar())
+            } else {
+                composingWord.clear()
+            }
         }
         updateSuggestions()
 
@@ -104,6 +111,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         connection.commitText("$value ", 1)
         composingWord.clear()
         shifted = false
+        keyboardView?.setShifted(false)
+        updateSuggestions()
+    }
+
+    override fun onLayerChanged(layer: KeyboardLayer) {
+        shifted = false
+        composingWord.clear()
         keyboardView?.setShifted(false)
         updateSuggestions()
     }

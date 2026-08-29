@@ -23,12 +23,13 @@ class KeyboardView @JvmOverloads constructor(
         fun onEnter()
         fun onShift()
         fun onSuggestion(value: String)
+        fun onLayerChanged(layer: KeyboardLayer)
     }
 
     var listener: Listener? = null
 
     private data class Key(val label: String, val weight: Float = 1f, val action: Action)
-    private enum class Action { CHARACTER, SHIFT, BACKSPACE, SPACE, ENTER }
+    private enum class Action { CHARACTER, SHIFT, BACKSPACE, SPACE, ENTER, MODE }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
 
@@ -53,25 +54,20 @@ class KeyboardView @JvmOverloads constructor(
         textSize = 13f * resources.displayMetrics.scaledDensity
     }
 
-    private val rows = listOf(
-        "qwertyuiop".map { Key(it.toString(), action = Action.CHARACTER) },
-        "asdfghjkl".map { Key(it.toString(), action = Action.CHARACTER) },
-        listOf(Key("⇧", 1.25f, Action.SHIFT)) +
-            "zxcvbnm".map { Key(it.toString(), action = Action.CHARACTER) } +
-            listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
-        listOf(
-            Key("space", 5f, Action.SPACE),
-            Key("↵", 1.4f, Action.ENTER)
-        )
-    )
-
     private val hitKeys = mutableListOf<HitKey>()
     private val hitSuggestions = mutableListOf<HitSuggestion>()
     private var shifted = false
     private var suggestions: List<String> = emptyList()
+    private var layer = KeyboardLayer.LETTERS
 
     fun setShifted(value: Boolean) {
-        shifted = value
+        shifted = value && layer == KeyboardLayer.LETTERS
+        invalidate()
+    }
+
+    fun setLayer(value: KeyboardLayer) {
+        layer = value
+        if (layer != KeyboardLayer.LETTERS) shifted = false
         invalidate()
     }
 
@@ -94,6 +90,7 @@ class KeyboardView @JvmOverloads constructor(
         hitKeys.clear()
         hitSuggestions.clear()
 
+        val rows = currentRows()
         val density = resources.displayMetrics.density
         val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
         val gap = GlazeKeyboardTokens.Space1Dp * density
@@ -116,7 +113,7 @@ class KeyboardView @JvmOverloads constructor(
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyPaint)
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyStrokePaint)
 
-                val label = if (key.action == Action.CHARACTER && shifted) {
+                val label = if (key.action == Action.CHARACTER && shifted && layer == KeyboardLayer.LETTERS) {
                     key.label.uppercase()
                 } else key.label
                 val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
@@ -126,6 +123,36 @@ class KeyboardView @JvmOverloads constructor(
             }
         }
     }
+
+    private fun currentRows(): List<List<Key>> {
+        val characterRows = KeyboardLayout.characterRows(layer)
+        return when (layer) {
+            KeyboardLayer.LETTERS -> listOf(
+                characterRows[0].map(::characterKey),
+                characterRows[1].map(::characterKey),
+                listOf(Key("⇧", 1.25f, Action.SHIFT)) +
+                    characterRows[2].map(::characterKey) +
+                    listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                listOf(
+                    Key("?123", 1.4f, Action.MODE),
+                    Key("space", 5f, Action.SPACE),
+                    Key("↵", 1.4f, Action.ENTER)
+                )
+            )
+            KeyboardLayer.SYMBOLS -> listOf(
+                characterRows[0].map(::characterKey),
+                characterRows[1].map(::characterKey),
+                characterRows[2].map(::characterKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                listOf(
+                    Key("ABC", 1.4f, Action.MODE),
+                    Key("space", 5f, Action.SPACE),
+                    Key("↵", 1.4f, Action.ENTER)
+                )
+            )
+        }
+    }
+
+    private fun characterKey(value: Char): Key = Key(value.toString(), action = Action.CHARACTER)
 
     private fun applyCurrentAppearance() {
         val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -144,6 +171,17 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+        if (layer == KeyboardLayer.SYMBOLS) {
+            val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+            canvas.drawText(
+                "Symbols stay local",
+                width / 2f,
+                baseline,
+                suggestionHintPaint
+            )
+            return
+        }
+
         if (suggestions.isEmpty()) {
             val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(
@@ -185,6 +223,12 @@ class KeyboardView @JvmOverloads constructor(
             Action.BACKSPACE -> listener?.onBackspace()
             Action.SPACE -> listener?.onSpace()
             Action.ENTER -> listener?.onEnter()
+            Action.MODE -> {
+                layer = if (layer == KeyboardLayer.LETTERS) KeyboardLayer.SYMBOLS else KeyboardLayer.LETTERS
+                shifted = false
+                listener?.onLayerChanged(layer)
+                invalidate()
+            }
         }
         performClick()
         return true

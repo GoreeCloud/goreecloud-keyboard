@@ -1,22 +1,38 @@
 # GoreeCloud Keyboard
 
-GoreeCloud Keyboard is an original, native GoreeCloud keyboard implementation for Android and Apple platforms. It is being built from the ground up rather than from a third-party keyboard codebase.
+GoreeCloud Keyboard is an original, native GoreeCloud keyboard implementation. The current implemented platform is Android through a first-party input-method service and rendering surface. Apple-platform support remains product direction and is not claimed as currently implemented.
 
-## Current foundation
+## Current Development foundation
 
-The first implementation slice establishes the native Android input-method foundation with:
+The current Android source includes:
 
 - Android `InputMethodService` integration.
 - A first-party keyboard rendering surface.
 - Core QWERTY input, shift, backspace, space, and enter actions.
-- A local suggestion boundary designed for future GoreeCloud Quill integration.
-- Privacy-by-default behavior with no network permission.
-- Explicit Glaze UI, Wardveil Security, Privacy Shield, and Everkeep integration boundaries.
-- Continuous integration for the Android source tree.
+- First-party `?123` / `ABC` letters-and-symbols mode switching with digits and common punctuation.
+- A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
+- Sensitive-editor privacy gating that suppresses suggestion capture, display, and acceptance.
+- Privacy-by-default behavior with no Android network permission.
+- Glaze UI 2.0.0 Adoption Candidate source mapping for current geometry, target floor, and Light/Dark appearance values.
+- Explicit Wardveil Security, Privacy Shield, Everkeep, GoreeCloud Identity, and GoreeCloud Mesh integration boundaries.
+- Android unit/build/governance and emulator validation infrastructure.
 
 ## Product direction
 
-The keyboard is intended to grow into a privacy-first input platform with swipe typing, local suggestions and correction, dictionaries, multilingual input, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
+The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, emoji and broader symbol surfaces, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
+
+These are product targets and are not current implementation claims.
+
+## Documentation
+
+- `SPECIFICATIONS.md` — canonical product/source specification and acceptance boundaries.
+- `FEATURES.md` — implemented versus planned capability inventory.
+- `BENEFITS.md` — product benefits grounded in current architecture.
+- `COMPETITIVE-OBJECTIVES.md` — product-quality objectives and evidence discipline.
+- `USER-MANUAL.md` — current Development user guidance.
+- `docs/native-architecture.md` — native implementation architecture.
+- `docs/glaze-ui-adoption.md` — Glaze UI 2.0 Adoption Candidate evidence and remaining gates.
+- `docs/glaze-motion-evaluation.md` — test-only Experimental Glaze Motion evaluation.
 
 ## Development model
 
@@ -24,4 +40,4 @@ This repository contains original GoreeCloud-owned application code. Third-party
 
 ## Status
 
-Development — native foundation.
+**Development — native Android foundation.** Source or CI validation does not by itself establish production acceptance, signed release, or Stable qualification.
