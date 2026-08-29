@@ -57,14 +57,11 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onText(value: String) {
         if (value.isEmpty()) return
-        val output = if (shifted && value.codePoints().allMatch(Character::isLetter)) {
-            value.uppercase()
-        } else {
-            value
-        }
+        val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
+        val output = if (shifted && isLetterText) value.uppercase() else value
         currentInputConnection?.commitText(output, 1)
         if (!sensitiveInput) {
-            if (output.codePoints().allMatch(Character::isLetter)) {
+            if (isLetterText) {
                 composingWord.append(output.lowercase())
             } else {
                 composingWord.clear()
@@ -110,9 +107,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onSuggestion(value: String) {
         if (sensitiveInput) return
         val connection = currentInputConnection ?: return
-        val prefixLength = composingWord.length
-        if (prefixLength > 0) {
-            connection.deleteSurroundingText(prefixLength, 0)
+        val prefixCodePoints = composingWord.codePointCount(0, composingWord.length)
+        if (prefixCodePoints > 0) {
+            connection.deleteSurroundingTextInCodePoints(prefixCodePoints, 0)
         }
         connection.commitText("$value ", 1)
         composingWord.clear()
