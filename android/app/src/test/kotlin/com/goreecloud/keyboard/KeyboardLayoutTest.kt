@@ -18,30 +18,32 @@ class KeyboardLayoutTest {
     @Test
     fun primarySymbolsExposeDigitsAndCommonPunctuationWithoutLetters() {
         val rows = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)
-        val characters = rows.flatten()
+        val keys = rows.flatten()
 
         assertEquals("1234567890", rows[0].joinToString(""))
-        assertTrue(characters.contains('@'))
-        assertTrue(characters.contains('?'))
-        assertTrue(characters.contains('!'))
-        assertFalse(characters.any { it.isLetter() })
+        assertTrue(keys.contains("@"))
+        assertTrue(keys.contains("?"))
+        assertTrue(keys.contains("!"))
+        assertFalse(keys.any { key -> key.codePoints().anyMatch { Character.isLetter(it) } })
     }
 
     @Test
     fun secondarySymbolsExposeBracketsOperatorsCurrencyAndTypographyWithoutLetters() {
         val rows = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS_MORE)
-        val characters = rows.flatten()
+        val keys = rows.flatten()
 
-        for (character in listOf('[', ']', '{', '}', '<', '>', '=', '\\', '|', '~', '€', '£', '¥', '…', '—', '°')) {
-            assertTrue("expected secondary symbol $character", characters.contains(character))
+        for (key in listOf("[", "]", "{", "}", "<", ">", "=", "\\", "|", "~", "€", "£", "¥", "…", "—", "°")) {
+            assertTrue("expected secondary symbol $key", keys.contains(key))
         }
-        assertFalse(characters.any { it.isLetter() })
+        assertFalse(keys.any { key -> key.codePoints().anyMatch { Character.isLetter(it) } })
     }
 
     @Test
-    fun everyLayerReturnsThreeCharacterRows() {
+    fun everyLayerReturnsThreeTextRows() {
         for (layer in KeyboardLayer.entries) {
-            assertEquals("$layer must expose three character rows", 3, KeyboardLayout.characterRows(layer).size)
+            val rows: List<List<String>> = KeyboardLayout.characterRows(layer)
+            assertEquals("$layer must expose three text rows", 3, rows.size)
+            assertTrue(rows.flatten().all { it.isNotEmpty() })
         }
     }
 }
