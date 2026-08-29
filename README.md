@@ -9,17 +9,17 @@ The current Android source includes:
 - Android `InputMethodService` integration.
 - A first-party keyboard rendering surface.
 - Core QWERTY input, shift, backspace, space, and enter actions.
-- First-party `?123` / `ABC` letters-and-symbols mode switching with digits and common punctuation.
+- First-party letters-and-symbols switching with `?123` / `ABC`, plus a second `=\\<` symbol page for brackets, operators, currency marks, and common typographic symbols.
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, and acceptance.
 - Privacy-by-default behavior with no Android network permission.
 - Glaze UI 2.0.0 Adoption Candidate source mapping for current geometry, target floor, and Light/Dark appearance values.
 - Explicit Wardveil Security, Privacy Shield, Everkeep, GoreeCloud Identity, and GoreeCloud Mesh integration boundaries.
-- Android unit/build/governance and emulator validation infrastructure.
+- Android unit/build/governance and emulator validation infrastructure, including rendered native symbol-page hit testing.
 
 ## Product direction
 
-The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, emoji and broader symbol surfaces, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
+The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, emoji, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
 
 These are product targets and are not current implementation claims.
 
@@ -40,4 +40,4 @@ This repository contains original GoreeCloud-owned application code. Third-party
 
 ## Status
 
-**Development — native Android foundation.** Source or CI validation does not by itself establish production acceptance, signed release, or Stable qualification.
+**Development — native Android foundation.** Source or CI validation does not by itself establish production acceptance, signed release, representative physical-device acceptance, or Stable qualification.
