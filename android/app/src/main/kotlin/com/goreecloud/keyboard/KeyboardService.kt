@@ -55,12 +55,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         super.onDestroy()
     }
 
-    override fun onCharacter(value: Char) {
-        val output = if (shifted && value.isLetter()) value.uppercaseChar() else value
-        currentInputConnection?.commitText(output.toString(), 1)
+    override fun onText(value: String) {
+        if (value.isEmpty()) return
+        val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
+        val output = if (shifted && isLetterText) value.uppercase() else value
+        currentInputConnection?.commitText(output, 1)
         if (!sensitiveInput) {
-            if (output.isLetter()) {
-                composingWord.append(output.lowercaseChar())
+            if (isLetterText) {
+                composingWord.append(output.lowercase())
             } else {
                 composingWord.clear()
             }
@@ -81,9 +83,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onBackspace() {
         val connection = currentInputConnection ?: return
-        connection.deleteSurroundingText(1, 0)
+        connection.deleteSurroundingTextInCodePoints(1, 0)
         if (!sensitiveInput && composingWord.isNotEmpty()) {
-            composingWord.deleteCharAt(composingWord.lastIndex)
+            val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
+            composingWord.delete(lastCodePointStart, composingWord.length)
         }
         updateSuggestions()
     }
@@ -104,9 +107,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onSuggestion(value: String) {
         if (sensitiveInput) return
         val connection = currentInputConnection ?: return
-        val prefixLength = composingWord.length
-        if (prefixLength > 0) {
-            connection.deleteSurroundingText(prefixLength, 0)
+        val prefixCodePoints = composingWord.codePointCount(0, composingWord.length)
+        if (prefixCodePoints > 0) {
+            connection.deleteSurroundingTextInCodePoints(prefixCodePoints, 0)
         }
         connection.commitText("$value ", 1)
         composingWord.clear()

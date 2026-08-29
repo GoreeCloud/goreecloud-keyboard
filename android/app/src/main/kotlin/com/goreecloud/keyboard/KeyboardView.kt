@@ -17,7 +17,7 @@ class KeyboardView @JvmOverloads constructor(
 ) : View(context, attrs) {
 
     interface Listener {
-        fun onCharacter(value: Char)
+        fun onText(value: String)
         fun onSpace()
         fun onBackspace()
         fun onEnter()
@@ -30,7 +30,7 @@ class KeyboardView @JvmOverloads constructor(
 
     private data class Key(val label: String, val weight: Float = 1f, val action: Action)
     private enum class Action {
-        CHARACTER,
+        TEXT,
         SHIFT,
         BACKSPACE,
         SPACE,
@@ -122,7 +122,7 @@ class KeyboardView @JvmOverloads constructor(
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyPaint)
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyStrokePaint)
 
-                val label = if (key.action == Action.CHARACTER && shifted && layer == KeyboardLayer.LETTERS) {
+                val label = if (key.action == Action.TEXT && shifted && layer == KeyboardLayer.LETTERS) {
                     key.label.uppercase()
                 } else key.label
                 val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
@@ -137,10 +137,10 @@ class KeyboardView @JvmOverloads constructor(
         val characterRows = KeyboardLayout.characterRows(layer)
         return when (layer) {
             KeyboardLayer.LETTERS -> listOf(
-                characterRows[0].map(::characterKey),
-                characterRows[1].map(::characterKey),
+                characterRows[0].map(::textKey),
+                characterRows[1].map(::textKey),
                 listOf(Key("⇧", 1.25f, Action.SHIFT)) +
-                    characterRows[2].map(::characterKey) +
+                    characterRows[2].map(::textKey) +
                     listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
                     Key("?123", 1.4f, Action.SYMBOLS),
@@ -149,9 +149,9 @@ class KeyboardView @JvmOverloads constructor(
                 )
             )
             KeyboardLayer.SYMBOLS -> listOf(
-                characterRows[0].map(::characterKey),
-                characterRows[1].map(::characterKey),
-                characterRows[2].map(::characterKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                characterRows[0].map(::textKey),
+                characterRows[1].map(::textKey),
+                characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
                     Key("ABC", 1.2f, Action.LETTERS),
                     Key("=\\<", 1.2f, Action.SYMBOLS_MORE),
@@ -160,9 +160,9 @@ class KeyboardView @JvmOverloads constructor(
                 )
             )
             KeyboardLayer.SYMBOLS_MORE -> listOf(
-                characterRows[0].map(::characterKey),
-                characterRows[1].map(::characterKey),
-                characterRows[2].map(::characterKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                characterRows[0].map(::textKey),
+                characterRows[1].map(::textKey),
+                characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
                     Key("ABC", 1.2f, Action.LETTERS),
                     Key("?123", 1.2f, Action.SYMBOLS),
@@ -173,7 +173,7 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
-    private fun characterKey(value: Char): Key = Key(value.toString(), action = Action.CHARACTER)
+    private fun textKey(value: String): Key = Key(value, action = Action.TEXT)
 
     private fun applyCurrentAppearance() {
         val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -239,7 +239,7 @@ class KeyboardView @JvmOverloads constructor(
 
         val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) } ?: return true
         when (hit.key.action) {
-            Action.CHARACTER -> listener?.onCharacter(hit.key.label[0])
+            Action.TEXT -> listener?.onText(hit.key.label)
             Action.SHIFT -> listener?.onShift()
             Action.BACKSPACE -> listener?.onBackspace()
             Action.SPACE -> listener?.onSpace()
