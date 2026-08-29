@@ -29,7 +29,16 @@ class KeyboardView @JvmOverloads constructor(
     var listener: Listener? = null
 
     private data class Key(val label: String, val weight: Float = 1f, val action: Action)
-    private enum class Action { CHARACTER, SHIFT, BACKSPACE, SPACE, ENTER, MODE }
+    private enum class Action {
+        CHARACTER,
+        SHIFT,
+        BACKSPACE,
+        SPACE,
+        ENTER,
+        LETTERS,
+        SYMBOLS,
+        SYMBOLS_MORE
+    }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
 
@@ -134,7 +143,7 @@ class KeyboardView @JvmOverloads constructor(
                     characterRows[2].map(::characterKey) +
                     listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("?123", 1.4f, Action.MODE),
+                    Key("?123", 1.4f, Action.SYMBOLS),
                     Key("space", 5f, Action.SPACE),
                     Key("↵", 1.4f, Action.ENTER)
                 )
@@ -144,9 +153,21 @@ class KeyboardView @JvmOverloads constructor(
                 characterRows[1].map(::characterKey),
                 characterRows[2].map(::characterKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("ABC", 1.4f, Action.MODE),
-                    Key("space", 5f, Action.SPACE),
-                    Key("↵", 1.4f, Action.ENTER)
+                    Key("ABC", 1.2f, Action.LETTERS),
+                    Key("=\\<", 1.2f, Action.SYMBOLS_MORE),
+                    Key("space", 4.2f, Action.SPACE),
+                    Key("↵", 1.3f, Action.ENTER)
+                )
+            )
+            KeyboardLayer.SYMBOLS_MORE -> listOf(
+                characterRows[0].map(::characterKey),
+                characterRows[1].map(::characterKey),
+                characterRows[2].map(::characterKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                listOf(
+                    Key("ABC", 1.2f, Action.LETTERS),
+                    Key("?123", 1.2f, Action.SYMBOLS),
+                    Key("space", 4.2f, Action.SPACE),
+                    Key("↵", 1.3f, Action.ENTER)
                 )
             )
         }
@@ -171,7 +192,7 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
-        if (layer == KeyboardLayer.SYMBOLS) {
+        if (layer != KeyboardLayer.LETTERS) {
             val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(
                 "Symbols stay local",
@@ -223,15 +244,19 @@ class KeyboardView @JvmOverloads constructor(
             Action.BACKSPACE -> listener?.onBackspace()
             Action.SPACE -> listener?.onSpace()
             Action.ENTER -> listener?.onEnter()
-            Action.MODE -> {
-                layer = if (layer == KeyboardLayer.LETTERS) KeyboardLayer.SYMBOLS else KeyboardLayer.LETTERS
-                shifted = false
-                listener?.onLayerChanged(layer)
-                invalidate()
-            }
+            Action.LETTERS -> switchLayer(KeyboardLayer.LETTERS)
+            Action.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
+            Action.SYMBOLS_MORE -> switchLayer(KeyboardLayer.SYMBOLS_MORE)
         }
         performClick()
         return true
+    }
+
+    private fun switchLayer(value: KeyboardLayer) {
+        layer = value
+        shifted = false
+        listener?.onLayerChanged(layer)
+        invalidate()
     }
 
     override fun performClick(): Boolean {
