@@ -6,14 +6,15 @@
 - Original first-party keyboard rendering surface.
 - QWERTY letter entry.
 - Shift, backspace, space, and enter controls.
-- Letters/symbols mode switching with first-party digit and punctuation layouts.
+- Letters/symbols mode switching with a primary digit/common-punctuation page and a second first-party symbol page for brackets, operators, currency marks, and common typographic symbols.
+- Direct `ABC`, `?123`, and `=\\<` navigation between implemented input layers.
 - Local-only GoreeCloud Quill suggestion boundary.
 - Deterministic prefix suggestions and bounded one-edit typo-correction candidates.
 - Sensitive-editor privacy gating for suggestion capture/display/acceptance.
 - Composing-context reset across editor transitions and symbol-layer changes.
 - Light and Dark Glaze UI 2.0 source token mapping.
 - No Android network permission in the current foundation.
-- Unit, build, governance, and emulator validation paths.
+- Unit, build, governance, and emulator validation paths, including rendered secondary-symbol hit testing.
 
 ## Development / acceptance work still required
 
@@ -21,7 +22,7 @@
 - Representative physical-device IME acceptance.
 - Complete TalkBack, switch-access, large-text, contrast, reduced-transparency, and adaptive-layout acceptance.
 - Tablet/foldable/one-handed/split keyboard experiences.
-- Broader punctuation, emoji, language, locale, and input-mode coverage.
+- Emoji, language, locale, and additional input-mode coverage beyond the current two symbol pages.
 - Signed release packaging and distribution acceptance.
 
 ## Planned product capabilities — not current implementation claims
