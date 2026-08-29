@@ -2,7 +2,7 @@
 
 ## Current availability
 
-GoreeCloud Keyboard is currently a **Development** Android input-method implementation. This manual describes behavior present in the repository source and Development builds. It does not claim a public production release, Stable qualification, or current Apple-platform build.
+GoreeCloud Keyboard is currently a **Development** Android input-method implementation. This manual describes behavior present in the repository source and Development builds. It does not claim a public production release, Stable qualification, representative physical-device acceptance, or current Apple-platform build.
 
 ## Enable the keyboard on Android
 
@@ -26,9 +26,14 @@ The temporary shift state resets after a shifted alphabetic character is entered
 
 ## Type numbers and symbols
 
-Tap **?123** to open the symbols layer. The current Development layout includes digits and common punctuation.
+Tap **?123** from the letters layer to open the primary symbols page. It includes digits and common punctuation.
 
-Tap **ABC** to return to the letters layer.
+From the primary symbols page:
+
+- tap **ABC** to return directly to letters;
+- tap **=\\<** to open the secondary symbols page.
+
+The secondary page adds brackets, operators and separators, currency marks, and common typographic symbols. From that page, tap **ABC** to return directly to letters or **?123** to return to the primary symbols page.
 
 Changing layers clears the temporary word context used for local suggestions. Symbol input is not added to that composing-word context.
 
