@@ -87,6 +87,41 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         assertTrue(GlazeMotionExperimental.PRESS_SCALE < 1f)
     }
 
+    @Test
+    fun primarySymbolPageNavigatesToSecondaryPageAndCommitsRenderedCharacter() {
+        val view = createRenderedKeyboard()
+        view.setLayer(KeyboardLayer.SYMBOLS)
+        render(view)
+        val layers = mutableListOf<KeyboardLayer>()
+        val characters = mutableListOf<Char>()
+        view.listener = listener(
+            onCharacter = { characters += it },
+            onLayerChanged = { layers += it }
+        )
+
+        val density = view.resources.displayMetrics.density
+        val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
+        val gap = GlazeKeyboardTokens.Space1Dp * density
+        val keyboardTop = (GlazeKeyboardTokens.SuggestionStripHeightDp + GlazeKeyboardTokens.Space2Dp) * density
+        val rowHeight = (view.height - keyboardTop - gap * 5f) / 4f
+        val bottomY = keyboardTop + 3f * (rowHeight + gap) + rowHeight / 2f
+
+        val bottomAvailable = view.width - horizontalPadding * 2f - gap * 3f
+        val modeWidth = bottomAvailable * (1.2f / 7.9f)
+        val moreModeX = horizontalPadding + modeWidth + gap + modeWidth / 2f
+        dispatch(view, MotionEvent.ACTION_UP, moreModeX, bottomY)
+
+        assertEquals(listOf(KeyboardLayer.SYMBOLS_MORE), layers)
+
+        render(view)
+        val topRowAvailable = view.width - horizontalPadding * 2f - gap * 9f
+        val firstCharacterX = horizontalPadding + topRowAvailable / 10f / 2f
+        val firstCharacterY = keyboardTop + rowHeight / 2f
+        dispatch(view, MotionEvent.ACTION_UP, firstCharacterX, firstCharacterY)
+
+        assertEquals("Secondary symbol page must commit the rendered [ key", listOf('['), characters)
+    }
+
     private fun createRenderedKeyboard(suggestions: List<String> = emptyList()): KeyboardView {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         return KeyboardView(context).apply {
@@ -96,8 +131,12 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
                 View.MeasureSpec.makeMeasureSpec(600, View.MeasureSpec.EXACTLY)
             )
             layout(0, 0, measuredWidth, measuredHeight)
-            draw(Canvas(Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)))
+            render(this)
         }
+    }
+
+    private fun render(view: KeyboardView) {
+        view.draw(Canvas(Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)))
     }
 
     private fun dispatch(view: KeyboardView, action: Int, x: Float, y: Float) {
@@ -111,7 +150,8 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
 
     private fun listener(
         onCharacter: (Char) -> Unit = {},
-        onSuggestion: (String) -> Unit = {}
+        onSuggestion: (String) -> Unit = {},
+        onLayerChanged: (KeyboardLayer) -> Unit = {}
     ) = object : KeyboardView.Listener {
         override fun onCharacter(value: Char) = onCharacter(value)
         override fun onSpace() = Unit
@@ -119,6 +159,6 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         override fun onEnter() = Unit
         override fun onShift() = Unit
         override fun onSuggestion(value: String) = onSuggestion(value)
-        override fun onLayerChanged(layer: KeyboardLayer) = Unit
+        override fun onLayerChanged(layer: KeyboardLayer) = onLayerChanged(layer)
     }
 }

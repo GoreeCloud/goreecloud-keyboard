@@ -16,7 +16,7 @@ class KeyboardLayoutTest {
     }
 
     @Test
-    fun symbolsExposeDigitsAndCommonPunctuationWithoutLetters() {
+    fun primarySymbolsExposeDigitsAndCommonPunctuationWithoutLetters() {
         val rows = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)
         val characters = rows.flatten()
 
@@ -28,8 +28,20 @@ class KeyboardLayoutTest {
     }
 
     @Test
-    fun layoutsReturnThreeCharacterRows() {
-        assertEquals(3, KeyboardLayout.characterRows(KeyboardLayer.LETTERS).size)
-        assertEquals(3, KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS).size)
+    fun secondarySymbolsExposeBracketsOperatorsCurrencyAndTypographyWithoutLetters() {
+        val rows = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS_MORE)
+        val characters = rows.flatten()
+
+        for (character in listOf('[', ']', '{', '}', '<', '>', '=', '\\', '|', '~', '€', '£', '¥', '…', '—', '°')) {
+            assertTrue("expected secondary symbol $character", characters.contains(character))
+        }
+        assertFalse(characters.any { it.isLetter() })
+    }
+
+    @Test
+    fun everyLayerReturnsThreeCharacterRows() {
+        for (layer in KeyboardLayer.entries) {
+            assertEquals("$layer must expose three character rows", 3, KeyboardLayout.characterRows(layer).size)
+        }
     }
 }

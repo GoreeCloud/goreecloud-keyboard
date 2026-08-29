@@ -11,13 +11,14 @@ GoreeCloud Keyboard is an original GoreeCloud-owned keyboard implementation. The
 - Native Android `InputMethodService` integration.
 - First-party `KeyboardView` rendering and pointer-input handling.
 - QWERTY letters with shift, backspace, space, and enter.
-- First-party letters/symbols mode switching with `?123` and `ABC` controls.
+- First-party letters/symbols mode switching with `?123`, `ABC`, and `=\\<` controls.
+- Primary symbol page with digits and common punctuation plus a secondary first-party page with brackets, operators, currency marks, and common typographic symbols.
 - Local-only GoreeCloud Quill suggestion boundary with deterministic prefix suggestions and bounded typo-correction candidates.
 - Sensitive-editor classification that clears composing context and suppresses suggestion collection, display, and acceptance for protected input variations.
 - No Android network permission in the current application foundation.
 - Glaze UI 2.0.0 Adoption Candidate source mapping for current spacing, geometry, 48 dp general interaction target floor, and Light/Dark appearance values.
 - Experimental Glaze Motion evaluation remains test-only and is not a production dependency.
-- Android unit/build and emulator validation infrastructure.
+- Android unit/build and emulator validation infrastructure, including native rendered secondary-symbol navigation and character hit testing.
 
 ## Native input behavior
 
@@ -25,9 +26,15 @@ GoreeCloud Keyboard is an original GoreeCloud-owned keyboard implementation. The
 
 The default layer exposes QWERTY alphabetic rows. Shift affects alphabetic output only and automatically returns to the unshifted state after a shifted character is committed.
 
-### Symbols layer
+### Primary symbols layer
 
-The symbols layer exposes digits and common punctuation through first-party layout data. Entering the symbols layer clears the current suggestion composition buffer. Non-letter symbol input does not become Quill suggestion context.
+Tap `?123` from letters to open the primary symbol page. It exposes digits and common punctuation. `ABC` returns directly to letters, while `=\\<` opens the secondary symbol page.
+
+### Secondary symbols layer
+
+The secondary page exposes additional brackets, mathematical/operator punctuation, path/separator characters, currency marks, and common typographic symbols. `ABC` returns directly to letters and `?123` returns directly to the primary symbol page.
+
+Entering any non-letter layer clears the current suggestion composition buffer. Non-letter symbol input does not become Quill suggestion context.
 
 ### Editor transitions
 
@@ -67,7 +74,7 @@ The product direction includes, subject to separate implementation and acceptanc
 - richer local correction and prediction;
 - user and language dictionaries;
 - multilingual layouts and language switching;
-- emoji and richer symbol surfaces;
+- emoji and further specialized input surfaces beyond the current two symbol pages;
 - clipboard tools with explicit privacy controls;
 - optional voice/input adapters where platform policy and privacy contracts permit;
 - one-handed, split, tablet, foldable, and other adaptive layouts;

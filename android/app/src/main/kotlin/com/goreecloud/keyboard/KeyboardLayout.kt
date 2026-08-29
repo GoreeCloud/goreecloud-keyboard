@@ -2,7 +2,8 @@ package com.goreecloud.keyboard
 
 enum class KeyboardLayer {
     LETTERS,
-    SYMBOLS
+    SYMBOLS,
+    SYMBOLS_MORE
 }
 
 object KeyboardLayout {
@@ -18,8 +19,15 @@ object KeyboardLayout {
         listOf('.', ',', '?', '!', '\'', '"', ':', ';', '/')
     )
 
+    private val moreSymbolRows = listOf(
+        listOf('[', ']', '{', '}', '<', '>', '^', '_', '=', '+'),
+        listOf('\\', '|', '~', '`', '€', '£', '¥', '•'),
+        listOf('…', '–', '—', '°', '©', '®', '™')
+    )
+
     fun characterRows(layer: KeyboardLayer): List<List<Char>> = when (layer) {
         KeyboardLayer.LETTERS -> letterRows
         KeyboardLayer.SYMBOLS -> symbolRows
+        KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
     }
 }
