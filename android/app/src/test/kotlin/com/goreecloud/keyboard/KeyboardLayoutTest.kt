@@ -39,6 +39,19 @@ class KeyboardLayoutTest {
     }
 
     @Test
+    fun emojiLayerExposesSupplementaryUnicodeAsCompleteTextKeys() {
+        val rows = KeyboardLayout.characterRows(KeyboardLayer.EMOJI)
+        val keys = rows.flatten()
+
+        for (key in listOf("😀", "😂", "🤔", "👍", "🎉", "🔥", "🚀")) {
+            assertTrue("expected emoji $key", keys.contains(key))
+        }
+        assertTrue(keys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
+        assertTrue(keys.all { key -> key.codePointCount(0, key.length) == 1 })
+        assertFalse(keys.any { key -> key.codePoints().anyMatch { Character.isLetterOrDigit(it) } })
+    }
+
+    @Test
     fun everyLayerReturnsThreeTextRows() {
         for (layer in KeyboardLayer.entries) {
             val rows: List<List<String>> = KeyboardLayout.characterRows(layer)
