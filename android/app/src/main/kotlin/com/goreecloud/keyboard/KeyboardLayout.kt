@@ -4,6 +4,7 @@ enum class KeyboardLayer {
     LETTERS,
     SYMBOLS,
     SYMBOLS_MORE,
+    EMOJI,
 }
 
 object KeyboardLayout {
@@ -22,11 +23,17 @@ object KeyboardLayout {
         keys("_", "^", "~", "`", "€", "£", "¥", "•", "…"),
         keys("±", "×", "÷", "§", "©", "®", "™", "—", "°"),
     )
+    private val emojiRows = listOf(
+        keys("😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊"),
+        keys("🙂", "🙃", "😉", "😍", "😘", "😎", "🤔", "🤗"),
+        keys("👍", "👏", "🙏", "🎉", "🔥", "⭐", "✅", "🚀"),
+    )
 
     fun characterRows(layer: KeyboardLayer): List<List<String>> = when (layer) {
         KeyboardLayer.LETTERS -> letterRows
         KeyboardLayer.SYMBOLS -> symbolRows
         KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
+        KeyboardLayer.EMOJI -> emojiRows
     }
 
     private fun keys(vararg values: String): List<String> = values.toList()
