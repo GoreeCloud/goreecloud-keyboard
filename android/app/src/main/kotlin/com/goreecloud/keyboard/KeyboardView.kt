@@ -37,7 +37,8 @@ class KeyboardView @JvmOverloads constructor(
         ENTER,
         LETTERS,
         SYMBOLS,
-        SYMBOLS_MORE
+        SYMBOLS_MORE,
+        EMOJI
     }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
@@ -143,9 +144,10 @@ class KeyboardView @JvmOverloads constructor(
                     characterRows[2].map(::textKey) +
                     listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("?123", 1.4f, Action.SYMBOLS),
-                    Key("space", 5f, Action.SPACE),
-                    Key("↵", 1.4f, Action.ENTER)
+                    Key("?123", 1.3f, Action.SYMBOLS),
+                    Key("☺", 1.05f, Action.EMOJI),
+                    Key("space", 4.65f, Action.SPACE),
+                    Key("↵", 1.3f, Action.ENTER)
                 )
             )
             KeyboardLayer.SYMBOLS -> listOf(
@@ -153,10 +155,11 @@ class KeyboardView @JvmOverloads constructor(
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("ABC", 1.2f, Action.LETTERS),
-                    Key("=\\<", 1.2f, Action.SYMBOLS_MORE),
-                    Key("space", 4.2f, Action.SPACE),
-                    Key("↵", 1.3f, Action.ENTER)
+                    Key("ABC", 1.15f, Action.LETTERS),
+                    Key("=\\<", 1.15f, Action.SYMBOLS_MORE),
+                    Key("☺", 1.05f, Action.EMOJI),
+                    Key("space", 3.9f, Action.SPACE),
+                    Key("↵", 1.25f, Action.ENTER)
                 )
             )
             KeyboardLayer.SYMBOLS_MORE -> listOf(
@@ -164,10 +167,22 @@ class KeyboardView @JvmOverloads constructor(
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("ABC", 1.2f, Action.LETTERS),
-                    Key("?123", 1.2f, Action.SYMBOLS),
-                    Key("space", 4.2f, Action.SPACE),
-                    Key("↵", 1.3f, Action.ENTER)
+                    Key("ABC", 1.15f, Action.LETTERS),
+                    Key("?123", 1.15f, Action.SYMBOLS),
+                    Key("☺", 1.05f, Action.EMOJI),
+                    Key("space", 3.9f, Action.SPACE),
+                    Key("↵", 1.25f, Action.ENTER)
+                )
+            )
+            KeyboardLayer.EMOJI -> listOf(
+                characterRows[0].map(::textKey),
+                characterRows[1].map(::textKey),
+                characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                listOf(
+                    Key("ABC", 1.15f, Action.LETTERS),
+                    Key("?123", 1.15f, Action.SYMBOLS),
+                    Key("space", 4.25f, Action.SPACE),
+                    Key("↵", 1.25f, Action.ENTER)
                 )
             )
         }
@@ -195,7 +210,7 @@ class KeyboardView @JvmOverloads constructor(
         if (layer != KeyboardLayer.LETTERS) {
             val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(
-                "Symbols stay local",
+                if (layer == KeyboardLayer.EMOJI) "Emoji stay local" else "Symbols stay local",
                 width / 2f,
                 baseline,
                 suggestionHintPaint
@@ -247,6 +262,7 @@ class KeyboardView @JvmOverloads constructor(
             Action.LETTERS -> switchLayer(KeyboardLayer.LETTERS)
             Action.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
             Action.SYMBOLS_MORE -> switchLayer(KeyboardLayer.SYMBOLS_MORE)
+            Action.EMOJI -> switchLayer(KeyboardLayer.EMOJI)
         }
         performClick()
         return true
