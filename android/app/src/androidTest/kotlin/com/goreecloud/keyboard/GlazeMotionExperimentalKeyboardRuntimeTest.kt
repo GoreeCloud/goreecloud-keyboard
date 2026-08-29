@@ -55,7 +55,7 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
 
         val view = createRenderedKeyboard()
         val events = mutableListOf<String>()
-        view.listener = listener(onCharacter = { events += it.toString() })
+        view.listener = listener(onText = { events += it })
 
         val density = view.resources.displayMetrics.density
         val x = 6f * density + ((view.width - 12f * density - 45f * density) / 10f) / 2f
@@ -88,14 +88,14 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
     }
 
     @Test
-    fun primarySymbolPageNavigatesToSecondaryPageAndCommitsRenderedCharacter() {
+    fun primarySymbolPageNavigatesToSecondaryPageAndCommitsRenderedText() {
         val view = createRenderedKeyboard()
         view.setLayer(KeyboardLayer.SYMBOLS)
         render(view)
         val layers = mutableListOf<KeyboardLayer>()
-        val characters = mutableListOf<Char>()
+        val text = mutableListOf<String>()
         view.listener = listener(
-            onCharacter = { characters += it },
+            onText = { text += it },
             onLayerChanged = { layers += it }
         )
 
@@ -115,11 +115,11 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
 
         render(view)
         val topRowAvailable = view.width - horizontalPadding * 2f - gap * 9f
-        val firstCharacterX = horizontalPadding + topRowAvailable / 10f / 2f
-        val firstCharacterY = keyboardTop + rowHeight / 2f
-        dispatch(view, MotionEvent.ACTION_UP, firstCharacterX, firstCharacterY)
+        val firstTextX = horizontalPadding + topRowAvailable / 10f / 2f
+        val firstTextY = keyboardTop + rowHeight / 2f
+        dispatch(view, MotionEvent.ACTION_UP, firstTextX, firstTextY)
 
-        assertEquals("Secondary symbol page must commit the rendered [ key", listOf('['), characters)
+        assertEquals("Secondary symbol page must commit the rendered [ key", listOf("["), text)
     }
 
     private fun createRenderedKeyboard(suggestions: List<String> = emptyList()): KeyboardView {
@@ -149,11 +149,11 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
     }
 
     private fun listener(
-        onCharacter: (Char) -> Unit = {},
+        onText: (String) -> Unit = {},
         onSuggestion: (String) -> Unit = {},
         onLayerChanged: (KeyboardLayer) -> Unit = {}
     ) = object : KeyboardView.Listener {
-        override fun onCharacter(value: Char) = onCharacter(value)
+        override fun onText(value: String) = onText(value)
         override fun onSpace() = Unit
         override fun onBackspace() = Unit
         override fun onEnter() = Unit
