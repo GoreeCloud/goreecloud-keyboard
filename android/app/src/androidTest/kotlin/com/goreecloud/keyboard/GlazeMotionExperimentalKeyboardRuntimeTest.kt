@@ -119,5 +119,6 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         override fun onEnter() = Unit
         override fun onShift() = Unit
         override fun onSuggestion(value: String) = onSuggestion(value)
+        override fun onLayerChanged(layer: KeyboardLayer) = Unit
     }
 }
