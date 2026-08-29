@@ -25,8 +25,8 @@ object KeyboardLayout {
     )
     private val emojiRows = listOf(
         keys("😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊"),
-        keys("🙂", "🙃", "😉", "😍", "😘", "😎", "🤔", "🤗"),
-        keys("👍", "👏", "🙏", "🎉", "🔥", "⭐", "✅", "🚀"),
+        keys("🙂", "😍", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈"),
+        keys("🇺🇸", "🇨🇦", "👏", "🎉", "🔥", "⭐", "✅", "🚀"),
     )
 
     fun characterRows(layer: KeyboardLayer): List<List<String>> = when (layer) {
