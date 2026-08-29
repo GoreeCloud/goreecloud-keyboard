@@ -10,6 +10,7 @@ The current Android source includes:
 - A first-party keyboard rendering surface.
 - Core QWERTY input, shift, backspace, space, and enter actions.
 - First-party letters-and-symbols switching with `?123` / `ABC`, plus a second `=\\<` symbol page for brackets, operators, currency marks, and common typographic symbols.
+- A bounded first-party emoji layer containing single-code-point emoji keys and routing complete Unicode text through the existing String-safe input contract.
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, and acceptance.
 - Privacy-by-default behavior with no Android network permission.
@@ -19,9 +20,9 @@ The current Android source includes:
 
 ## Product direction
 
-The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, emoji, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
+The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, a complete searchable/categorized emoji and grapheme-aware input surface, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
 
-These are product targets and are not current implementation claims.
+The current bounded emoji layer is not a full emoji picker. Multi-code-point grapheme sequences, skin-tone/variation composition, categories, recents, search, and grapheme-cluster-aware deletion remain product targets and are not current implementation claims.
 
 ## Documentation
 
