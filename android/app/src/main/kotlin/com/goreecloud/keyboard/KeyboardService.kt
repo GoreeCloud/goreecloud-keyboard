@@ -83,7 +83,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onBackspace() {
         val connection = currentInputConnection ?: return
-        connection.deleteSurroundingTextInCodePoints(1, 0)
+        val deleteCodePoints = if (sensitiveInput) {
+            1
+        } else {
+            val beforeCursor = connection.getTextBeforeCursor(BACKSPACE_LOOKBEHIND_UTF16, 0)
+            TextDeletion.previousTextUnitCodePointCount(beforeCursor ?: "").takeIf { it > 0 } ?: 1
+        }
+        connection.deleteSurroundingTextInCodePoints(deleteCodePoints, 0)
+
         if (!sensitiveInput && composingWord.isNotEmpty()) {
             val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
             composingWord.delete(lastCodePointStart, composingWord.length)
@@ -135,5 +142,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             dictionary = bootstrapDictionary
         )
         keyboardView?.setSuggestions(suggestions)
+    }
+
+    private companion object {
+        const val BACKSPACE_LOOKBEHIND_UTF16 = 64
     }
 }
