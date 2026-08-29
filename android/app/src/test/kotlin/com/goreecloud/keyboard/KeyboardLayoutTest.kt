@@ -39,16 +39,25 @@ class KeyboardLayoutTest {
     }
 
     @Test
-    fun emojiLayerExposesSupplementaryUnicodeAsCompleteTextKeys() {
+    fun emojiLayerIncludesBoundedComposedSequencesThatDeleteAsWholeTextUnits() {
         val rows = KeyboardLayout.characterRows(KeyboardLayer.EMOJI)
         val keys = rows.flatten()
 
-        for (key in listOf("😀", "😂", "🤔", "👍", "🎉", "🔥", "🚀")) {
+        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀")) {
             assertTrue("expected emoji $key", keys.contains(key))
         }
         assertTrue(keys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
-        assertTrue(keys.all { key -> key.codePointCount(0, key.length) == 1 })
-        assertFalse(keys.any { key -> key.codePoints().anyMatch { Character.isLetterOrDigit(it) } })
+        assertTrue(keys.any { key -> key.codePointCount(0, key.length) > 1 })
+        assertTrue(keys.any { key -> key.codePoints().anyMatch { it == 0x200D } })
+        assertTrue(keys.any { key -> key.codePoints().anyMatch { it in 0x1F3FB..0x1F3FF } })
+        assertTrue(keys.any { key -> key.codePointCount(0, key.length) == 2 && key.codePoints().allMatch { it in 0x1F1E6..0x1F1FF } })
+        for (key in keys) {
+            assertEquals(
+                "backspace must consume the complete emoji key $key",
+                key.codePointCount(0, key.length),
+                TextDeletion.previousTextUnitCodePointCount(key),
+            )
+        }
     }
 
     @Test
