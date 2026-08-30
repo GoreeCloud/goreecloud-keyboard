@@ -7,6 +7,12 @@ enum class KeyboardLayer {
     EMOJI,
 }
 
+enum class EmojiCategory(val label: String) {
+    SMILEYS("☺"),
+    PEOPLE("👤"),
+    SYMBOLS("★"),
+}
+
 object KeyboardLayout {
     private val letterRows = listOf(
         keys("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
@@ -23,17 +29,37 @@ object KeyboardLayout {
         keys("_", "^", "~", "`", "€", "£", "¥", "•", "…"),
         keys("±", "×", "÷", "§", "©", "®", "™", "—", "°"),
     )
-    private val emojiRows = listOf(
-        keys("😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊"),
-        keys("🙂", "😍", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈"),
-        keys("🇺🇸", "🇨🇦", "👏", "🎉", "🔥", "⭐", "✅", "🚀"),
+    private val emojiRowsByCategory = mapOf(
+        EmojiCategory.SMILEYS to listOf(
+            keys("😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊"),
+            keys("🙂", "🥰", "😍", "🤩", "😎", "🤔", "😢", "😭"),
+            keys("😡", "🥳", "😴", "🤗", "🙃", "😉", "😇", "🤭"),
+        ),
+        EmojiCategory.PEOPLE to listOf(
+            keys("👍", "👍🏽", "👎", "👏", "🙌", "🙏🏾", "💪", "🤝"),
+            keys("👋", "🫶", "👩‍💻", "👨‍💻", "🧑‍🚀", "👩‍🔬", "👨‍🔬", "🧑‍🍳"),
+            keys("👨‍👩‍👧‍👦", "👩‍👩‍👦", "👨‍👨‍👧", "🧑‍🤝‍🧑", "🙋", "🙆", "🙅", "🤷"),
+        ),
+        EmojiCategory.SYMBOLS to listOf(
+            keys("❤️", "⭐", "✅", "❌", "🔥", "🎉", "🚀", "💯"),
+            keys("✨", "⚠️", "💡", "📌", "🌈", "🏳️‍🌈", "🇺🇸", "🇨🇦"),
+            keys("☀️", "🌙", "☁️", "⚡", "❄️", "☕", "🎵", "🎁"),
+        ),
     )
 
     fun characterRows(layer: KeyboardLayer): List<List<String>> = when (layer) {
         KeyboardLayer.LETTERS -> letterRows
         KeyboardLayer.SYMBOLS -> symbolRows
         KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
-        KeyboardLayer.EMOJI -> emojiRows
+        KeyboardLayer.EMOJI -> emojiRows(EmojiCategory.SMILEYS)
+    }
+
+    fun emojiRows(category: EmojiCategory): List<List<String>> =
+        emojiRowsByCategory.getValue(category)
+
+    fun nextEmojiCategory(category: EmojiCategory): EmojiCategory {
+        val categories = EmojiCategory.entries
+        return categories[(category.ordinal + 1) % categories.size]
     }
 
     private fun keys(vararg values: String): List<String> = values.toList()
