@@ -24,6 +24,10 @@ class EmojiRecents(
         while (entries.size > limit) entries.removeAt(entries.lastIndex)
     }
 
+    fun clear() {
+        entries.clear()
+    }
+
     fun values(): List<String> = entries.toList()
 
     fun rows(rowCount: Int = DEFAULT_ROW_COUNT): List<List<String>> {
