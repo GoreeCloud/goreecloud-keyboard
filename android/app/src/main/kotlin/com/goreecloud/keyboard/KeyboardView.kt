@@ -39,10 +39,10 @@ class KeyboardView @JvmOverloads constructor(
         SYMBOLS,
         SYMBOLS_MORE,
         EMOJI,
-        EMOJI_CATEGORY,
     }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
+    private data class HitEmojiCategory(val bounds: RectF, val category: EmojiCategory)
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -67,6 +67,7 @@ class KeyboardView @JvmOverloads constructor(
 
     private val hitKeys = mutableListOf<HitKey>()
     private val hitSuggestions = mutableListOf<HitSuggestion>()
+    private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
@@ -101,6 +102,7 @@ class KeyboardView @JvmOverloads constructor(
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
         hitKeys.clear()
         hitSuggestions.clear()
+        hitEmojiCategories.clear()
 
         val rows = currentRows()
         val density = resources.displayMetrics.density
@@ -185,11 +187,10 @@ class KeyboardView @JvmOverloads constructor(
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("ABC", 1.05f, Action.LETTERS),
-                    Key("?123", 1.05f, Action.SYMBOLS),
-                    Key(emojiCategory.label, 0.9f, Action.EMOJI_CATEGORY),
-                    Key("space", 3.4f, Action.SPACE),
-                    Key("↵", 1.2f, Action.ENTER)
+                    Key("ABC", 1.1f, Action.LETTERS),
+                    Key("?123", 1.1f, Action.SYMBOLS),
+                    Key("space", 4.2f, Action.SPACE),
+                    Key("↵", 1.25f, Action.ENTER)
                 )
             )
         }
@@ -214,17 +215,13 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+        if (layer == KeyboardLayer.EMOJI) {
+            drawEmojiCategoryStrip(canvas, horizontalPadding, topArea)
+            return
+        }
         if (layer != KeyboardLayer.LETTERS) {
             val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
-            canvas.drawText(
-                when (layer) {
-                    KeyboardLayer.EMOJI -> "Emoji · ${emojiCategory.displayName()} · local"
-                    else -> "Symbols stay local"
-                },
-                width / 2f,
-                baseline,
-                suggestionHintPaint
-            )
+            canvas.drawText("Symbols stay local", width / 2f, baseline, suggestionHintPaint)
             return
         }
 
@@ -253,8 +250,35 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
+    private fun drawEmojiCategoryStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+        val categories = EmojiCategory.entries
+        val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
+        val availableWidth = width - horizontalPadding * 2 - gap * (categories.size - 1)
+        val cellWidth = availableWidth / categories.size
+        val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
+        categories.forEachIndexed { index, category ->
+            val left = horizontalPadding + index * (cellWidth + gap)
+            val bounds = RectF(left, 0f, left + cellWidth, topArea)
+            if (category == emojiCategory) {
+                canvas.drawRoundRect(bounds, radius, radius, keyPaint)
+                canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
+            }
+            val label = "${category.label} ${category.displayName()}"
+            val baseline = bounds.centerY() - (suggestionPaint.descent() + suggestionPaint.ascent()) / 2
+            canvas.drawText(label, bounds.centerX(), baseline, suggestionPaint)
+            hitEmojiCategories += HitEmojiCategory(bounds, category)
+        }
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return true
+
+        hitEmojiCategories.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
+            emojiCategory = hit.category
+            invalidate()
+            performClick()
+            return true
+        }
 
         hitSuggestions.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
             listener?.onSuggestion(hit.value)
@@ -273,10 +297,6 @@ class KeyboardView @JvmOverloads constructor(
             Action.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
             Action.SYMBOLS_MORE -> switchLayer(KeyboardLayer.SYMBOLS_MORE)
             Action.EMOJI -> switchLayer(KeyboardLayer.EMOJI)
-            Action.EMOJI_CATEGORY -> {
-                emojiCategory = KeyboardLayout.nextEmojiCategory(emojiCategory)
-                invalidate()
-            }
         }
         performClick()
         return true
