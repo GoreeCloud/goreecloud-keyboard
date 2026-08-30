@@ -111,7 +111,9 @@ def main() -> None:
         "GlazeKeyboardTokens.RadiusMediumDp",
         "override fun onTouchEvent(event: MotionEvent)",
         "listener?.onSuggestion(hit.value)",
-        "Action.TEXT -> listener?.onText(hit.key.label)",
+        "Action.TEXT -> {",
+        "emojiRecents.record(hit.key.label)",
+        "listener?.onText(hit.key.label)",
         "performClick()",
     ]
     for evidence in required_consumer:
