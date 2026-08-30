@@ -10,7 +10,8 @@ The current Android source includes:
 - A first-party keyboard rendering surface.
 - Core QWERTY input, shift, backspace, space, and enter actions.
 - First-party letters-and-symbols switching with `?123` / `ABC`, plus a second `=\\<` symbol page for brackets, operators, currency marks, and common typographic symbols.
-- A bounded first-party emoji layer that routes complete Unicode text through the existing String-safe input contract and now includes both single-code-point emoji and selected composed sequences such as variation-selector hearts, skin-tone modifiers, ZWJ people/family emoji, rainbow-flag composition, and regional-indicator flags.
+- A bounded first-party emoji layer that routes complete Unicode text through the existing String-safe input contract, includes selected composed sequences, and organizes the current local set into deterministic Smileys, People, and Symbols categories.
+- Category cycling remains in-memory view state only; it does not create emoji-history persistence, telemetry, cloud lookup, or learned-use profiling.
 - Bounded Unicode-aware backspace for common emoji modifiers, ZWJ-linked emoji, regional-indicator flags, keycaps, variation selectors, combining marks, and CRLF while sensitive editors retain one-code-point deletion without text look-behind.
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, acceptance, and backspace look-behind inspection.
@@ -21,9 +22,9 @@ The current Android source includes:
 
 ## Product direction
 
-The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, a complete searchable/categorized emoji surface, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
+The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, richer emoji discovery, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
 
-The current emoji layer remains intentionally bounded rather than a full emoji picker. Its selected multi-code-point keys are admitted only where the current text-unit deletion model is tested to delete the entire key in one backspace action. The backspace helper still does not claim complete Unicode UAX #29 grapheme segmentation for every script. Emoji categories, recents, search, broader composed-sequence coverage, complete grapheme segmentation, and broader multilingual editing acceptance remain product targets rather than current implementation claims.
+The current emoji surface remains intentionally bounded rather than a complete picker. Every exposed categorized key is required by unit coverage to be compatible with the current one-backspace text-unit deletion model before it is admitted. The backspace helper still does not claim complete Unicode UAX #29 grapheme segmentation for every script. Emoji search, recents, persistence, broader composed-sequence coverage, complete grapheme segmentation, and broader multilingual editing acceptance remain product targets rather than current implementation claims.
 
 ## Documentation
 

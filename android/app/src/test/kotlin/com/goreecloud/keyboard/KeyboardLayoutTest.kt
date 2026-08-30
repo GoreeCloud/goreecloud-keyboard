@@ -39,25 +39,39 @@ class KeyboardLayoutTest {
     }
 
     @Test
-    fun emojiLayerIncludesBoundedComposedSequencesThatDeleteAsWholeTextUnits() {
-        val rows = KeyboardLayout.characterRows(KeyboardLayer.EMOJI)
-        val keys = rows.flatten()
+    fun emojiCategoriesExposeBoundedComposedSequencesThatDeleteAsWholeTextUnits() {
+        val keysByCategory = EmojiCategory.entries.associateWith { category ->
+            KeyboardLayout.emojiRows(category).flatten()
+        }
+        val allKeys = keysByCategory.values.flatten()
 
         for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀")) {
-            assertTrue("expected emoji $key", keys.contains(key))
+            assertTrue("expected emoji $key", allKeys.contains(key))
         }
-        assertTrue(keys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
-        assertTrue(keys.any { key -> key.codePointCount(0, key.length) > 1 })
-        assertTrue(keys.any { key -> key.codePoints().anyMatch { it == 0x200D } })
-        assertTrue(keys.any { key -> key.codePoints().anyMatch { it in 0x1F3FB..0x1F3FF } })
-        assertTrue(keys.any { key -> key.codePointCount(0, key.length) == 2 && key.codePoints().allMatch { it in 0x1F1E6..0x1F1FF } })
-        for (key in keys) {
-            assertEquals(
-                "backspace must consume the complete emoji key $key",
-                key.codePointCount(0, key.length),
-                TextDeletion.previousTextUnitCodePointCount(key),
-            )
+        assertTrue(allKeys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
+        assertTrue(allKeys.any { key -> key.codePointCount(0, key.length) > 1 })
+        assertTrue(allKeys.any { key -> key.codePoints().anyMatch { it == 0x200D } })
+        assertTrue(allKeys.any { key -> key.codePoints().anyMatch { it in 0x1F3FB..0x1F3FF } })
+        assertTrue(allKeys.any { key -> key.codePointCount(0, key.length) == 2 && key.codePoints().allMatch { it in 0x1F1E6..0x1F1FF } })
+
+        for ((category, keys) in keysByCategory) {
+            assertEquals("$category must expose three emoji rows", 3, KeyboardLayout.emojiRows(category).size)
+            assertEquals("$category must remain bounded", 24, keys.size)
+            for (key in keys) {
+                assertEquals(
+                    "backspace must consume the complete emoji key $key from $category",
+                    key.codePointCount(0, key.length),
+                    TextDeletion.previousTextUnitCodePointCount(key),
+                )
+            }
         }
+    }
+
+    @Test
+    fun emojiCategoriesCycleDeterministicallyWithoutPersistence() {
+        assertEquals(EmojiCategory.PEOPLE, KeyboardLayout.nextEmojiCategory(EmojiCategory.SMILEYS))
+        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.PEOPLE))
+        assertEquals(EmojiCategory.SMILEYS, KeyboardLayout.nextEmojiCategory(EmojiCategory.SYMBOLS))
     }
 
     @Test
