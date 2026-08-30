@@ -38,7 +38,8 @@ class KeyboardView @JvmOverloads constructor(
         LETTERS,
         SYMBOLS,
         SYMBOLS_MORE,
-        EMOJI
+        EMOJI,
+        EMOJI_CATEGORY,
     }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
@@ -69,6 +70,7 @@ class KeyboardView @JvmOverloads constructor(
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
+    private var emojiCategory = EmojiCategory.SMILEYS
 
     fun setShifted(value: Boolean) {
         shifted = value && layer == KeyboardLayer.LETTERS
@@ -135,7 +137,11 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun currentRows(): List<List<Key>> {
-        val characterRows = KeyboardLayout.characterRows(layer)
+        val characterRows = if (layer == KeyboardLayer.EMOJI) {
+            KeyboardLayout.emojiRows(emojiCategory)
+        } else {
+            KeyboardLayout.characterRows(layer)
+        }
         return when (layer) {
             KeyboardLayer.LETTERS -> listOf(
                 characterRows[0].map(::textKey),
@@ -179,10 +185,11 @@ class KeyboardView @JvmOverloads constructor(
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
                 listOf(
-                    Key("ABC", 1.15f, Action.LETTERS),
-                    Key("?123", 1.15f, Action.SYMBOLS),
-                    Key("space", 4.25f, Action.SPACE),
-                    Key("↵", 1.25f, Action.ENTER)
+                    Key("ABC", 1.05f, Action.LETTERS),
+                    Key("?123", 1.05f, Action.SYMBOLS),
+                    Key(emojiCategory.label, 0.9f, Action.EMOJI_CATEGORY),
+                    Key("space", 3.4f, Action.SPACE),
+                    Key("↵", 1.2f, Action.ENTER)
                 )
             )
         }
@@ -210,7 +217,10 @@ class KeyboardView @JvmOverloads constructor(
         if (layer != KeyboardLayer.LETTERS) {
             val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(
-                if (layer == KeyboardLayer.EMOJI) "Emoji stay local" else "Symbols stay local",
+                when (layer) {
+                    KeyboardLayer.EMOJI -> "Emoji · ${emojiCategory.displayName()} · local"
+                    else -> "Symbols stay local"
+                },
                 width / 2f,
                 baseline,
                 suggestionHintPaint
@@ -263,6 +273,10 @@ class KeyboardView @JvmOverloads constructor(
             Action.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
             Action.SYMBOLS_MORE -> switchLayer(KeyboardLayer.SYMBOLS_MORE)
             Action.EMOJI -> switchLayer(KeyboardLayer.EMOJI)
+            Action.EMOJI_CATEGORY -> {
+                emojiCategory = KeyboardLayout.nextEmojiCategory(emojiCategory)
+                invalidate()
+            }
         }
         performClick()
         return true
@@ -274,6 +288,8 @@ class KeyboardView @JvmOverloads constructor(
         listener?.onLayerChanged(layer)
         invalidate()
     }
+
+    private fun EmojiCategory.displayName(): String = name.lowercase().replaceFirstChar { it.uppercase() }
 
     override fun performClick(): Boolean {
         super.performClick()
