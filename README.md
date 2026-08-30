@@ -11,20 +11,21 @@ The current Android source includes:
 - Core QWERTY input, shift, backspace, space, and enter actions.
 - First-party letters-and-symbols switching with `?123` / `ABC`, plus a second `=\\<` symbol page for brackets, operators, currency marks, and common typographic symbols.
 - A bounded first-party emoji layer that routes complete Unicode text through the existing String-safe input contract, includes selected composed sequences, and organizes the current local set into deterministic Smileys, People, and Symbols categories.
-- Category cycling remains in-memory view state only; it does not create emoji-history persistence, telemetry, cloud lookup, or learned-use profiling.
+- Direct in-memory emoji category selection plus a bounded **Recent** category that appears after emoji are committed. Recents retain exact String values, deduplicate by promotion, are capped at 24 entries, and exist only in the current IME process memory.
+- Emoji recents are not written to disk, synchronized, logged, transmitted, or used for learned-use profiling; restarting the IME process clears them.
 - Bounded Unicode-aware backspace for common emoji modifiers, ZWJ-linked emoji, regional-indicator flags, keycaps, variation selectors, combining marks, and CRLF while sensitive editors retain one-code-point deletion without text look-behind.
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, acceptance, and backspace look-behind inspection.
 - Privacy-by-default behavior with no Android network permission.
 - Glaze UI 2.0.0 Adoption Candidate source mapping for current geometry, target floor, and Light/Dark appearance values.
 - Explicit Wardveil Security, Privacy Shield, Everkeep, GoreeCloud Identity, and GoreeCloud Mesh integration boundaries.
-- Android unit/build/governance and emulator validation infrastructure, including rendered native symbol-page hit testing.
+- Android unit/build/governance and emulator validation infrastructure, including rendered native symbol-page hit testing and pure recency-model coverage.
 
 ## Product direction
 
 The keyboard is intended to grow into a privacy-first input platform with gesture typing, richer local suggestions and correction, dictionaries, multilingual input, richer emoji discovery, clipboard tools, voice/input adapters where appropriate, accessibility, one-handed and split layouts, tablet/foldable adaptation, and GoreeCloud Quill writing capabilities.
 
-The current emoji surface remains intentionally bounded rather than a complete picker. Every exposed categorized key is required by unit coverage to be compatible with the current one-backspace text-unit deletion model before it is admitted. The backspace helper still does not claim complete Unicode UAX #29 grapheme segmentation for every script. Emoji search, recents, persistence, broader composed-sequence coverage, complete grapheme segmentation, and broader multilingual editing acceptance remain product targets rather than current implementation claims.
+The current emoji surface remains intentionally bounded rather than a complete picker. Every exposed categorized key is required by unit coverage to be compatible with the current one-backspace text-unit deletion model before it is admitted. The backspace helper still does not claim complete Unicode UAX #29 grapheme segmentation for every script. Emoji search, persistent recents, synchronization, broader composed-sequence coverage, complete grapheme segmentation, and broader multilingual editing acceptance remain product targets rather than current implementation claims.
 
 ## Documentation
 
