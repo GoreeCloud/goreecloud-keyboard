@@ -46,6 +46,7 @@ class KeyboardView @JvmOverloads constructor(
         val label: String,
         val category: EmojiCategory? = null,
         val recent: Boolean = false,
+        val clearRecents: Boolean = false,
     )
     private data class HitEmojiCategory(val bounds: RectF, val entry: EmojiStripEntry)
 
@@ -262,8 +263,12 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun drawEmojiCategoryStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+        val hasRecents = emojiRecents.values().isNotEmpty()
         val entries = buildList {
-            if (emojiRecents.values().isNotEmpty()) add(EmojiStripEntry("◷ Recent", recent = true))
+            if (hasRecents) {
+                add(EmojiStripEntry("◷ Recent", recent = true))
+                add(EmojiStripEntry("Clear", clearRecents = true))
+            }
             EmojiCategory.entries.forEach { category ->
                 add(EmojiStripEntry("${category.label} ${category.displayName()}", category = category))
             }
@@ -290,11 +295,16 @@ class KeyboardView @JvmOverloads constructor(
         if (event.action != MotionEvent.ACTION_UP) return true
 
         hitEmojiCategories.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
-            if (hit.entry.recent) {
-                showingEmojiRecents = emojiRecents.values().isNotEmpty()
-            } else if (hit.entry.category != null) {
-                emojiCategory = hit.entry.category
-                showingEmojiRecents = false
+            when {
+                hit.entry.clearRecents -> {
+                    emojiRecents.clear()
+                    showingEmojiRecents = false
+                }
+                hit.entry.recent -> showingEmojiRecents = emojiRecents.values().isNotEmpty()
+                hit.entry.category != null -> {
+                    emojiCategory = hit.entry.category
+                    showingEmojiRecents = false
+                }
             }
             invalidate()
             performClick()

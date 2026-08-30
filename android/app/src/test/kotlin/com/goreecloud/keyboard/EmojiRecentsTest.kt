@@ -40,4 +40,19 @@ class EmojiRecentsTest {
         )
         assertTrue(recents.rows().size == EmojiRecents.DEFAULT_ROW_COUNT)
     }
+
+    @Test
+    fun clearDropsAllProcessMemoryRecentsWithoutChangingBounds() {
+        val recents = EmojiRecents(limit = 4, rowWidth = 2)
+        recents.record("👩‍💻")
+        recents.record("👍🏽")
+
+        recents.clear()
+
+        assertTrue(recents.values().isEmpty())
+        assertEquals(
+            listOf(emptyList<String>(), emptyList<String>(), emptyList<String>()),
+            recents.rows(),
+        )
+    }
 }
