@@ -42,7 +42,12 @@ class KeyboardView @JvmOverloads constructor(
     }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
-    private data class HitEmojiCategory(val bounds: RectF, val category: EmojiCategory)
+    private data class EmojiStripEntry(
+        val label: String,
+        val category: EmojiCategory? = null,
+        val recent: Boolean = false,
+    )
+    private data class HitEmojiCategory(val bounds: RectF, val entry: EmojiStripEntry)
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -68,10 +73,12 @@ class KeyboardView @JvmOverloads constructor(
     private val hitKeys = mutableListOf<HitKey>()
     private val hitSuggestions = mutableListOf<HitSuggestion>()
     private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
+    private val emojiRecents = EmojiRecents()
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
     private var emojiCategory = EmojiCategory.SMILEYS
+    private var showingEmojiRecents = false
 
     fun setShifted(value: Boolean) {
         shifted = value && layer == KeyboardLayer.LETTERS
@@ -140,7 +147,11 @@ class KeyboardView @JvmOverloads constructor(
 
     private fun currentRows(): List<List<Key>> {
         val characterRows = if (layer == KeyboardLayer.EMOJI) {
-            KeyboardLayout.emojiRows(emojiCategory)
+            if (showingEmojiRecents && emojiRecents.values().isNotEmpty()) {
+                emojiRecents.rows()
+            } else {
+                KeyboardLayout.emojiRows(emojiCategory)
+            }
         } else {
             KeyboardLayout.characterRows(layer)
         }
@@ -251,22 +262,27 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun drawEmojiCategoryStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
-        val categories = EmojiCategory.entries
+        val entries = buildList {
+            if (emojiRecents.values().isNotEmpty()) add(EmojiStripEntry("◷ Recent", recent = true))
+            EmojiCategory.entries.forEach { category ->
+                add(EmojiStripEntry("${category.label} ${category.displayName()}", category = category))
+            }
+        }
         val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
-        val availableWidth = width - horizontalPadding * 2 - gap * (categories.size - 1)
-        val cellWidth = availableWidth / categories.size
+        val availableWidth = width - horizontalPadding * 2 - gap * (entries.size - 1)
+        val cellWidth = availableWidth / entries.size
         val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
-        categories.forEachIndexed { index, category ->
+        entries.forEachIndexed { index, entry ->
             val left = horizontalPadding + index * (cellWidth + gap)
             val bounds = RectF(left, 0f, left + cellWidth, topArea)
-            if (category == emojiCategory) {
+            val selected = if (entry.recent) showingEmojiRecents else !showingEmojiRecents && entry.category == emojiCategory
+            if (selected) {
                 canvas.drawRoundRect(bounds, radius, radius, keyPaint)
                 canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
             }
-            val label = "${category.label} ${category.displayName()}"
             val baseline = bounds.centerY() - (suggestionPaint.descent() + suggestionPaint.ascent()) / 2
-            canvas.drawText(label, bounds.centerX(), baseline, suggestionPaint)
-            hitEmojiCategories += HitEmojiCategory(bounds, category)
+            canvas.drawText(entry.label, bounds.centerX(), baseline, suggestionPaint)
+            hitEmojiCategories += HitEmojiCategory(bounds, entry)
         }
     }
 
@@ -274,7 +290,12 @@ class KeyboardView @JvmOverloads constructor(
         if (event.action != MotionEvent.ACTION_UP) return true
 
         hitEmojiCategories.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
-            emojiCategory = hit.category
+            if (hit.entry.recent) {
+                showingEmojiRecents = emojiRecents.values().isNotEmpty()
+            } else if (hit.entry.category != null) {
+                emojiCategory = hit.entry.category
+                showingEmojiRecents = false
+            }
             invalidate()
             performClick()
             return true
@@ -288,7 +309,13 @@ class KeyboardView @JvmOverloads constructor(
 
         val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) } ?: return true
         when (hit.key.action) {
-            Action.TEXT -> listener?.onText(hit.key.label)
+            Action.TEXT -> {
+                if (layer == KeyboardLayer.EMOJI) {
+                    emojiRecents.record(hit.key.label)
+                }
+                listener?.onText(hit.key.label)
+                if (layer == KeyboardLayer.EMOJI) invalidate()
+            }
             Action.SHIFT -> listener?.onShift()
             Action.BACKSPACE -> listener?.onBackspace()
             Action.SPACE -> listener?.onSpace()
