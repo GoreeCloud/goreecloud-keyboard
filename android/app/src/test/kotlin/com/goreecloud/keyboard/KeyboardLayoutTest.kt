@@ -45,7 +45,7 @@ class KeyboardLayoutTest {
         }
         val allKeys = keysByCategory.values.flatten()
 
-        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀", "🐶", "🌿", "🍎", "🍕", "✈️", "🚗", "🧳", "🏕️")) {
+        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀", "🐶", "🌿", "🍎", "🍕", "✈️", "🚗", "🧳", "🏕️", "⚽", "🎮", "🎨", "📱", "⌨️", "🔑")) {
             assertTrue("expected emoji $key", allKeys.contains(key))
         }
         assertTrue(allKeys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
@@ -73,16 +73,24 @@ class KeyboardLayoutTest {
         assertEquals(EmojiCategory.NATURE, KeyboardLayout.nextEmojiCategory(EmojiCategory.PEOPLE))
         assertEquals(EmojiCategory.FOOD, KeyboardLayout.nextEmojiCategory(EmojiCategory.NATURE))
         assertEquals(EmojiCategory.TRAVEL, KeyboardLayout.nextEmojiCategory(EmojiCategory.FOOD))
-        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.TRAVEL))
+        assertEquals(EmojiCategory.ACTIVITIES, KeyboardLayout.nextEmojiCategory(EmojiCategory.TRAVEL))
+        assertEquals(EmojiCategory.OBJECTS, KeyboardLayout.nextEmojiCategory(EmojiCategory.ACTIVITIES))
+        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.OBJECTS))
         assertEquals(EmojiCategory.SMILEYS, KeyboardLayout.nextEmojiCategory(EmojiCategory.SYMBOLS))
     }
 
     @Test
-    fun travelCategoryIsOfflineAndBounded() {
+    fun newerOfflineCategoriesRemainBounded() {
         val travel = KeyboardLayout.emojiRows(EmojiCategory.TRAVEL).flatten()
+        val activities = KeyboardLayout.emojiRows(EmojiCategory.ACTIVITIES).flatten()
+        val objects = KeyboardLayout.emojiRows(EmojiCategory.OBJECTS).flatten()
 
         assertEquals(24, travel.size)
         assertTrue(travel.containsAll(listOf("🚗", "✈️", "🚆", "🚢", "🏖️", "🗺️", "🧳")))
+        assertEquals(24, activities.size)
+        assertTrue(activities.containsAll(listOf("⚽", "🏀", "🎾", "🎮", "🎲", "🎨", "🎭")))
+        assertEquals(24, objects.size)
+        assertTrue(objects.containsAll(listOf("⌚", "📱", "💻", "📷", "⏰", "💡", "🔑", "🔒")))
     }
 
     @Test
