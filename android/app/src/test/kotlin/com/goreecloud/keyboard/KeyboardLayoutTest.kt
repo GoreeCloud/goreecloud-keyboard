@@ -45,7 +45,7 @@ class KeyboardLayoutTest {
         }
         val allKeys = keysByCategory.values.flatten()
 
-        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀", "🐶", "🌿", "🍎", "🍕")) {
+        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀", "🐶", "🌿", "🍎", "🍕", "✈️", "🚗", "🧳", "🏕️")) {
             assertTrue("expected emoji $key", allKeys.contains(key))
         }
         assertTrue(allKeys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
@@ -72,8 +72,17 @@ class KeyboardLayoutTest {
         assertEquals(EmojiCategory.PEOPLE, KeyboardLayout.nextEmojiCategory(EmojiCategory.SMILEYS))
         assertEquals(EmojiCategory.NATURE, KeyboardLayout.nextEmojiCategory(EmojiCategory.PEOPLE))
         assertEquals(EmojiCategory.FOOD, KeyboardLayout.nextEmojiCategory(EmojiCategory.NATURE))
-        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.FOOD))
+        assertEquals(EmojiCategory.TRAVEL, KeyboardLayout.nextEmojiCategory(EmojiCategory.FOOD))
+        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.TRAVEL))
         assertEquals(EmojiCategory.SMILEYS, KeyboardLayout.nextEmojiCategory(EmojiCategory.SYMBOLS))
+    }
+
+    @Test
+    fun travelCategoryIsOfflineAndBounded() {
+        val travel = KeyboardLayout.emojiRows(EmojiCategory.TRAVEL).flatten()
+
+        assertEquals(24, travel.size)
+        assertTrue(travel.containsAll(listOf("🚗", "✈️", "🚆", "🚢", "🏖️", "🗺️", "🧳")))
     }
 
     @Test
