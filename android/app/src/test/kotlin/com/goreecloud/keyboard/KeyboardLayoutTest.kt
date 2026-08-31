@@ -45,7 +45,7 @@ class KeyboardLayoutTest {
         }
         val allKeys = keysByCategory.values.flatten()
 
-        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀")) {
+        for (key in listOf("😀", "😂", "❤️", "👍🏽", "🙏🏾", "👩‍💻", "👨‍👩‍👧‍👦", "🏳️‍🌈", "🇺🇸", "🚀", "🐶", "🌿", "🍎", "🍕")) {
             assertTrue("expected emoji $key", allKeys.contains(key))
         }
         assertTrue(allKeys.any { key -> key.length == 2 && key.codePointCount(0, key.length) == 1 })
@@ -70,7 +70,9 @@ class KeyboardLayoutTest {
     @Test
     fun emojiCategoriesCycleDeterministicallyWithoutPersistence() {
         assertEquals(EmojiCategory.PEOPLE, KeyboardLayout.nextEmojiCategory(EmojiCategory.SMILEYS))
-        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.PEOPLE))
+        assertEquals(EmojiCategory.NATURE, KeyboardLayout.nextEmojiCategory(EmojiCategory.PEOPLE))
+        assertEquals(EmojiCategory.FOOD, KeyboardLayout.nextEmojiCategory(EmojiCategory.NATURE))
+        assertEquals(EmojiCategory.SYMBOLS, KeyboardLayout.nextEmojiCategory(EmojiCategory.FOOD))
         assertEquals(EmojiCategory.SMILEYS, KeyboardLayout.nextEmojiCategory(EmojiCategory.SYMBOLS))
     }
 

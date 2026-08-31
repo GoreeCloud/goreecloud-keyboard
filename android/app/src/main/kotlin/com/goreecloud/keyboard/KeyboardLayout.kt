@@ -10,6 +10,8 @@ enum class KeyboardLayer {
 enum class EmojiCategory(val label: String) {
     SMILEYS("☺"),
     PEOPLE("👤"),
+    NATURE("🌿"),
+    FOOD("🍽"),
     SYMBOLS("★"),
 }
 
@@ -39,6 +41,16 @@ object KeyboardLayout {
             keys("👍", "👍🏽", "👎", "👏", "🙌", "🙏🏾", "💪", "🤝"),
             keys("👋", "🫶", "👩‍💻", "👨‍💻", "🧑‍🚀", "👩‍🔬", "👨‍🔬", "🧑‍🍳"),
             keys("👨‍👩‍👧‍👦", "👩‍👩‍👦", "👨‍👨‍👧", "🧑‍🤝‍🧑", "🙋", "🙆", "🙅", "🤷"),
+        ),
+        EmojiCategory.NATURE to listOf(
+            keys("🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"),
+            keys("🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🦋"),
+            keys("🌱", "🌿", "🍀", "🌵", "🌴", "🌻", "🌹", "🌊"),
+        ),
+        EmojiCategory.FOOD to listOf(
+            keys("🍎", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐"),
+            keys("🍒", "🍑", "🥭", "🍍", "🥑", "🥕", "🌽", "🥦"),
+            keys("🍞", "🥐", "🧀", "🍕", "🍔", "🍜", "🍣", "🍰"),
         ),
         EmojiCategory.SYMBOLS to listOf(
             keys("❤️", "⭐", "✅", "❌", "🔥", "🎉", "🚀", "💯"),
