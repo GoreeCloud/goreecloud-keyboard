@@ -18,8 +18,8 @@ object EmojiRecentsCodec {
     fun decode(serialized: String?, limit: Int = EmojiRecents.DEFAULT_LIMIT): List<String> {
         if (serialized.isNullOrEmpty()) return emptyList()
         return serialized.lineSequence()
-            .map(String::trim)
-            .filter(String::isNotEmpty)
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             .distinct()
             .take(limit.coerceAtLeast(1))
             .toList()
