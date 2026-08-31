@@ -30,11 +30,22 @@ class KeyboardView @JvmOverloads constructor(
 
     private data class Key(val label: String, val weight: Float = 1f, val action: Action)
     private enum class Action {
-        TEXT, SHIFT, BACKSPACE, SPACE, ENTER, LETTERS, SYMBOLS, SYMBOLS_MORE, EMOJI,
+        TEXT,
+        SHIFT,
+        BACKSPACE,
+        SPACE,
+        ENTER,
+        LETTERS,
+        SYMBOLS,
+        SYMBOLS_MORE,
+        EMOJI,
+        EMOJI_SEARCH_CLEAR,
+        EMOJI_SEARCH_CLOSE,
     }
     private data class HitKey(val bounds: RectF, val key: Key)
     private data class HitSuggestion(val bounds: RectF, val value: String)
     private data class HitEmojiCategory(val bounds: RectF, val entry: EmojiStripEntry)
+    private data class HitEmojiSearchResult(val bounds: RectF, val result: EmojiSearchResult)
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -60,9 +71,11 @@ class KeyboardView @JvmOverloads constructor(
     private val hitKeys = mutableListOf<HitKey>()
     private val hitSuggestions = mutableListOf<HitSuggestion>()
     private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
+    private val hitEmojiSearchResults = mutableListOf<HitEmojiSearchResult>()
     private val emojiRecentsStore = LocalEmojiRecentsStore(context)
     private val emojiCategoryStore = LocalEmojiCategoryStore(context)
     private val emojiRecents = EmojiRecents(initialValues = emojiRecentsStore.load())
+    private val emojiSearchSession = EmojiSearchSession()
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
@@ -77,6 +90,7 @@ class KeyboardView @JvmOverloads constructor(
     fun setLayer(value: KeyboardLayer) {
         layer = value
         if (layer != KeyboardLayer.LETTERS) shifted = false
+        if (layer != KeyboardLayer.EMOJI) emojiSearchSession.close()
         invalidate()
     }
 
@@ -99,6 +113,7 @@ class KeyboardView @JvmOverloads constructor(
         hitKeys.clear()
         hitSuggestions.clear()
         hitEmojiCategories.clear()
+        hitEmojiSearchResults.clear()
 
         val rows = currentRows()
         val density = resources.displayMetrics.density
@@ -133,6 +148,20 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun currentRows(): List<List<Key>> {
+        if (layer == KeyboardLayer.EMOJI && emojiSearchSession.snapshot().active) {
+            val letterRows = KeyboardLayout.characterRows(KeyboardLayer.LETTERS)
+            return listOf(
+                letterRows[0].map(::textKey),
+                letterRows[1].map(::textKey),
+                letterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                listOf(
+                    Key("Clear", 1.35f, Action.EMOJI_SEARCH_CLEAR),
+                    Key("space", 3.9f, Action.SPACE),
+                    Key("Close", 1.35f, Action.EMOJI_SEARCH_CLOSE),
+                ),
+            )
+        }
+
         val characterRows = if (layer == KeyboardLayer.EMOJI) {
             if (showingEmojiRecents && emojiRecents.values().isNotEmpty()) emojiRecents.rows() else KeyboardLayout.emojiRows(emojiCategory)
         } else {
@@ -182,7 +211,11 @@ class KeyboardView @JvmOverloads constructor(
 
     private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
         if (layer == KeyboardLayer.EMOJI) {
-            drawEmojiCategoryStrip(canvas, horizontalPadding, topArea)
+            if (emojiSearchSession.snapshot().active) {
+                drawEmojiSearchStrip(canvas, horizontalPadding, topArea)
+            } else {
+                drawEmojiCategoryStrip(canvas, horizontalPadding, topArea)
+            }
             return
         }
         if (layer != KeyboardLayer.LETTERS) {
@@ -206,6 +239,41 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
+    private fun drawEmojiSearchStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+        val snapshot = emojiSearchSession.snapshot()
+        val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
+        val queryWidth = (width - horizontalPadding * 2) * 0.46f
+        val queryBounds = RectF(horizontalPadding, 0f, horizontalPadding + queryWidth, topArea)
+        val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
+        canvas.drawRoundRect(queryBounds, radius, radius, keyPaint)
+        canvas.drawRoundRect(queryBounds, radius, radius, keyStrokePaint)
+        val queryLabel = if (snapshot.query.isBlank()) "Search emoji locally" else "⌕ ${snapshot.query}"
+        val queryBaseline = queryBounds.centerY() - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+        canvas.drawText(queryLabel, queryBounds.centerX(), queryBaseline, suggestionHintPaint)
+
+        val visibleResults = snapshot.results.take(3)
+        val resultsLeft = queryBounds.right + gap
+        val resultsWidth = width - horizontalPadding - resultsLeft
+        if (visibleResults.isEmpty()) {
+            val message = if (snapshot.query.isBlank()) "Type a name" else "No matches"
+            val bounds = RectF(resultsLeft, 0f, width - horizontalPadding, topArea)
+            val baseline = bounds.centerY() - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+            canvas.drawText(message, bounds.centerX(), baseline, suggestionHintPaint)
+            return
+        }
+
+        val cellWidth = (resultsWidth - gap * (visibleResults.size - 1)) / visibleResults.size
+        visibleResults.forEachIndexed { index, result ->
+            val left = resultsLeft + index * (cellWidth + gap)
+            val bounds = RectF(left, 0f, left + cellWidth, topArea)
+            canvas.drawRoundRect(bounds, radius, radius, keyPaint)
+            canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
+            val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
+            canvas.drawText(result.emoji, bounds.centerX(), baseline, textPaint)
+            hitEmojiSearchResults += HitEmojiSearchResult(bounds, result)
+        }
+    }
+
     private fun drawEmojiCategoryStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
         val entries = EmojiStripModel.entries(hasRecents = emojiRecents.values().isNotEmpty())
         val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
@@ -215,7 +283,11 @@ class KeyboardView @JvmOverloads constructor(
         entries.forEachIndexed { index, entry ->
             val left = horizontalPadding + index * (cellWidth + gap)
             val bounds = RectF(left, 0f, left + cellWidth, topArea)
-            val selected = if (entry.recent) showingEmojiRecents else !showingEmojiRecents && entry.category == emojiCategory
+            val selected = when {
+                entry.search -> false
+                entry.recent -> showingEmojiRecents
+                else -> !showingEmojiRecents && entry.category == emojiCategory
+            }
             if (selected) {
                 canvas.drawRoundRect(bounds, radius, radius, keyPaint)
                 canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
@@ -229,15 +301,34 @@ class KeyboardView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return true
 
+        hitEmojiSearchResults.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
+            emojiRecents.record(hit.result.emoji)
+            emojiRecentsStore.save(emojiRecents.values())
+            listener?.onText(hit.result.emoji)
+            announceForAccessibility("Inserted emoji from local search")
+            invalidate()
+            performClick()
+            return true
+        }
+
         hitEmojiCategories.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
             when {
+                hit.entry.search -> {
+                    emojiSearchSession.open()
+                    showingEmojiRecents = false
+                }
                 hit.entry.clearRecents -> {
+                    emojiSearchSession.close()
                     emojiRecents.clear()
                     emojiRecentsStore.save(emojiRecents.values())
                     showingEmojiRecents = false
                 }
-                hit.entry.recent -> showingEmojiRecents = emojiRecents.values().isNotEmpty()
+                hit.entry.recent -> {
+                    emojiSearchSession.close()
+                    showingEmojiRecents = emojiRecents.values().isNotEmpty()
+                }
                 hit.entry.category != null -> {
+                    emojiSearchSession.close()
                     emojiCategory = hit.entry.category
                     emojiCategoryStore.save(emojiCategory)
                     showingEmojiRecents = false
@@ -256,23 +347,52 @@ class KeyboardView @JvmOverloads constructor(
         }
 
         val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) } ?: return true
+        val searchActive = layer == KeyboardLayer.EMOJI && emojiSearchSession.snapshot().active
         when (hit.key.action) {
             Action.TEXT -> {
-                if (layer == KeyboardLayer.EMOJI) {
-                    emojiRecents.record(hit.key.label)
-                    emojiRecentsStore.save(emojiRecents.values())
+                if (searchActive) {
+                    emojiSearchSession.append(hit.key.label.lowercase())
+                } else {
+                    if (layer == KeyboardLayer.EMOJI) {
+                        emojiRecents.record(hit.key.label)
+                        emojiRecentsStore.save(emojiRecents.values())
+                    }
+                    listener?.onText(hit.key.label)
                 }
-                listener?.onText(hit.key.label)
                 if (layer == KeyboardLayer.EMOJI) invalidate()
             }
             Action.SHIFT -> listener?.onShift()
-            Action.BACKSPACE -> listener?.onBackspace()
-            Action.SPACE -> listener?.onSpace()
+            Action.BACKSPACE -> {
+                if (searchActive) {
+                    emojiSearchSession.backspace()
+                    invalidate()
+                } else {
+                    listener?.onBackspace()
+                }
+            }
+            Action.SPACE -> {
+                if (searchActive) {
+                    emojiSearchSession.append(" ")
+                    invalidate()
+                } else {
+                    listener?.onSpace()
+                }
+            }
             Action.ENTER -> listener?.onEnter()
             Action.LETTERS -> switchLayer(KeyboardLayer.LETTERS)
             Action.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
             Action.SYMBOLS_MORE -> switchLayer(KeyboardLayer.SYMBOLS_MORE)
             Action.EMOJI -> switchLayer(KeyboardLayer.EMOJI)
+            Action.EMOJI_SEARCH_CLEAR -> {
+                emojiSearchSession.clear()
+                announceForAccessibility("Emoji search cleared")
+                invalidate()
+            }
+            Action.EMOJI_SEARCH_CLOSE -> {
+                emojiSearchSession.close()
+                announceForAccessibility("Emoji search closed")
+                invalidate()
+            }
         }
         performClick()
         return true
@@ -281,6 +401,7 @@ class KeyboardView @JvmOverloads constructor(
     private fun switchLayer(value: KeyboardLayer) {
         layer = value
         shifted = false
+        if (layer != KeyboardLayer.EMOJI) emojiSearchSession.close()
         listener?.onLayerChanged(layer)
         invalidate()
     }
