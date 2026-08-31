@@ -61,11 +61,12 @@ class KeyboardView @JvmOverloads constructor(
     private val hitSuggestions = mutableListOf<HitSuggestion>()
     private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
     private val emojiRecentsStore = LocalEmojiRecentsStore(context)
+    private val emojiCategoryStore = LocalEmojiCategoryStore(context)
     private val emojiRecents = EmojiRecents(initialValues = emojiRecentsStore.load())
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
-    private var emojiCategory = EmojiCategory.SMILEYS
+    private var emojiCategory = emojiCategoryStore.load()
     private var showingEmojiRecents = false
 
     fun setShifted(value: Boolean) {
@@ -238,6 +239,7 @@ class KeyboardView @JvmOverloads constructor(
                 hit.entry.recent -> showingEmojiRecents = emojiRecents.values().isNotEmpty()
                 hit.entry.category != null -> {
                     emojiCategory = hit.entry.category
+                    emojiCategoryStore.save(emojiCategory)
                     showingEmojiRecents = false
                 }
             }
