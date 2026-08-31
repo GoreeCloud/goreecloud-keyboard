@@ -7,9 +7,13 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 
 class KeyboardView @JvmOverloads constructor(
     context: Context,
@@ -46,6 +50,12 @@ class KeyboardView @JvmOverloads constructor(
     private data class HitSuggestion(val bounds: RectF, val value: String)
     private data class HitEmojiCategory(val bounds: RectF, val entry: EmojiStripEntry)
     private data class HitEmojiSearchResult(val bounds: RectF, val result: EmojiSearchResult)
+    private data class AlternatePopup(
+        val sourceBounds: RectF,
+        val values: List<String>,
+        var selectedIndex: Int? = 0,
+        val itemBounds: MutableList<RectF> = mutableListOf(),
+    )
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -67,6 +77,8 @@ class KeyboardView @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
         textSize = 13f * resources.displayMetrics.scaledDensity
     }
+    private val alternatePopupPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val alternateSelectedPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private val hitKeys = mutableListOf<HitKey>()
     private val hitSuggestions = mutableListOf<HitSuggestion>()
@@ -81,13 +93,27 @@ class KeyboardView @JvmOverloads constructor(
     private var layer = KeyboardLayer.LETTERS
     private var emojiCategory = emojiCategoryStore.load()
     private var showingEmojiRecents = false
+    private var pendingAlternateHit: HitKey? = null
+    private var alternatePopup: AlternatePopup? = null
+
+    private val showAlternatesRunnable = Runnable {
+        val hit = pendingAlternateHit ?: return@Runnable
+        val values = alternatesFor(hit)
+        if (values.isEmpty()) return@Runnable
+        alternatePopup = AlternatePopup(RectF(hit.bounds), values)
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        announceForAccessibility("Alternate characters available")
+        invalidate()
+    }
 
     fun setShifted(value: Boolean) {
+        cancelAlternateInteraction()
         shifted = value && layer == KeyboardLayer.LETTERS
         invalidate()
     }
 
     fun setLayer(value: KeyboardLayer) {
+        cancelAlternateInteraction()
         layer = value
         if (layer != KeyboardLayer.LETTERS) shifted = false
         if (layer != KeyboardLayer.EMOJI) emojiSearchSession.close()
@@ -138,13 +164,15 @@ class KeyboardView @JvmOverloads constructor(
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyPaint)
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyStrokePaint)
 
-                val label = if (key.action == Action.TEXT && shifted && layer == KeyboardLayer.LETTERS) key.label.uppercase() else key.label
+                val label = renderedKeyLabel(key)
                 val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
                 canvas.drawText(label, bounds.centerX(), baseline, textPaint)
                 hitKeys += HitKey(bounds, key)
                 left += keyWidth + gap
             }
         }
+
+        alternatePopup?.let { drawAlternatePopup(canvas, it) }
     }
 
     private fun currentRows(): List<List<Key>> {
@@ -197,6 +225,16 @@ class KeyboardView @JvmOverloads constructor(
 
     private fun textKey(value: String): Key = Key(value, action = Action.TEXT)
 
+    private fun renderedKeyLabel(key: Key): String =
+        if (key.action == Action.TEXT && shifted && layer == KeyboardLayer.LETTERS) key.label.uppercase() else key.label
+
+    private fun alternatesFor(hit: HitKey): List<String> {
+        if (hit.key.action != Action.TEXT || layer == KeyboardLayer.EMOJI || emojiSearchSession.snapshot().active) {
+            return emptyList()
+        }
+        return KeyAlternates.forKey(renderedKeyLabel(hit.key))
+    }
+
     private fun applyCurrentAppearance() {
         val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val appearance = if (nightMode == Configuration.UI_MODE_NIGHT_YES) GlazeKeyboardTokens.Appearance.DARK else GlazeKeyboardTokens.Appearance.LIGHT
@@ -207,6 +245,8 @@ class KeyboardView @JvmOverloads constructor(
         textPaint.color = palette.onSurfaceArgb
         suggestionPaint.color = palette.onSurfaceArgb
         suggestionHintPaint.color = palette.onSurfaceMutedArgb
+        alternatePopupPaint.color = palette.canvasArgb
+        alternateSelectedPaint.color = palette.surfaceArgb
     }
 
     private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
@@ -298,8 +338,94 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
+    private fun drawAlternatePopup(canvas: Canvas, popup: AlternatePopup) {
+        val density = resources.displayMetrics.density
+        val cell = GlazeKeyboardTokens.GeneralInteractionFloorDp * density
+        val gap = GlazeKeyboardTokens.Space1Dp * density
+        val columns = min(5, popup.values.size)
+        val rows = ceil(popup.values.size / columns.toFloat()).toInt()
+        val popupWidth = columns * cell + (columns - 1) * gap
+        val popupHeight = rows * cell + (rows - 1) * gap
+        val left = (popup.sourceBounds.centerX() - popupWidth / 2f)
+            .coerceIn(gap, max(gap, width - gap - popupWidth))
+        val preferredTop = popup.sourceBounds.top - gap - popupHeight
+        val top = if (preferredTop >= gap) preferredTop else popup.sourceBounds.bottom + gap
+        val radius = GlazeKeyboardTokens.RadiusMediumDp * density
+        val shell = RectF(left - gap, top - gap, left + popupWidth + gap, top + popupHeight + gap)
+        canvas.drawRoundRect(shell, radius, radius, alternatePopupPaint)
+        canvas.drawRoundRect(shell, radius, radius, keyStrokePaint)
+
+        popup.itemBounds.clear()
+        popup.values.forEachIndexed { index, value ->
+            val row = index / columns
+            val column = index % columns
+            val itemLeft = left + column * (cell + gap)
+            val itemTop = top + row * (cell + gap)
+            val bounds = RectF(itemLeft, itemTop, itemLeft + cell, itemTop + cell)
+            popup.itemBounds += bounds
+            canvas.drawRoundRect(
+                bounds,
+                radius,
+                radius,
+                if (popup.selectedIndex == index) alternateSelectedPaint else keyPaint,
+            )
+            canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
+            val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
+            canvas.drawText(value, bounds.centerX(), baseline, textPaint)
+        }
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action != MotionEvent.ACTION_UP) return true
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                cancelAlternateInteraction()
+                val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
+                if (hit != null && alternatesFor(hit).isNotEmpty()) {
+                    pendingAlternateHit = hit
+                    postDelayed(showAlternatesRunnable, ViewConfiguration.getLongPressTimeout().toLong())
+                }
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val popup = alternatePopup
+                if (popup != null) {
+                    val selected = popup.itemBounds.indexOfLast { it.contains(event.x, event.y) }
+                    popup.selectedIndex = selected.takeIf { it >= 0 }
+                    invalidate()
+                    return true
+                }
+                pendingAlternateHit?.let { hit ->
+                    val slop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
+                    val expanded = RectF(hit.bounds).apply { inset(-slop, -slop) }
+                    if (!expanded.contains(event.x, event.y)) {
+                        removeCallbacks(showAlternatesRunnable)
+                        pendingAlternateHit = null
+                    }
+                }
+                return true
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                cancelAlternateInteraction()
+                invalidate()
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                removeCallbacks(showAlternatesRunnable)
+                pendingAlternateHit = null
+                alternatePopup?.let { popup ->
+                    val value = popup.selectedIndex?.let(popup.values::getOrNull)
+                    alternatePopup = null
+                    if (value != null) {
+                        listener?.onText(value)
+                        announceForAccessibility("Inserted alternate character")
+                    }
+                    invalidate()
+                    performClick()
+                    return true
+                }
+            }
+            else -> return true
+        }
 
         hitEmojiSearchResults.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
             emojiRecents.record(hit.result.emoji)
@@ -357,7 +483,7 @@ class KeyboardView @JvmOverloads constructor(
                         emojiRecents.record(hit.key.label)
                         emojiRecentsStore.save(emojiRecents.values())
                     }
-                    listener?.onText(hit.key.label)
+                    listener?.onText(renderedKeyLabel(hit.key))
                 }
                 if (layer == KeyboardLayer.EMOJI) invalidate()
             }
@@ -398,7 +524,14 @@ class KeyboardView @JvmOverloads constructor(
         return true
     }
 
+    private fun cancelAlternateInteraction() {
+        removeCallbacks(showAlternatesRunnable)
+        pendingAlternateHit = null
+        alternatePopup = null
+    }
+
     private fun switchLayer(value: KeyboardLayer) {
+        cancelAlternateInteraction()
         layer = value
         shifted = false
         if (layer != KeyboardLayer.EMOJI) emojiSearchSession.close()
