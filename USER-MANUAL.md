@@ -39,18 +39,21 @@ Changing layers clears the temporary word context used for local suggestions. Sy
 
 ## Emoji
 
-Tap **☺** from the letters or symbols layers to open the current bounded local emoji surface. The category strip exposes **Smileys**, **People**, and **Symbols** directly. Emoji keys commit their complete Unicode String value, including supported multi-code-point sequences such as skin-tone variants, ZWJ sequences, flags, and variation-selector forms.
+Tap **☺** from the letters or symbols layers to open the current bounded local emoji surface. The compact category strip exposes **Smileys**, **People**, **Nature**, **Food**, and **Symbols**, with fuller spoken accessibility labels than the visible icon labels. Emoji keys commit their complete Unicode String value, including supported multi-code-point sequences such as skin-tone variants, ZWJ sequences, flags, and variation-selector forms.
 
-After you commit at least one emoji, a **Recent** category appears. Current recents behavior is intentionally privacy-bounded:
+After you commit at least one emoji, a **Recent** control appears. Current recents behavior is intentionally privacy-bounded:
 
 - the most recently committed emoji is promoted to the front;
 - selecting an emoji already in the list promotes it rather than creating a duplicate;
 - at most 24 exact emoji String values are retained;
-- recents exist only in the current keyboard process memory;
-- recents are not written to disk, synchronized, transmitted, logged, or used to build a learned-use profile; and
-- restarting the IME process clears the recents list.
+- recents are stored only in Android private application preferences for GoreeCloud Keyboard;
+- recents survive an IME process restart on the same Android app installation;
+- recents are not synchronized, transmitted, logged, or used to build a learned-use profile; and
+- the visible **Clear** control removes the stored local recents list as well as the current in-memory list.
 
-The current picker is not a complete emoji catalog. Emoji search, persistent recents, cloud emoji lookup, GIF/sticker search, and synchronization are not implemented current behavior.
+The persistence format is a small bounded local list; it does not include surrounding typed text, editor contents, message drafts, timestamps, application identity, or usage telemetry.
+
+The current picker is not a complete emoji catalog. Emoji search, cloud emoji lookup, GIF/sticker search, and synchronization are not implemented current behavior.
 
 ## Local GoreeCloud Quill suggestions
 
@@ -68,7 +71,7 @@ This is a Development privacy boundary, not a claim that the keyboard can indepe
 
 ## Network behavior
 
-The current Android application foundation does **not** request Android network permission. Current Quill suggestions and emoji categories/recents are local-only.
+The current Android application foundation does **not** request Android network permission. Current Quill suggestions, emoji categories, and emoji recents are local-only.
 
 Future network-backed capabilities, if implemented, require separate user-control, Privacy Shield, security, identity, and acceptance work and must be documented before they can be treated as current behavior.
 
@@ -80,8 +83,8 @@ Complete rendered Glaze UI conformance, Deep Dark, accessibility configurations,
 
 ## Current limitations
 
-The Development implementation does not yet claim complete gesture typing, multilingual input, a complete emoji catalog/search surface, persistent emoji history, clipboard tools, voice input, one-handed/split layouts, full tablet/foldable adaptation, complete accessibility acceptance, user dictionary synchronization, complete Unicode grapheme segmentation for every script, signed production packaging, or Stable release acceptance.
+The Development implementation does not yet claim complete gesture typing, multilingual input, emoji search, clipboard tools, voice input, one-handed/split layouts, full tablet/foldable adaptation, complete accessibility acceptance, user dictionary synchronization, complete Unicode grapheme segmentation for every script, signed production packaging, or Stable release acceptance.
 
 ## Privacy and security expectations
 
-Do not interpret the absence of network permission as proof that every future keyboard feature is automatically safe. New content sources, downloadable dictionaries/models, synchronization, clipboard access, voice adapters, account-backed personalization, or persisted usage history require their own GoreeCloud privacy, security, identity, continuity, and integration boundaries before production use.
+Do not interpret the absence of network permission as proof that every future keyboard feature is automatically safe. New content sources, downloadable dictionaries/models, synchronization, clipboard access, voice adapters, account-backed personalization, or broader persisted usage history require their own GoreeCloud privacy, security, identity, continuity, and integration boundaries before production use.

@@ -1,20 +1,23 @@
 package com.goreecloud.keyboard
 
 /**
- * Process-memory-only recency model for emoji committed from the keyboard surface.
+ * Bounded recency model for emoji committed from the keyboard surface.
  *
- * Nothing is persisted, synchronized, logged, or transmitted. Restarting the IME process clears
- * the list. Exact String values are retained so multi-code-point emoji remain intact.
+ * Exact String values are retained so multi-code-point emoji remain intact. The
+ * model itself has no persistence or network authority; callers may restore and
+ * save the bounded list through the private local store.
  */
 class EmojiRecents(
     private val limit: Int = DEFAULT_LIMIT,
     private val rowWidth: Int = DEFAULT_ROW_WIDTH,
+    initialValues: List<String> = emptyList(),
 ) {
     private val entries = mutableListOf<String>()
 
     init {
         require(limit > 0) { "emoji recent limit must be positive" }
         require(rowWidth > 0) { "emoji recent row width must be positive" }
+        restore(initialValues)
     }
 
     fun record(value: String) {
@@ -22,6 +25,15 @@ class EmojiRecents(
         entries.remove(value)
         entries.add(0, value)
         while (entries.size > limit) entries.removeAt(entries.lastIndex)
+    }
+
+    fun restore(values: List<String>) {
+        entries.clear()
+        values.asSequence()
+            .filter(String::isNotBlank)
+            .distinct()
+            .take(limit)
+            .forEach(entries::add)
     }
 
     fun clear() {
