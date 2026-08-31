@@ -13,6 +13,8 @@ enum class EmojiCategory(val label: String) {
     NATURE("🌿"),
     FOOD("🍽"),
     TRAVEL("✈"),
+    ACTIVITIES("⚽"),
+    OBJECTS("💡"),
     SYMBOLS("★"),
 }
 
@@ -57,6 +59,16 @@ object KeyboardLayout {
             keys("🚗", "🚕", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒"),
             keys("✈️", "🚀", "🚁", "🚲", "🛴", "🚆", "🚇", "🚢"),
             keys("⛵", "🏖️", "🏕️", "🏔️", "🗺️", "🧳", "🎡", "🏟️"),
+        ),
+        EmojiCategory.ACTIVITIES to listOf(
+            keys("⚽", "🏀", "🏈", "⚾", "🥎", "🎾", "🏐", "🏉"),
+            keys("🥏", "🎱", "🏓", "🏸", "🥅", "⛳", "🪁", "🛹"),
+            keys("🎯", "🎳", "🎮", "🎲", "🧩", "♟️", "🎨", "🎭"),
+        ),
+        EmojiCategory.OBJECTS to listOf(
+            keys("⌚", "📱", "💻", "⌨️", "🖥️", "🖨️", "📷", "📸"),
+            keys("📹", "🎥", "📞", "☎️", "📺", "📻", "⏰", "🔋"),
+            keys("💡", "🔦", "🕯️", "🧭", "🔑", "🔒", "✂️", "🛠️"),
         ),
         EmojiCategory.SYMBOLS to listOf(
             keys("❤️", "⭐", "✅", "❌", "🔥", "🎉", "🚀", "💯"),
