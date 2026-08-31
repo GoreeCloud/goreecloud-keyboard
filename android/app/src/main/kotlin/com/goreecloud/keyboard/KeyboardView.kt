@@ -60,7 +60,8 @@ class KeyboardView @JvmOverloads constructor(
     private val hitKeys = mutableListOf<HitKey>()
     private val hitSuggestions = mutableListOf<HitSuggestion>()
     private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
-    private val emojiRecents = EmojiRecents()
+    private val emojiRecentsStore = LocalEmojiRecentsStore(context)
+    private val emojiRecents = EmojiRecents(initialValues = emojiRecentsStore.load())
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
@@ -231,6 +232,7 @@ class KeyboardView @JvmOverloads constructor(
             when {
                 hit.entry.clearRecents -> {
                     emojiRecents.clear()
+                    emojiRecentsStore.save(emojiRecents.values())
                     showingEmojiRecents = false
                 }
                 hit.entry.recent -> showingEmojiRecents = emojiRecents.values().isNotEmpty()
@@ -254,7 +256,10 @@ class KeyboardView @JvmOverloads constructor(
         val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) } ?: return true
         when (hit.key.action) {
             Action.TEXT -> {
-                if (layer == KeyboardLayer.EMOJI) emojiRecents.record(hit.key.label)
+                if (layer == KeyboardLayer.EMOJI) {
+                    emojiRecents.record(hit.key.label)
+                    emojiRecentsStore.save(emojiRecents.values())
+                }
                 listener?.onText(hit.key.label)
                 if (layer == KeyboardLayer.EMOJI) invalidate()
             }
