@@ -42,6 +42,19 @@ class TextDeletionTest {
     }
 
     @Test
+    fun regionalIndicatorRunsPairFromTheStart() {
+        assertEquals(1, TextDeletion.previousTextUnitCodePointCount("flags🇦🇧🇨"))
+        assertEquals(2, TextDeletion.previousTextUnitCodePointCount("flags🇦🇧🇨🇩"))
+        assertEquals(1, TextDeletion.previousTextUnitCodePointCount("flags🇦🇧🇨🇩🇪"))
+    }
+
+    @Test
+    fun nonRegionalTextResetsRegionalIndicatorPairing() {
+        assertEquals(2, TextDeletion.previousTextUnitCodePointCount("🇦🇧x🇨🇩"))
+        assertEquals(1, TextDeletion.previousTextUnitCodePointCount("🇦🇧x🇨"))
+    }
+
+    @Test
     fun crlfDeletesAsOneLineBreakUnit() {
         assertEquals(2, TextDeletion.previousTextUnitCodePointCount("line\r\n"))
     }
