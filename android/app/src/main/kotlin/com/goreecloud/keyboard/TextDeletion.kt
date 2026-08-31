@@ -5,8 +5,10 @@ package com.goreecloud.keyboard
  *
  * This is a deliberately bounded text-unit model for the keyboard input surface. It keeps common
  * emoji sequences, combining marks, variation selectors, emoji modifiers, keycaps, tag sequences,
- * regional-indicator flags, and ZWJ-linked emoji together. It does not claim full UAX #29 grapheme
- * segmentation for every script.
+ * regional-indicator flags, and ZWJ-linked emoji together. Regional-indicator runs follow the
+ * Unicode pair-from-the-start rule, so an odd trailing indicator is not incorrectly merged with
+ * the preceding completed flag pair. It does not claim full UAX #29 grapheme segmentation for
+ * every script.
  */
 object TextDeletion {
     fun previousTextUnitCodePointCount(textBeforeCursor: CharSequence): Int {
@@ -17,8 +19,11 @@ object TextDeletion {
 
         var start = baseStart(codePoints, codePoints.lastIndex)
 
-        if (isRegionalIndicator(codePoints[start]) && start > 0 && isRegionalIndicator(codePoints[start - 1])) {
-            start -= 1
+        if (isRegionalIndicator(codePoints[start])) {
+            val runLength = trailingRegionalIndicatorRunLength(codePoints, start)
+            if (runLength % 2 == 0) {
+                start -= 1
+            }
         }
 
         while (start > 1 && codePoints[start - 1] == ZERO_WIDTH_JOINER) {
@@ -30,6 +35,14 @@ object TextDeletion {
         }
 
         return codePoints.size - start
+    }
+
+    private fun trailingRegionalIndicatorRunLength(codePoints: IntArray, finalIndicatorIndex: Int): Int {
+        var start = finalIndicatorIndex
+        while (start > 0 && isRegionalIndicator(codePoints[start - 1])) {
+            start -= 1
+        }
+        return finalIndicatorIndex - start + 1
     }
 
     private fun baseStart(codePoints: IntArray, index: Int): Int {
