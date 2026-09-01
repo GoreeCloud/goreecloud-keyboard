@@ -20,6 +20,13 @@ data class AlternatePopupSourceBounds(
         get() = (left + right) / 2f
 }
 
+data class AlternatePopupCellBounds(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+)
+
 data class AlternatePopupLayoutResult(
     val left: Float,
     val top: Float,
@@ -28,7 +35,24 @@ data class AlternatePopupLayoutResult(
     val contentWidth: Float,
     val contentHeight: Float,
     val placedAboveSource: Boolean,
-)
+    val itemCount: Int,
+    val cellSize: Float,
+    val gap: Float,
+) {
+    fun itemBounds(index: Int): AlternatePopupCellBounds {
+        require(index in 0 until itemCount) { "alternate item index is outside the layout" }
+        val row = index / columns
+        val column = index % columns
+        val itemLeft = left + column * (cellSize + gap)
+        val itemTop = top + row * (cellSize + gap)
+        return AlternatePopupCellBounds(
+            left = itemLeft,
+            top = itemTop,
+            right = itemLeft + cellSize,
+            bottom = itemTop + cellSize,
+        )
+    }
+}
 
 /**
  * Pure viewport-bounded geometry policy for native long-press key alternates.
@@ -84,6 +108,9 @@ object AlternatePopupLayout {
             contentWidth = contentWidth,
             contentHeight = contentHeight,
             placedAboveSource = canPlaceAbove,
+            itemCount = itemCount,
+            cellSize = cellSize,
+            gap = gap,
         )
     }
 }
