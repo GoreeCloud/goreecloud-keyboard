@@ -24,6 +24,13 @@ class AlternatePopupLayoutTest {
         assertTrue(result.left >= 8f)
         assertTrue(result.left + result.contentWidth <= 432f)
         assertTrue(result.top >= 8f)
+
+        val first = result.itemBounds(0)
+        val last = result.itemBounds(3)
+        assertEquals(result.left, first.left)
+        assertEquals(result.top, first.top)
+        assertEquals(result.left + result.contentWidth, last.right)
+        assertEquals(result.top + result.cellSize, last.bottom)
     }
 
     @Test
@@ -42,7 +49,7 @@ class AlternatePopupLayoutTest {
     }
 
     @Test
-    fun `reduces columns to remain inside narrow viewport`() {
+    fun `reduces columns and exposes bounded multi-row item geometry`() {
         val result = AlternatePopupLayout.calculate(
             source = AlternatePopupSourceBounds(80f, 240f, 140f, 300f),
             itemCount = 6,
@@ -55,6 +62,14 @@ class AlternatePopupLayoutTest {
         assertEquals(3, result.columns)
         assertEquals(2, result.rows)
         assertTrue(result.left + result.contentWidth <= 168f)
+
+        val fourth = result.itemBounds(3)
+        val sixth = result.itemBounds(5)
+        assertEquals(result.left, fourth.left)
+        assertEquals(result.top + result.cellSize + result.gap, fourth.top)
+        assertEquals(result.left + result.contentWidth, sixth.right)
+        assertTrue(sixth.bottom <= 512f)
+        assertFailsWith<IllegalArgumentException> { result.itemBounds(6) }
     }
 
     @Test
