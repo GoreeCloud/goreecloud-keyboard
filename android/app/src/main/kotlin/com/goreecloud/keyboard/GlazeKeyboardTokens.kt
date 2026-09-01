@@ -1,13 +1,13 @@
 package com.goreecloud.keyboard
 
 /**
- * Bounded native mapping of the current Glaze UI 2.0 Stable token map consumed by
+ * Bounded native mapping of the current Glaze UI 2.1 Stable token map consumed by
  * GoreeCloud Keyboard's first-party Android surface.
  *
- * Light and Dark are mapped because the Stable token map currently publishes concrete
- * palettes for those appearances. Deep Dark and expression/material-mode expansion remain
- * separate application gates until the canonical Stable map publishes the required values
- * and Keyboard completes rendered/device acceptance.
+ * The 2.1 migration preserves compatible Light/Dark, spacing, radius, and general-target
+ * semantics from the prior 2.0 mapping while adding the canonical Touch Assistance floor.
+ * Deep Dark and the broader accessibility/material-resolution renderings remain separate
+ * application gates until Keyboard has concrete platform wiring and acceptance evidence.
  */
 internal object GlazeKeyboardTokens {
     enum class Appearance { LIGHT, DARK }
@@ -24,6 +24,7 @@ internal object GlazeKeyboardTokens {
     const val Space2Dp = 8f
     const val RadiusMediumDp = 14f
     const val GeneralInteractionFloorDp = 48f
+    const val TouchAssistanceInteractionFloorDp = 56f
     const val SuggestionStripHeightDp = GeneralInteractionFloorDp
 
     val LightPalette = Palette(
@@ -41,6 +42,9 @@ internal object GlazeKeyboardTokens {
         onSurfaceMutedArgb = 0xFFA1AEC0.toInt(),
         lineArgb = 0x1FC1CFE5,
     )
+
+    fun interactionFloorDp(touchAssistance: Boolean): Float =
+        if (touchAssistance) TouchAssistanceInteractionFloorDp else GeneralInteractionFloorDp
 
     fun palette(appearance: Appearance): Palette = when (appearance) {
         Appearance.LIGHT -> LightPalette

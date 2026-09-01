@@ -6,11 +6,12 @@ import org.junit.Test
 
 class GlazeKeyboardTokensTest {
     @Test
-    fun currentStableMappedGeometryUsesGlazeUi2Values() {
+    fun currentStableMappedGeometryUsesGlazeUi21Values() {
         assertEquals(4f, GlazeKeyboardTokens.Space1Dp)
         assertEquals(8f, GlazeKeyboardTokens.Space2Dp)
         assertEquals(14f, GlazeKeyboardTokens.RadiusMediumDp)
         assertEquals(48f, GlazeKeyboardTokens.GeneralInteractionFloorDp)
+        assertEquals(56f, GlazeKeyboardTokens.TouchAssistanceInteractionFloorDp)
         assertEquals(
             GlazeKeyboardTokens.GeneralInteractionFloorDp,
             GlazeKeyboardTokens.SuggestionStripHeightDp
@@ -18,7 +19,13 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun currentStableLightFoundationUsesCanonicalGlazeUi2Tokens() {
+    fun touchAssistanceRaisesInteractionFloorWithoutChangingNormalGeometry() {
+        assertEquals(48f, GlazeKeyboardTokens.interactionFloorDp(touchAssistance = false))
+        assertEquals(56f, GlazeKeyboardTokens.interactionFloorDp(touchAssistance = true))
+    }
+
+    @Test
+    fun currentStableLightFoundationUsesCanonicalGlazeUi21Tokens() {
         val palette = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.LIGHT)
         assertEquals(0xFFEEF3F9.toInt(), palette.canvasArgb)
         assertEquals(0xC2FFFFFF.toInt(), palette.surfaceArgb)
@@ -28,7 +35,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun currentStableDarkFoundationUsesCanonicalGlazeUi2Tokens() {
+    fun currentStableDarkFoundationUsesCanonicalGlazeUi21Tokens() {
         val palette = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.DARK)
         assertEquals(0xFF0D1119.toInt(), palette.canvasArgb)
         assertEquals(0xC719202D.toInt(), palette.surfaceArgb)

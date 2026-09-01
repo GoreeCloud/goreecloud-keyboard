@@ -9,7 +9,7 @@ MAIN = ROOT / "android/app/src/main"
 KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-STABLE_REVISION = "d19c576336881e44c4795d687d768b3cbb7bdf45"
+STABLE_REVISION = "c49113eb8b93c267613fdf1bbca1f814495acad7"
 MARKER = "GlazeMotionExperimental"
 
 
@@ -34,7 +34,7 @@ def main() -> None:
         "Runtime compatibility baseline: **0.4.0**",
         "Evaluation mode: **native Android interaction mapping, test-only**",
         "Production dependency: **no**",
-        "Glaze UI 2.0 Stable is the production design-system authority.",
+        "Glaze UI 2.1 Stable is the production design-system authority.",
         "insufficient for Candidate promotion by itself",
     ]
     for evidence in required_doc:
@@ -42,16 +42,19 @@ def main() -> None:
             fail(f"missing lifecycle or evidence boundary `{evidence}`")
 
     required_adoption = [
-        "# Glaze UI 2.0 Adoption Candidate — GoreeCloud Keyboard",
+        "# Glaze UI 2.1 Adoption Candidate — GoreeCloud Keyboard",
         "Status: **Adoption Candidate**",
-        "Required Stable baseline: **Glaze UI 2.0.0**",
+        "Required Stable baseline: **Glaze UI 2.1.0**",
         f"Reviewed canonical Stable revision: `{STABLE_REVISION}`",
+        "Reviewed Stable tag: `v2.1.0`",
         "Production eligible on the Glaze UI gate: **no**",
         "48 dp general interaction floor",
+        "56 dp Touch Assistance interaction floor",
         "14 dp `radius.md` token",
         "Dark maps the canonical canvas",
         "Deep Dark remains unimplemented",
-        "Glaze UI 2.0 Stable is the production design-system authority.",
+        "Glaze UI 2.2 remains non-consumer-eligible",
+        "Glaze UI 2.1 Stable is the production design-system authority.",
         "Experimental Glaze Motion remains test-only and is not a production dependency.",
     ]
     for evidence in required_adoption:
@@ -59,6 +62,9 @@ def main() -> None:
             fail(f"missing Glaze UI adoption boundary `{evidence}`")
 
     for stale in (
+        "Required Stable baseline: **Glaze UI 2.0.0**",
+        "Glaze UI 2.0 Stable is the production design-system authority.",
+        "Glaze UI 2.0 Stable remains the production design-system authority.",
         "Required Stable baseline: **Glaze UI 1.6.0**",
         "Glaze UI 1.6 Stable remains the production design-system authority.",
         "Required Stable baseline: **Glaze UI 1.5.0**",
@@ -69,12 +75,15 @@ def main() -> None:
             fail(f"stale Stable adoption boundary remains active: `{stale}`")
 
     required_tokens = [
+        "current Glaze UI 2.1 Stable token map",
         "enum class Appearance { LIGHT, DARK }",
         "const val Space1Dp = 4f",
         "const val Space2Dp = 8f",
         "const val RadiusMediumDp = 14f",
         "const val GeneralInteractionFloorDp = 48f",
+        "const val TouchAssistanceInteractionFloorDp = 56f",
         "const val SuggestionStripHeightDp = GeneralInteractionFloorDp",
+        "fun interactionFloorDp(touchAssistance: Boolean): Float =",
         "0xFFEEF3F9",
         "0xC2FFFFFF",
         "0xFF172033",
@@ -86,7 +95,7 @@ def main() -> None:
     ]
     for evidence in required_tokens:
         if evidence not in token_text:
-            fail(f"missing Glaze UI 2.0 source mapping `{evidence}`")
+            fail(f"missing Glaze UI 2.1 source mapping `{evidence}`")
 
     required_test = [
         f'const val REFERENCE_REVISION = "{REFERENCE_REVISION}"',
@@ -131,8 +140,8 @@ def main() -> None:
         )
 
     print(
-        "Glaze UI 2.0 Keyboard Adoption Candidate + Glaze Motion 0.5 test-only boundary passed: "
-        "current Stable Light/Dark source mapping validated and Experimental Motion remains quarantined."
+        "Glaze UI 2.1 Keyboard Adoption Candidate + Glaze Motion 0.5 test-only boundary passed: "
+        "current Stable source mapping validated and Experimental Motion remains quarantined."
     )
 
 
