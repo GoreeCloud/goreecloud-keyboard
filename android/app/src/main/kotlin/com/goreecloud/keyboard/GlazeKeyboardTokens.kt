@@ -1,13 +1,16 @@
 package com.goreecloud.keyboard
 
 /**
- * Bounded native mapping of the current Glaze UI 2.1 Stable token map consumed by
+ * Bounded native mapping of the current Glaze UI 2.2 Stable token map consumed by
  * GoreeCloud Keyboard's first-party Android surface.
  *
- * The 2.1 migration preserves compatible Light/Dark, spacing, radius, and general-target
- * semantics from the prior 2.0 mapping while adding the canonical Touch Assistance floor.
- * Deep Dark and the broader accessibility/material-resolution renderings remain separate
+ * The 2.2 migration preserves compatible Light/Dark, spacing, radius, and target-floor
+ * semantics from the prior 2.1 mapping. The broader 2.2 System Shell, material-budget,
+ * accessibility-resolution, adaptive, and component-contract requirements remain separate
  * application gates until Keyboard has concrete platform wiring and acceptance evidence.
+ *
+ * Deep Dark remains a separate application gate because the canonical Stable semantic token
+ * map currently names the appearance but publishes concrete color blocks only for Light/Dark.
  */
 internal object GlazeKeyboardTokens {
     enum class Appearance { LIGHT, DARK }
