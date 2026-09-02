@@ -11,9 +11,7 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import kotlin.math.ceil
 import kotlin.math.max
-import kotlin.math.min
 
 class KeyboardView @JvmOverloads constructor(
     context: Context,
@@ -342,26 +340,39 @@ class KeyboardView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
         val cell = GlazeKeyboardTokens.GeneralInteractionFloorDp * density
         val gap = GlazeKeyboardTokens.Space1Dp * density
-        val columns = min(5, popup.values.size)
-        val rows = ceil(popup.values.size / columns.toFloat()).toInt()
-        val popupWidth = columns * cell + (columns - 1) * gap
-        val popupHeight = rows * cell + (rows - 1) * gap
-        val left = (popup.sourceBounds.centerX() - popupWidth / 2f)
-            .coerceIn(gap, max(gap, width - gap - popupWidth))
-        val preferredTop = popup.sourceBounds.top - gap - popupHeight
-        val top = if (preferredTop >= gap) preferredTop else popup.sourceBounds.bottom + gap
+        val layout = runCatching {
+            AlternatePopupLayout.calculate(
+                source = AlternatePopupSourceBounds(
+                    left = popup.sourceBounds.left,
+                    top = popup.sourceBounds.top,
+                    right = popup.sourceBounds.right,
+                    bottom = popup.sourceBounds.bottom,
+                ),
+                itemCount = popup.values.size,
+                viewportWidth = width.toFloat(),
+                viewportHeight = height.toFloat(),
+                cellSize = cell,
+                gap = gap,
+            )
+        }.getOrElse {
+            popup.itemBounds.clear()
+            popup.selectedIndex = null
+            return
+        }
         val radius = GlazeKeyboardTokens.RadiusMediumDp * density
-        val shell = RectF(left - gap, top - gap, left + popupWidth + gap, top + popupHeight + gap)
+        val shell = RectF(
+            layout.left - gap,
+            layout.top - gap,
+            layout.left + layout.contentWidth + gap,
+            layout.top + layout.contentHeight + gap,
+        )
         canvas.drawRoundRect(shell, radius, radius, alternatePopupPaint)
         canvas.drawRoundRect(shell, radius, radius, keyStrokePaint)
 
         popup.itemBounds.clear()
         popup.values.forEachIndexed { index, value ->
-            val row = index / columns
-            val column = index % columns
-            val itemLeft = left + column * (cell + gap)
-            val itemTop = top + row * (cell + gap)
-            val bounds = RectF(itemLeft, itemTop, itemLeft + cell, itemTop + cell)
+            val item = layout.itemBounds(index)
+            val bounds = RectF(item.left, item.top, item.right, item.bottom)
             popup.itemBounds += bounds
             canvas.drawRoundRect(
                 bounds,
