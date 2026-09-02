@@ -52,6 +52,24 @@ data class AlternatePopupLayoutResult(
             bottom = itemTop + cellSize,
         )
     }
+
+    /** Returns the exact alternate item under a pointer, excluding inter-cell gaps. */
+    fun hitTest(x: Float, y: Float): Int? {
+        if (!x.isFinite() || !y.isFinite()) return null
+        if (x < left || y < top || x >= left + contentWidth || y >= top + contentHeight) return null
+
+        val stride = cellSize + gap
+        val column = floor((x - left) / stride).toInt()
+        val row = floor((y - top) / stride).toInt()
+        if (column !in 0 until columns || row !in 0 until rows) return null
+
+        val index = row * columns + column
+        if (index !in 0 until itemCount) return null
+        val bounds = itemBounds(index)
+        return index.takeIf {
+            x >= bounds.left && x < bounds.right && y >= bounds.top && y < bounds.bottom
+        }
+    }
 }
 
 /**
