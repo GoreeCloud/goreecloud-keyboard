@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class AlternatePopupLayoutTest {
@@ -70,6 +71,30 @@ class AlternatePopupLayoutTest {
         assertEquals(result.left + result.contentWidth, sixth.right)
         assertTrue(sixth.bottom <= 512f)
         assertFailsWith<IllegalArgumentException> { result.itemBounds(6) }
+    }
+
+    @Test
+    fun `hit testing selects cells but never gaps or unused grid space`() {
+        val result = AlternatePopupLayout.calculate(
+            source = AlternatePopupSourceBounds(80f, 240f, 140f, 300f),
+            itemCount = 5,
+            viewportWidth = 176f,
+            viewportHeight = 520f,
+            cellSize = 48f,
+            gap = 8f,
+        )
+
+        val first = result.itemBounds(0)
+        val fifth = result.itemBounds(4)
+        assertEquals(0, result.hitTest(first.left + 1f, first.top + 1f))
+        assertEquals(4, result.hitTest(fifth.right - 1f, fifth.bottom - 1f))
+        assertNull(result.hitTest(first.right + 2f, first.top + 10f))
+
+        val unusedThirdColumnX = result.left + 2 * (result.cellSize + result.gap) + 1f
+        val secondRowY = result.top + result.cellSize + result.gap + 1f
+        assertNull(result.hitTest(unusedThirdColumnX, secondRowY))
+        assertNull(result.hitTest(Float.NaN, first.top))
+        assertNull(result.hitTest(result.left - 1f, result.top))
     }
 
     @Test
