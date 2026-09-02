@@ -52,7 +52,7 @@ class KeyboardView @JvmOverloads constructor(
         val sourceBounds: RectF,
         val values: List<String>,
         var selectedIndex: Int? = 0,
-        val itemBounds: MutableList<RectF> = mutableListOf(),
+        var layout: AlternatePopupLayoutResult? = null,
     )
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -355,10 +355,11 @@ class KeyboardView @JvmOverloads constructor(
                 gap = gap,
             )
         }.getOrElse {
-            popup.itemBounds.clear()
+            popup.layout = null
             popup.selectedIndex = null
             return
         }
+        popup.layout = layout
         val radius = GlazeKeyboardTokens.RadiusMediumDp * density
         val shell = RectF(
             layout.left - gap,
@@ -369,11 +370,9 @@ class KeyboardView @JvmOverloads constructor(
         canvas.drawRoundRect(shell, radius, radius, alternatePopupPaint)
         canvas.drawRoundRect(shell, radius, radius, keyStrokePaint)
 
-        popup.itemBounds.clear()
         popup.values.forEachIndexed { index, value ->
             val item = layout.itemBounds(index)
             val bounds = RectF(item.left, item.top, item.right, item.bottom)
-            popup.itemBounds += bounds
             canvas.drawRoundRect(
                 bounds,
                 radius,
@@ -400,8 +399,7 @@ class KeyboardView @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 val popup = alternatePopup
                 if (popup != null) {
-                    val selected = popup.itemBounds.indexOfLast { it.contains(event.x, event.y) }
-                    popup.selectedIndex = selected.takeIf { it >= 0 }
+                    popup.selectedIndex = popup.layout?.hitTest(event.x, event.y)
                     invalidate()
                     return true
                 }
