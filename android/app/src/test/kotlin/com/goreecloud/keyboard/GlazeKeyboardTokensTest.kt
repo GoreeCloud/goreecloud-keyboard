@@ -6,7 +6,7 @@ import org.junit.Test
 
 class GlazeKeyboardTokensTest {
     @Test
-    fun currentStableMappedGeometryUsesGlazeUi21Values() {
+    fun currentStableMappedGeometryUsesGlazeUi22Values() {
         assertEquals(4f, GlazeKeyboardTokens.Space1Dp)
         assertEquals(8f, GlazeKeyboardTokens.Space2Dp)
         assertEquals(14f, GlazeKeyboardTokens.RadiusMediumDp)
@@ -25,7 +25,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun currentStableLightFoundationUsesCanonicalGlazeUi21Tokens() {
+    fun currentStableLightFoundationUsesCanonicalGlazeUi22Tokens() {
         val palette = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.LIGHT)
         assertEquals(0xFFEEF3F9.toInt(), palette.canvasArgb)
         assertEquals(0xC2FFFFFF.toInt(), palette.surfaceArgb)
@@ -35,7 +35,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun currentStableDarkFoundationUsesCanonicalGlazeUi21Tokens() {
+    fun currentStableDarkFoundationUsesCanonicalGlazeUi22Tokens() {
         val palette = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.DARK)
         assertEquals(0xFF0D1119.toInt(), palette.canvasArgb)
         assertEquals(0xC719202D.toInt(), palette.surfaceArgb)
