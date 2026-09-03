@@ -4,108 +4,122 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "docs/glaze-motion-evaluation.md"
 ADOPTION = ROOT / "docs/glaze-ui-adoption.md"
+PLATFORM = ROOT / "goreecloud.platform.yaml"
 TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeMotionExperimentalKeyboardRuntimeTest.kt"
 MAIN = ROOT / "android/app/src/main"
 KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
-REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-STABLE_PROMOTION_HEAD = "fb5ecde4a8258503789ffde08ac46a2e524ef71e"
-STABLE_RELEASE_REVISION = "6731098b28dd0393faa878c70d989a221d714a20"
+MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
+V1_VERSION = "1.0.0"
+V1_SOURCE_REVISION = "70909bbdccad378fb7281ae1842e2f5beed64c38"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"Glaze Motion keyboard evaluation failed: {message}")
+    raise SystemExit(f"Keyboard GLAZE UI V1.0 / Glaze Motion boundary failed: {message}")
 
 
 def main() -> None:
-    for path in (DOC, ADOPTION, TEST, KEYBOARD_VIEW, TOKENS):
+    for path in (DOC, ADOPTION, PLATFORM, TEST, KEYBOARD_VIEW, TOKENS):
         if not path.is_file():
             fail(f"missing required evidence: {path.relative_to(ROOT)}")
 
     doc_text = DOC.read_text(encoding="utf-8")
     adoption_text = ADOPTION.read_text(encoding="utf-8")
+    platform_text = PLATFORM.read_text(encoding="utf-8")
     test_text = TEST.read_text(encoding="utf-8")
     view_text = KEYBOARD_VIEW.read_text(encoding="utf-8")
     token_text = TOKENS.read_text(encoding="utf-8")
 
     required_doc = [
         "Lifecycle: **Experimental 0.5**",
-        f"Reviewed canonical revision: `{REFERENCE_REVISION}`",
+        f"Reviewed canonical revision: `{MOTION_REFERENCE_REVISION}`",
         "Runtime compatibility baseline: **0.4.0**",
         "Evaluation mode: **native Android interaction mapping, test-only**",
         "Production dependency: **no**",
-        "Glaze UI 2.2.0 Stable is the production design-system authority.",
-        "insufficient for Candidate promotion by itself",
+        "GLAZE UI V1.0 (`1.0.0`) is the official and only current",
+        "provides no V1 production or conformance evidence",
+        "insufficient for promotion by itself",
     ]
     for evidence in required_doc:
         if evidence not in doc_text:
-            fail(f"missing lifecycle or evidence boundary `{evidence}`")
+            fail(f"missing lifecycle or Motion boundary `{evidence}`")
 
     required_adoption = [
-        "# Glaze UI 2.2 Adoption Candidate — GoreeCloud Keyboard",
-        "Status: **Adoption Candidate**",
-        "Required Stable baseline: **Glaze UI 2.2.0**",
-        f"Reviewed exact Stable promotion head: `{STABLE_PROMOTION_HEAD}`",
-        f"Reviewed Stable release merge: `{STABLE_RELEASE_REVISION}`",
-        "Reviewed Stable tag: `v2.2.0`",
+        "# GLAZE UI V1.0 Migration — GoreeCloud Keyboard",
+        "Status: **Migration in progress / Development**",
+        "Official target: **GLAZE UI V1.0 (`1.0.0`)**",
+        f"Exact V1 source authority: `{V1_SOURCE_REVISION}`",
         "Production eligible on the Glaze UI gate: **no**",
-        "48 dp general interaction floor",
-        "56 dp Touch Assistance interaction floor",
-        "14 dp `radius.md` token",
-        "Dark maps the canonical canvas",
-        "Deep Dark remains unimplemented",
-        "**Application** surface under the 2.2 System Shell hierarchy",
-        "local emoji search remains local application search",
-        "Glaze UI 2.2.0 Stable is the production design-system authority.",
-        "Experimental Glaze Motion remains test-only and is not a production dependency.",
+        "does **not** establish complete V1 conformance",
+        "No pre-reset Glaze acceptance is inherited as V1 evidence",
+        "48 dp",
+        "56 dp Touch Assistance / far-view",
+        "V1 12 dp small/control radius tier",
+        "Dark maps V1 canvas `#0B0D11`",
+        "V1 publishes Deep Dark",
+        "**Application** surface under the V1 System Shell contract",
+        "Local emoji search remains application-local",
+        "Historical evidence boundary",
+        "Glaze Motion 0.5 evaluation remains test-only",
+        "not use a retired Glaze product version as the current rollback target",
     ]
     for evidence in required_adoption:
         if evidence not in adoption_text:
-            fail(f"missing Glaze UI adoption boundary `{evidence}`")
-
-    for stale in (
-        "Required Stable baseline: **Glaze UI 2.1.0**",
-        "Glaze UI 2.1 Stable is the production design-system authority.",
-        "Glaze UI 2.1.0 Stable is the production design-system authority.",
-        "Glaze UI 2.2 remains non-consumer-eligible",
-        "Required Stable baseline: **Glaze UI 2.0.0**",
-        "Glaze UI 2.0 Stable is the production design-system authority.",
-        "Glaze UI 2.0 Stable remains the production design-system authority.",
-        "Required Stable baseline: **Glaze UI 1.6.0**",
-        "Glaze UI 1.6 Stable remains the production design-system authority.",
-        "Required Stable baseline: **Glaze UI 1.5.0**",
-        "Glaze UI 1.5 Stable remains the production design-system authority.",
-        "12 dp medium utility radius",
-    ):
-        if stale in adoption_text or stale in doc_text:
-            fail(f"stale Stable adoption boundary remains active: `{stale}`")
+            fail(f"missing V1 adoption boundary `{evidence}`")
 
     required_tokens = [
-        "current Glaze UI 2.2 Stable token map",
+        "official GLAZE UI V1.0 foundation subset",
+        f'const val TargetVersion = "{V1_VERSION}"',
+        f'const val SourceRevision = "{V1_SOURCE_REVISION}"',
         "enum class Appearance { LIGHT, DARK }",
         "const val Space1Dp = 4f",
         "const val Space2Dp = 8f",
-        "const val RadiusMediumDp = 14f",
+        "const val RadiusMediumDp = 12f",
         "const val GeneralInteractionFloorDp = 48f",
         "const val TouchAssistanceInteractionFloorDp = 56f",
         "const val SuggestionStripHeightDp = GeneralInteractionFloorDp",
         "fun interactionFloorDp(touchAssistance: Boolean): Float =",
-        "0xFFEEF3F9",
-        "0xC2FFFFFF",
-        "0xFF172033",
-        "0xFF67748A",
-        "0xFF0D1119",
-        "0xC719202D",
-        "0xFFF3F6FB",
-        "0xFFA1AEC0",
+        "0xFFF5F7FA",
+        "0xC7FFFFFF",
+        "0xFF151A23",
+        "0xFF5D6675",
+        "0xFF0B0D11",
+        "0xC2181D26",
+        "0xFFF5F7FA",
+        "0xFFB0B7C3",
     ]
     for evidence in required_tokens:
         if evidence not in token_text:
-            fail(f"missing Glaze UI 2.2 source mapping `{evidence}`")
+            fail(f"missing GLAZE UI V1.0 source mapping `{evidence}`")
+
+    if 'required_version: "1.0.0"' not in platform_text:
+        fail("Platform Contract must require GLAZE UI V1.0")
+    if 'implemented_version: "1.0.0"' not in platform_text:
+        fail("Platform Contract must record repository-local V1 mapping")
+    if "stable_eligible: false" not in platform_text:
+        fail("Platform Contract must preserve Stable eligibility block")
+
+    active_records = {
+        "adoption record": adoption_text,
+        "Motion boundary": doc_text,
+        "native tokens": token_text,
+        "Platform Contract": platform_text,
+    }
+    retired_active_markers = (
+        "Glaze UI 2.2.0 Stable is the production design-system authority.",
+        "Required Stable baseline: **Glaze UI 2.2.0**",
+        "Glaze UI 2.2 Adoption Candidate",
+        'required_version: "2.2.0"',
+        'implemented_version: "2.2.0"',
+    )
+    for name, content in active_records.items():
+        for retired in retired_active_markers:
+            if retired in content:
+                fail(f"{name} retains retired active target `{retired}`")
 
     required_test = [
-        f'const val REFERENCE_REVISION = "{REFERENCE_REVISION}"',
+        f'const val REFERENCE_REVISION = "{MOTION_REFERENCE_REVISION}"',
         'const val VERSION = "0.5.0"',
         'const val RUNTIME_BASELINE = "0.4.0"',
         "Settings.Global.ANIMATOR_DURATION_SCALE",
@@ -115,7 +129,7 @@ def main() -> None:
     ]
     for evidence in required_test:
         if evidence not in test_text:
-            fail(f"missing native test-only evidence `{evidence}`")
+            fail(f"missing native test-only Motion evidence `{evidence}`")
 
     required_consumer = [
         "class KeyboardView",
@@ -147,8 +161,9 @@ def main() -> None:
         )
 
     print(
-        "Glaze UI 2.2 Keyboard Adoption Candidate + Glaze Motion 0.5 test-only boundary passed: "
-        "current Stable source mapping validated and Experimental Motion remains quarantined."
+        "Keyboard GLAZE UI V1.0 source mapping + Glaze Motion 0.5 test-only boundary passed: "
+        f"target {V1_VERSION}, source {V1_SOURCE_REVISION}; Experimental Motion remains quarantined; "
+        "runtime/accessibility/device/release acceptance remains separate."
     )
 
 
