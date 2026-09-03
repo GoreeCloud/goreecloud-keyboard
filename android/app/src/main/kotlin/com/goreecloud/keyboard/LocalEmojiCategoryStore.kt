@@ -8,13 +8,17 @@ import android.content.Context
  * The value is a bounded enum name only. It is not synchronized, logged,
  * transmitted, or used as learned-language/personality data.
  */
-class LocalEmojiCategoryStore(context: Context) : EmojiCategoryPreferenceWriter {
+class LocalEmojiCategoryStore(context: Context) :
+    EmojiCategoryPreferenceWriter,
+    EmojiCategoryPreferenceReader {
     private val preferences = context.applicationContext.getSharedPreferences(
         PREFERENCES_NAME,
         Context.MODE_PRIVATE,
     )
 
     fun load(): EmojiCategory = EmojiCategoryPreference.decode(preferences.getString(KEY_CATEGORY, null))
+
+    override fun loadEmojiCategory(): EmojiCategory = load()
 
     override fun save(category: EmojiCategory) {
         preferences.edit()
