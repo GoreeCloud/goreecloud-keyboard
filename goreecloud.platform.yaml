@@ -1,0 +1,190 @@
+schema_version: "1.0"
+component:
+  id: goreecloud.keyboard
+  product_name: GoreeCloud Keyboard
+  kind: application
+  repository: GoreeCloud/goreecloud-keyboard
+  lifecycle: Development
+  version: "0.1.0-dev"
+  supported_platforms:
+    - android
+  user_facing: true
+api:
+  version: null
+  endpoints: []
+glaze_ui:
+  applicable: true
+  required_version: "2.2.0"
+  implemented_version: "2.2.0"
+  migration_status: in_progress
+  evidence:
+    - keyboard-glaze-source
+    - keyboard-glaze-validator
+    - keyboard-glaze-doc
+    - keyboard-ci-88
+platform_systems:
+  manager:
+    status: "Applicable — Nonconformant"
+    justification: Keyboard is a first-party GoreeCloud application, but canonical Mesh registration and accepted Manager platform visibility are not established.
+    evidence:
+      - keyboard-readme
+  identity:
+    status: "Applicable — Nonconformant"
+    justification: Core typing requires no GoreeCloud account; any future account-backed personalization or synchronization must use GoreeCloud Identity, and accepted Identity integration is not established.
+    evidence:
+      - keyboard-specs
+  wardveil_security:
+    status: "Applicable — Nonconformant"
+    justification: Keyboard has local sensitive-editor safeguards and no network permission, but those repository controls do not establish accepted Wardveil Security integration or validation.
+    evidence:
+      - keyboard-specs
+      - keyboard-ci-88
+  privacy_shield:
+    status: "Applicable — Nonconformant"
+    justification: Typed content is highly sensitive and current source applies local minimization and sensitive-editor gating, but accepted Privacy Shield integration and production privacy validation are not established.
+    evidence:
+      - keyboard-specs
+      - keyboard-ci-88
+  everkeep:
+    status: "Applicable — Nonconformant"
+    justification: Device-local emoji preferences exist, but accepted backup, restore, portability, and Everkeep continuity behavior are not established.
+    evidence:
+      - keyboard-readme
+      - keyboard-specs
+  mesh:
+    status: "Applicable — Nonconformant"
+    justification: Current local typing does not depend on Mesh, but Keyboard is not registered through the canonical GoreeCloud Mesh platform registry and accepted cross-service integration is not established.
+    evidence:
+      - keyboard-specs
+  glaze_ui:
+    status: "Applicable — Migration Required"
+    justification: Glaze UI 2.2.0 Stable tokens and native interaction mappings are implemented as an Adoption Candidate, but complete component/state, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    evidence:
+      - keyboard-glaze-source
+      - keyboard-glaze-validator
+      - keyboard-glaze-doc
+      - keyboard-ci-88
+mesh:
+  registration: required
+  capabilities:
+    - android-input-method
+    - local-quill-suggestions
+    - local-emoji-input
+    - sensitive-editor-gating
+  dependencies: []
+  published_events: []
+  consumed_events: []
+  evidence: []
+health:
+  liveness: []
+  readiness: []
+recovery:
+  backup_required: true
+  backup_status: required_missing
+  restore_required: true
+  restore_status: required_missing
+  last_verified_restore: null
+  recovery_dependencies:
+    - Android private keyboard preferences
+    - local emoji recents and selected-category preferences
+    - future user dictionaries and personalization only when separately accepted
+  documentation:
+    - README.md
+    - SPECIFICATIONS.md
+  evidence:
+    - keyboard-readme
+    - keyboard-specs
+data_portability:
+  export_capability: unknown
+  export_formats: []
+  last_export_validation: null
+  portability_requirements:
+    - define the minimal Keyboard-owned portable state scope before export is implemented
+    - exclude sensitive editor contents and transient typed text from portability data
+    - preserve privacy minimization and explicit user control
+    - validate clean-target restore or deterministic reconstruction where applicable
+  evidence:
+    - keyboard-specs
+external_dependencies:
+  - id: android-platform
+    purpose: Android InputMethodService lifecycle, editor metadata, input connection, accessibility, configuration, and application execution environment.
+    required: true
+    compatibility: Current source targets Android API 35 with minSdk 26; representative Android-version, application, accessibility, IME lifecycle, and device behavior require release acceptance.
+compatibility:
+  platform_releases: []
+  api_requirements: []
+  schema_requirements:
+    - goreecloud.platform/1.0
+  component_requirements:
+    - Glaze UI 2.2.0
+    - Privacy Shield accepted integration before Stable because Keyboard processes highly sensitive user input
+    - Wardveil Security accepted integration before Stable
+    - Everkeep accepted backup/recovery behavior for any durable Keyboard-owned user state before Stable
+    - GoreeCloud Identity accepted integration for any identity-aware or synchronized capability before Stable
+    - GoreeCloud Mesh platform registration before coordinated platform release acceptance
+conformance:
+  declared_state: migration_required
+  stable_eligible: false
+  checks:
+    - {id: glaze-ui, mandatory: true, status: pending, evidence: [keyboard-glaze-source, keyboard-glaze-validator, keyboard-glaze-doc, keyboard-ci-88], note: "Glaze UI 2.2 Adoption Candidate source and exact-head CI evidence exist; complete component/state/accessibility/adaptive/device/HVE/release acceptance remains incomplete."}
+    - {id: goreecloud-identity, mandatory: true, status: pending, evidence: [keyboard-specs]}
+    - {id: wardveil-security, mandatory: true, status: pending, evidence: [keyboard-specs, keyboard-ci-88], note: "Local sensitive-editor and zero-network controls do not establish Wardveil Security platform acceptance."}
+    - {id: privacy-shield, mandatory: true, status: pending, evidence: [keyboard-specs, keyboard-ci-88], note: "Local minimization and privacy guards do not establish Privacy Shield platform acceptance."}
+    - {id: everkeep-recovery, mandatory: true, status: pending, evidence: [keyboard-readme, keyboard-specs]}
+    - {id: mesh-registration, mandatory: true, status: pending, evidence: []}
+    - {id: api-compatibility, mandatory: true, status: pending, evidence: [keyboard-specs], note: "Keyboard currently declares no cross-component API; coordinated release compatibility acceptance is not established."}
+    - {id: accessibility, mandatory: true, status: pending, evidence: [keyboard-glaze-doc, keyboard-ci-88], note: "Automated native interaction evidence exists; TalkBack, Switch Access, large-text/reflow, RTL/localization, Touch Assistance resolution, and representative-device acceptance remain outstanding."}
+    - {id: platform-acceptance, mandatory: true, status: pending, evidence: []}
+    - {id: backup, mandatory: true, status: pending, evidence: [keyboard-readme, keyboard-specs]}
+    - {id: restore, mandatory: true, status: pending, evidence: [keyboard-readme, keyboard-specs]}
+    - {id: export-portability, mandatory: true, status: pending, evidence: [keyboard-specs]}
+    - {id: security-validation, mandatory: true, status: pending, evidence: [keyboard-specs, keyboard-ci-88], note: "Repository-level input/privacy guards do not establish Wardveil Security acceptance."}
+    - {id: privacy-validation, mandatory: true, status: pending, evidence: [keyboard-specs, keyboard-ci-88], note: "Repository-level privacy controls do not establish Privacy Shield acceptance."}
+    - {id: required-documentation, mandatory: true, status: pass, evidence: [keyboard-readme, keyboard-specs, keyboard-glaze-doc]}
+    - {id: required-tests, mandatory: true, status: pass, evidence: [keyboard-ci-88], note: "Exact-head Android CI #88 passed the Glaze UI/Experimental Motion boundary, JVM unit tests, debug APK assembly, and Android 15 native interaction emulator evaluation."}
+    - {id: release-evidence, mandatory: true, status: pending, evidence: []}
+evidence:
+  acceptance:
+    - id: keyboard-readme
+      kind: documentation
+      location: README.md
+      revision: null
+      observed_at: null
+      producer: GoreeCloud/goreecloud-keyboard
+      description: Repository-local Development behavior, local-first privacy posture, emoji/input state, platform boundaries, and remaining release gaps. Documentation alone does not satisfy production gates.
+    - id: keyboard-specs
+      kind: documentation
+      location: SPECIFICATIONS.md
+      revision: null
+      observed_at: null
+      producer: GoreeCloud/goreecloud-keyboard
+      description: Repository-local native input scope and Privacy Shield, Wardveil Security, Everkeep, Identity, Mesh, Glaze UI, and production acceptance boundaries.
+    - id: keyboard-glaze-source
+      kind: source
+      location: android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
+      revision: null
+      observed_at: null
+      producer: GoreeCloud/goreecloud-keyboard
+      description: Native Android mapping of the consumed Glaze UI 2.2 Stable spacing, radius, interaction floors, and Light/Dark palette subset. Source mapping does not establish complete application acceptance.
+    - id: keyboard-glaze-validator
+      kind: automated_test
+      location: scripts/check_glaze_motion_evaluation.py
+      revision: null
+      observed_at: null
+      producer: GoreeCloud/goreecloud-keyboard
+      description: Fail-closed repository guard for the current Glaze UI 2.2 Adoption Candidate and Experimental Glaze Motion test-only quarantine. Validator source is not itself a successful run.
+    - id: keyboard-glaze-doc
+      kind: documentation
+      location: docs/glaze-ui-adoption.md
+      revision: null
+      observed_at: null
+      producer: GoreeCloud/goreecloud-keyboard
+      description: Repository-local Glaze UI 2.2 source mapping, System Shell classification, privacy/authority boundaries, and outstanding application acceptance record.
+    - id: keyboard-ci-88
+      kind: automated_test
+      location: https://github.com/GoreeCloud/goreecloud-keyboard/actions/runs/33705223511
+      revision: d138787d5982c3e672434b5c5c5b92f7bb13707c
+      observed_at: null
+      producer: GoreeCloud/goreecloud-keyboard
+      description: Exact-head Android CI #88 passed Glaze UI/Experimental Motion governance validation, JVM unit tests, debug APK assembly, and Android 15 native interaction emulator evaluation. It does not establish platform-system, representative-device, signed-release, or production acceptance.
+  release: []
