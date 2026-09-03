@@ -16,7 +16,7 @@ GoreeCloud Keyboard is an original GoreeCloud-owned keyboard implementation. The
 - Local-only GoreeCloud Quill suggestion boundary with deterministic prefix suggestions and bounded typo-correction candidates.
 - Sensitive-editor classification that clears composing context and suppresses suggestion collection, display, and acceptance for protected input variations.
 - No Android network permission in the current application foundation.
-- Glaze UI 2.0.0 Adoption Candidate source mapping for current spacing, geometry, 48 dp general interaction target floor, and Light/Dark appearance values.
+- Glaze UI 2.2.0 Adoption Candidate source mapping for compatible spacing/radius geometry, 48 dp normal and 56 dp Touch Assistance interaction floors, canonical Light/Dark appearance values, and current Application/System Shell classification.
 - Experimental Glaze Motion evaluation remains test-only and is not a production dependency.
 - Android unit/build and emulator validation infrastructure, including native rendered secondary-symbol navigation and character hit testing.
 
@@ -64,7 +64,9 @@ Future cross-application capabilities must use governed GoreeCloud integration c
 
 ### Glaze UI / Design Center
 
-Glaze UI 2.0.0 is the current Stable design-system authority. The repository currently has an Adoption Candidate source mapping and does not claim complete rendered/native/accessibility/physical-device acceptance.
+Glaze UI 2.2.0 Stable is the current production design-system authority. The repository currently has a bounded Adoption Candidate source mapping and does not claim complete rendered/native/accessibility/System Glaze/tablet/foldable/representative-device/Human Visual Excellence acceptance. Deep Dark, Reduced Motion/Transparency, Increased Contrast, Forced Colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, production packaging, release, and Stable qualification remain separate gates.
+
+Local emoji search remains an application-local input-navigation capability and is not GoreeCloud Universal Search. Glaze UI presentation semantics do not grant Universal Search, Control Center, security, privacy, identity, recovery, or other platform authority to Keyboard.
 
 ## Target capability families — not yet complete
 
