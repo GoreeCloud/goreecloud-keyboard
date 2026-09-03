@@ -93,12 +93,17 @@ def main() -> None:
         if evidence not in token_text:
             fail(f"missing GLAZE UI V1.0 source mapping `{evidence}`")
 
-    if 'required_version: "1.0.0"' not in platform_text:
-        fail("Platform Contract must require GLAZE UI V1.0")
-    if 'implemented_version: "1.0.0"' not in platform_text:
-        fail("Platform Contract must record repository-local V1 mapping")
-    if "stable_eligible: false" not in platform_text:
-        fail("Platform Contract must preserve Stable eligibility block")
+    platform_markers = (
+        'schema_version: "0.1"',
+        "  id: goreecloud-keyboard",
+        '  glaze_ui:\n    status: partial\n    version: "1.0.0"',
+        "GLAZE UI V1.0",
+        "conformance:\n  status: nonconformant",
+        "glaze-ui==1.0.0",
+    )
+    for marker in platform_markers:
+        if marker not in platform_text:
+            fail(f"Platform Contract v0.1 is missing current V1 boundary `{marker}`")
 
     active_records = {
         "adoption record": adoption_text,
@@ -110,8 +115,12 @@ def main() -> None:
         "Glaze UI 2.2.0 Stable is the production design-system authority.",
         "Required Stable baseline: **Glaze UI 2.2.0**",
         "Glaze UI 2.2 Adoption Candidate",
+        'schema_version: "1.0"',
+        'required_version: "1.0.0"',
+        'implemented_version: "1.0.0"',
         'required_version: "2.2.0"',
         'implemented_version: "2.2.0"',
+        "stable_eligible: true",
     )
     for name, content in active_records.items():
         for retired in retired_active_markers:
@@ -162,8 +171,8 @@ def main() -> None:
 
     print(
         "Keyboard GLAZE UI V1.0 source mapping + Glaze Motion 0.5 test-only boundary passed: "
-        f"target {V1_VERSION}, source {V1_SOURCE_REVISION}; Experimental Motion remains quarantined; "
-        "runtime/accessibility/device/release acceptance remains separate."
+        f"target {V1_VERSION}, source {V1_SOURCE_REVISION}; Platform Contract v0.1 remains nonconformant; "
+        "Experimental Motion remains quarantined; runtime/accessibility/device/release acceptance remains separate."
     )
 
 
