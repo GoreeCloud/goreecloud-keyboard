@@ -19,9 +19,11 @@ The current Android source includes:
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, acceptance, and backspace look-behind inspection.
 - Privacy-by-default behavior with no Android network permission.
-- Glaze UI 2.0.0 Adoption Candidate source mapping for current geometry, target floor, and Light/Dark appearance values.
+- Glaze UI 2.2.0 Adoption Candidate source mapping for compatible spacing/radius geometry, the 48 dp normal and 56 dp Touch Assistance floors, canonical Light/Dark appearance values, and current Application/System Shell classification.
 - Explicit Wardveil Security, Privacy Shield, Everkeep, GoreeCloud Identity, and GoreeCloud Mesh integration boundaries.
 - Android unit/build/governance and emulator validation infrastructure, including rendered native symbol-page hit testing and pure recency/serialization coverage.
+
+The Glaze UI mapping remains Development/Adoption Candidate evidence only. Deep Dark, complete 2.2 component/state and System Glaze acceptance, Reduced Motion/Transparency, Increased Contrast, Forced Colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, representative-device ergonomics, Human Visual Excellence, signed distribution, release, and Stable qualification remain separate gates.
 
 ## Product direction
 
@@ -39,7 +41,7 @@ Private on-device recents are a convenience cache, not a general learned-languag
 - `COMPETITIVE-OBJECTIVES.md` — product-quality objectives and evidence discipline.
 - `USER-MANUAL.md` — current Development user guidance.
 - `docs/native-architecture.md` — native implementation architecture.
-- `docs/glaze-ui-adoption.md` — Glaze UI 2.0 Adoption Candidate evidence and remaining gates.
+- `docs/glaze-ui-adoption.md` — Glaze UI 2.2.0 Adoption Candidate evidence and remaining gates.
 - `docs/glaze-motion-evaluation.md` — test-only Experimental Glaze Motion evaluation.
 
 ## Development model
