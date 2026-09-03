@@ -19,11 +19,11 @@ The current Android source includes:
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, acceptance, and backspace look-behind inspection.
 - Privacy-by-default behavior with no Android network permission.
-- Glaze UI 2.2.0 Adoption Candidate source mapping for compatible spacing/radius geometry, the 48 dp normal and 56 dp Touch Assistance floors, canonical Light/Dark appearance values, and current Application/System Shell classification.
+- GLAZE UI V1.0 (`1.0.0`) Development source mapping pinned to exact post-reset authority `70909bbdccad378fb7281ae1842e2f5beed64c38`, including the consumed 4/8 dp spacing steps, V1 12 dp small/control radius tier, 48 dp normal and 56 dp Touch Assistance / far-view interaction floors, Light/Dark foundation values, and Application/System Shell classification.
 - Explicit Wardveil Security, Privacy Shield, Everkeep, GoreeCloud Identity, and GoreeCloud Mesh integration boundaries.
 - Android unit/build/governance and emulator validation infrastructure, including rendered native symbol-page hit testing and pure recency/serialization coverage.
 
-The Glaze UI mapping remains Development/Adoption Candidate evidence only. Deep Dark, complete 2.2 component/state and System Glaze acceptance, Reduced Motion/Transparency, Increased Contrast, Forced Colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, representative-device ergonomics, Human Visual Excellence, signed distribution, release, and Stable qualification remain separate gates.
+The GLAZE UI V1.0 mapping remains Development/migration evidence only. Deep Dark, complete V1 component/state and material-role mapping, Reduced Motion/Transparency, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, representative-device ergonomics, Human Visual Excellence, signed distribution, release, and Stable qualification remain separate gates. Pre-reset Glaze UI 2.x evidence is historical implementation ancestry only and is not current V1 acceptance.
 
 ## Product direction
 
@@ -41,8 +41,8 @@ Private on-device recents are a convenience cache, not a general learned-languag
 - `COMPETITIVE-OBJECTIVES.md` — product-quality objectives and evidence discipline.
 - `USER-MANUAL.md` — current Development user guidance.
 - `docs/native-architecture.md` — native implementation architecture.
-- `docs/glaze-ui-adoption.md` — Glaze UI 2.2.0 Adoption Candidate evidence and remaining gates.
-- `docs/glaze-motion-evaluation.md` — test-only Experimental Glaze Motion evaluation.
+- `docs/glaze-ui-adoption.md` — current GLAZE UI V1.0 migration evidence and remaining gates.
+- `docs/glaze-motion-evaluation.md` — historical/test-only Experimental Glaze Motion evaluation.
 
 ## Development model
 
