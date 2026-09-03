@@ -31,13 +31,14 @@ platform_systems:
       - docs/development/portable-preference-snapshot.md
       - docs/development/portable-preference-import.md
       - docs/development/portable-preference-export.md
-    notes: Typed content is highly sensitive. Current source minimizes editor observation, suppresses suggestion behavior in sensitive editors, and keeps the portable preference scope to one explicit emoji-category choice while excluding typed and usage-derived state, but accepted Privacy Shield integration and production privacy validation are not established.
+      - docs/development/portable-preference-user-transfer.md
+    notes: Typed content is highly sensitive. Current source minimizes editor observation, suppresses suggestion behavior in sensitive editors, and keeps the explicit user file-transfer scope to one emoji-category choice while excluding typed and usage-derived state, but accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     status: planned
     version: null
     evidence:
       - SPECIFICATIONS.md
-    notes: Keyboard has local sensitive-editor safeguards and no Android network permission, but those repository controls do not establish accepted Wardveil Security integration or validation.
+    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, and bounded explicit file transfer through the platform document picker, but these repository controls do not establish accepted Wardveil Security integration or validation.
   everkeep:
     status: planned
     version: null
@@ -45,17 +46,19 @@ platform_systems:
       - docs/development/portable-preference-snapshot.md
       - docs/development/portable-preference-import.md
       - docs/development/portable-preference-export.md
-    notes: A one-field versioned portable preference format plus category-only local export and apply seams exist, but complete approved Keyboard backup/restore scope, user-facing continuity workflows, clean-target recovery, and accepted Everkeep integration remain incomplete.
+      - docs/development/portable-preference-user-transfer.md
+    notes: A one-field versioned portable preference format, category-only local export/apply seams, and an explicit user-controlled Storage Access Framework transfer surface exist, but complete approved Keyboard backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration remain incomplete.
   glaze_ui:
     status: partial
     version: "1.0.0"
     evidence:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
       - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: Repository-local GLAZE UI V1.0 Light/Dark geometry, palette, interaction-floor, native interaction, and authority mappings target exact canonical post-reset source revision 70909bbdccad378fb7281ae1842e2f5beed64c38. Android CI #93 passed the first published V1 head, but Deep Dark, complete component/state, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain incomplete.
+    notes: Repository-local GLAZE UI V1.0 Light/Dark geometry, palette, interaction-floor, native input, and Application settings mappings target exact canonical post-reset source revision 70909bbdccad378fb7281ae1842e2f5beed64c38. The parent V1 source line passed exact-head Android CI #96; the new transfer surface still requires fresh exact-head CI and does not complete Deep Dark, component/state, accessibility, adaptive, representative-device, Human Visual Excellence, release, or production acceptance.
   mesh:
     status: planned
     version: null
@@ -70,7 +73,7 @@ platform_systems:
     version: null
     evidence:
       - SPECIFICATIONS.md
-    notes: Core typing requires no GoreeCloud account. Any future account-backed personalization or synchronization must use GoreeCloud Identity, and accepted Identity integration is not established.
+    notes: Core typing and the local category-only transfer flow require no GoreeCloud account. Any future account-backed personalization or synchronization must use GoreeCloud Identity, and accepted Identity integration is not established.
 
 health:
   health_endpoint: null
@@ -85,22 +88,23 @@ continuity:
   restore:
     required: true
     requirements:
-      - Preserve validation-before-write for any supported portable preference import.
-      - Establish user-facing clean-target recovery and accepted Everkeep authority before product-wide restore is claimed.
+      - Preserve validation-before-write for the supported category-only portable preference import.
+      - Treat the explicit Storage Access Framework import as one-field portability, not product-wide clean-target recovery or Everkeep restore acceptance.
   export:
     required: true
     requirements:
       - Preserve goreecloud-keyboard-preferences/1 as a privacy-minimized format whose current version contains only the explicitly selected emoji category.
       - Keep typed text, composing context, learned input, suggestion state, emoji recents, search queries, clipboard data, key history, credentials, secrets, and sensitive-editor contents out of portable output.
+      - Keep file export user-initiated through Android's document picker without background URI retention or automatic synchronization.
   portability:
     required: true
     requirements:
       - Keep schema expansion explicit and separately reviewed for privacy, retention, user control, and recovery authority.
-      - Preserve the category-only reader, codec, and writer boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
+      - Preserve the category-only reader, codec, writer, and explicit file-transfer boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
 
 external_dependencies:
   - name: Android platform
-    purpose: InputMethodService lifecycle, editor metadata, InputConnection, accessibility, configuration, and application execution environment.
+    purpose: InputMethodService lifecycle, editor metadata, InputConnection, Storage Access Framework document selection, accessibility, configuration, and application execution environment.
     required: true
 
 compatibility:
@@ -120,15 +124,18 @@ conformance:
     - docs/glaze-ui-adoption.md
     - scripts/check_glaze_motion_evaluation.py
     - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferenceTransfer.kt
     - docs/development/portable-preference-snapshot.md
     - docs/development/portable-preference-import.md
     - docs/development/portable-preference-export.md
+    - docs/development/portable-preference-user-transfer.md
   blockers:
-    - GLAZE UI V1.0 application acceptance is incomplete; Deep Dark, complete component/state mapping, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GLAZE UI V1.0 application acceptance is incomplete; the new Application settings transfer surface also requires fresh rendered/accessibility/device acceptance in addition to Deep Dark and complete component/state mapping.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
-    - Everkeep integration plus approved product backup, user-facing export/import, and clean-target restore acceptance are incomplete.
+    - Everkeep integration plus approved product backup and clean-target restore acceptance remain incomplete; the explicit user file flow is only one-field portability.
     - GoreeCloud Mesh registration, capability publication, and runtime acceptance are not established.
     - Manager platform visibility and administrative integration acceptance are not established.
     - Current portability covers only one explicit emoji-category preference and does not include product-wide Keyboard state.
