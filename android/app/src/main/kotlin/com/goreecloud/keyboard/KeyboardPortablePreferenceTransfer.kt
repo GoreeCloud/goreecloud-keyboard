@@ -12,6 +12,7 @@ object KeyboardPortablePreferenceTransfer {
     const val EXPORT_FILE_NAME = "goreecloud-keyboard-preferences.txt"
     const val MAX_IMPORT_BYTES = 4096
 
+    data class ExportPreview internal constructor(val emojiCategory: EmojiCategory)
     data class ImportPreview internal constructor(val emojiCategory: EmojiCategory)
 
     sealed interface PreviewResult {
@@ -19,8 +20,16 @@ object KeyboardPortablePreferenceTransfer {
         data class Rejected(val reason: String) : PreviewResult
     }
 
+    fun previewExport(reader: EmojiCategoryPreferenceReader): ExportPreview =
+        ExportPreview(reader.loadEmojiCategory())
+
+    fun exportPreviewBytes(preview: ExportPreview): ByteArray =
+        KeyboardPortablePreferences.encode(
+            KeyboardPortablePreferences.Snapshot(preview.emojiCategory)
+        ).toByteArray(Charsets.UTF_8)
+
     fun exportBytes(reader: EmojiCategoryPreferenceReader): ByteArray =
-        KeyboardPortablePreferenceExport.create(reader).toByteArray(Charsets.UTF_8)
+        exportPreviewBytes(previewExport(reader))
 
     /**
      * Validate and decode an explicitly selected file without invoking any preference writer.
