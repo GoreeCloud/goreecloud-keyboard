@@ -21,50 +21,56 @@ class KeyboardPortablePreferenceTransferTest {
     }
 
     @Test
-    fun validBytesApplyExactlyOneCategoryWrite() {
-        val writes = mutableListOf<EmojiCategory>()
+    fun validBytesPreviewWithoutAnyPreferenceWrite() {
         val bytes = KeyboardPortablePreferenceTransfer.exportBytes(
             EmojiCategoryPreferenceReader { EmojiCategory.FOOD }
         )
 
-        val result = KeyboardPortablePreferenceTransfer.importBytes(
-            bytes,
+        val result = KeyboardPortablePreferenceTransfer.previewImportBytes(bytes)
+
+        assertTrue(result is KeyboardPortablePreferenceTransfer.PreviewResult.Ready)
+        val ready = result as KeyboardPortablePreferenceTransfer.PreviewResult.Ready
+        assertEquals(EmojiCategory.FOOD, ready.preview.emojiCategory)
+    }
+
+    @Test
+    fun confirmedPreviewAppliesExactlyOneCategoryWrite() {
+        val writes = mutableListOf<EmojiCategory>()
+        val bytes = KeyboardPortablePreferenceTransfer.exportBytes(
+            EmojiCategoryPreferenceReader { EmojiCategory.FOOD }
+        )
+        val ready = KeyboardPortablePreferenceTransfer.previewImportBytes(bytes)
+            as KeyboardPortablePreferenceTransfer.PreviewResult.Ready
+
+        val applied = KeyboardPortablePreferenceTransfer.applyPreview(
+            ready.preview,
             EmojiCategoryPreferenceWriter { writes += it },
         )
 
-        assertTrue(result is KeyboardPortablePreferenceTransfer.ImportResult.Applied)
+        assertEquals(EmojiCategory.FOOD, applied)
         assertEquals(listOf(EmojiCategory.FOOD), writes)
     }
 
     @Test
-    fun oversizedFileIsRejectedBeforeAnyPreferenceWrite() {
-        val writes = mutableListOf<EmojiCategory>()
-
-        val result = KeyboardPortablePreferenceTransfer.importBytes(
-            ByteArray(KeyboardPortablePreferenceTransfer.MAX_IMPORT_BYTES + 1) { 'x'.code.toByte() },
-            EmojiCategoryPreferenceWriter { writes += it },
+    fun oversizedFileIsRejectedDuringPreview() {
+        val result = KeyboardPortablePreferenceTransfer.previewImportBytes(
+            ByteArray(KeyboardPortablePreferenceTransfer.MAX_IMPORT_BYTES + 1) { 'x'.code.toByte() }
         )
 
-        assertTrue(result is KeyboardPortablePreferenceTransfer.ImportResult.Rejected)
-        assertTrue(writes.isEmpty())
+        assertTrue(result is KeyboardPortablePreferenceTransfer.PreviewResult.Rejected)
     }
 
     @Test
-    fun malformedUtf8IsRejectedBeforeAnyPreferenceWrite() {
-        val writes = mutableListOf<EmojiCategory>()
-
-        val result = KeyboardPortablePreferenceTransfer.importBytes(
-            byteArrayOf(0xC3.toByte(), 0x28),
-            EmojiCategoryPreferenceWriter { writes += it },
+    fun malformedUtf8IsRejectedDuringPreview() {
+        val result = KeyboardPortablePreferenceTransfer.previewImportBytes(
+            byteArrayOf(0xC3.toByte(), 0x28)
         )
 
-        assertTrue(result is KeyboardPortablePreferenceTransfer.ImportResult.Rejected)
-        assertTrue(writes.isEmpty())
+        assertTrue(result is KeyboardPortablePreferenceTransfer.PreviewResult.Rejected)
     }
 
     @Test
-    fun tamperedPortablePayloadIsRejectedBeforeAnyPreferenceWrite() {
-        val writes = mutableListOf<EmojiCategory>()
+    fun tamperedPortablePayloadIsRejectedDuringPreview() {
         val bytes = KeyboardPortablePreferenceTransfer.exportBytes(
             EmojiCategoryPreferenceReader { EmojiCategory.SYMBOLS }
         )
@@ -72,12 +78,8 @@ class KeyboardPortablePreferenceTransferTest {
             .replace("emoji_category=SYMBOLS", "emoji_category=SMILEYS")
             .toByteArray(Charsets.UTF_8)
 
-        val result = KeyboardPortablePreferenceTransfer.importBytes(
-            tampered,
-            EmojiCategoryPreferenceWriter { writes += it },
-        )
+        val result = KeyboardPortablePreferenceTransfer.previewImportBytes(tampered)
 
-        assertTrue(result is KeyboardPortablePreferenceTransfer.ImportResult.Rejected)
-        assertTrue(writes.isEmpty())
+        assertTrue(result is KeyboardPortablePreferenceTransfer.PreviewResult.Rejected)
     }
 }

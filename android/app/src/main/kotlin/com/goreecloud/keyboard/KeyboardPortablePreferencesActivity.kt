@@ -1,6 +1,7 @@
 package com.goreecloud.keyboard
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,9 +16,10 @@ import java.io.IOException
  * Explicit user-controlled file transfer surface for the one-field portable Keyboard preference.
  *
  * The activity uses Android's Storage Access Framework so the user chooses every source or
- * destination document. It requests no broad storage or network permission and does not expose
- * typed text, emoji recents, clipboard state, search history, learned input, telemetry, Identity
- * data, or credentials.
+ * destination document. Import selection validates and previews the one category before any local
+ * preference write. It requests no broad storage or network permission and does not expose typed
+ * text, emoji recents, clipboard state, search history, learned input, telemetry, Identity data,
+ * or credentials.
  */
 class KeyboardPortablePreferencesActivity : Activity() {
     private lateinit var categoryStore: LocalEmojiCategoryStore
@@ -84,7 +86,7 @@ class KeyboardPortablePreferencesActivity : Activity() {
 
         when (requestCode) {
             REQUEST_EXPORT -> exportTo(uri)
-            REQUEST_IMPORT -> importFrom(uri)
+            REQUEST_IMPORT -> previewImportFrom(uri)
         }
     }
 
@@ -122,15 +124,14 @@ class KeyboardPortablePreferencesActivity : Activity() {
         }
     }
 
-    private fun importFrom(uri: Uri) {
+    private fun previewImportFrom(uri: Uri) {
         try {
             val bytes = readBounded(uri)
-            when (val result = KeyboardPortablePreferenceTransfer.importBytes(bytes, categoryStore)) {
-                is KeyboardPortablePreferenceTransfer.ImportResult.Applied -> {
-                    refreshCategory()
-                    statusView.text = getString(R.string.portable_preferences_imported)
-                }
-                is KeyboardPortablePreferenceTransfer.ImportResult.Rejected -> {
+            when (val result = KeyboardPortablePreferenceTransfer.previewImportBytes(bytes)) {
+                is KeyboardPortablePreferenceTransfer.PreviewResult.Ready ->
+                    showImportPreview(result.preview)
+
+                is KeyboardPortablePreferenceTransfer.PreviewResult.Rejected -> {
                     statusView.text = getString(
                         R.string.portable_preferences_import_rejected,
                         result.reason,
@@ -144,6 +145,22 @@ class KeyboardPortablePreferencesActivity : Activity() {
         } catch (_: SecurityException) {
             statusView.text = getString(R.string.portable_preferences_import_failed)
         }
+    }
+
+    private fun showImportPreview(preview: KeyboardPortablePreferenceTransfer.ImportPreview) {
+        val category = displayCategory(preview.emojiCategory)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.portable_preferences_import_preview_title)
+            .setMessage(getString(R.string.portable_preferences_import_preview_message, category))
+            .setNegativeButton(R.string.portable_preferences_import_cancel) { _, _ ->
+                statusView.text = getString(R.string.portable_preferences_import_cancelled)
+            }
+            .setPositiveButton(R.string.portable_preferences_import_apply) { _, _ ->
+                KeyboardPortablePreferenceTransfer.applyPreview(preview, categoryStore)
+                refreshCategory()
+                statusView.text = getString(R.string.portable_preferences_imported)
+            }
+            .show()
     }
 
     private fun readBounded(uri: Uri): ByteArray {
@@ -167,12 +184,17 @@ class KeyboardPortablePreferencesActivity : Activity() {
     }
 
     private fun refreshCategory() {
-        val category = categoryStore.loadEmojiCategory().name
+        categoryView.text = getString(
+            R.string.portable_preferences_current_category,
+            displayCategory(categoryStore.loadEmojiCategory()),
+        )
+    }
+
+    private fun displayCategory(category: EmojiCategory): String =
+        category.name
             .lowercase()
             .replace('_', ' ')
             .replaceFirstChar { it.titlecase() }
-        categoryView.text = getString(R.string.portable_preferences_current_category, category)
-    }
 
     private fun matchWidth(): LinearLayout.LayoutParams = LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
