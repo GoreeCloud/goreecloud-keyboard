@@ -1,4 +1,4 @@
-schema_version: "0.1"
+schema_version: "0.2"
 
 component:
   type: application
@@ -18,13 +18,13 @@ api:
 
 platform_systems:
   manager:
-    status: planned
+    result: applicable-blocked
     version: null
     evidence:
       - README.md
     notes: Keyboard is a first-party GoreeCloud application, but canonical Mesh registration and accepted Manager platform visibility are not established.
   privacy_shield:
-    status: planned
+    result: applicable-blocked
     version: null
     evidence:
       - SPECIFICATIONS.md
@@ -33,16 +33,16 @@ platform_systems:
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
-    notes: Typed content is highly sensitive. Current source minimizes editor observation and keeps the explicit user file-transfer scope to one emoji-category choice. Import now validates and previews that one category before any local preference write, but accepted Privacy Shield integration and production privacy validation are not established.
+    notes: Typed content is highly sensitive. Current source keeps the explicit user file-transfer scope to one emoji-category choice and validates and previews it before any write, but accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
-    status: planned
+    result: applicable-blocked
     version: null
     evidence:
       - SPECIFICATIONS.md
       - docs/development/portable-preference-import-preview.md
-    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer through the platform document picker, and preview-before-write behavior, but these repository controls do not establish accepted Wardveil Security integration or validation.
+    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer, and preview-before-write behavior, but accepted Wardveil Security integration and validation are not established.
   everkeep:
-    status: planned
+    result: applicable-blocked
     version: null
     evidence:
       - docs/development/portable-preference-snapshot.md
@@ -50,33 +50,32 @@ platform_systems:
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
-    notes: A one-field versioned portable preference format, category-only local export/apply seams, and an explicit user-controlled Storage Access Framework transfer surface exist. Preview-before-write improves user control but does not provide complete approved Keyboard backup/restore scope, clean-target recovery, automatic continuity, or accepted Everkeep integration.
+    notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
   glaze_ui:
-    status: partial
+    result: applicable-migration-required
     version: "1.0.0"
     evidence:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
-      - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: Repository-local GLAZE UI V1.0 Light/Dark geometry, palette, interaction-floor, native input, and Application settings mappings target exact canonical post-reset source revision 70909bbdccad378fb7281ae1842e2f5beed64c38. The parent user-transfer head passed exact-head Android CI #97; this preview child still requires fresh exact-head CI and does not complete Deep Dark, component/state, accessibility, adaptive, representative-device, Human Visual Excellence, release, or production acceptance.
+    notes: Repository-local source targets historical GLAZE UI V1.0. Migration and application-specific acceptance against current Stable GLAZE UI V1.1 / 1.1.0 remain required.
   mesh:
-    status: planned
+    result: applicable-blocked
     version: null
     evidence: []
-    notes: Current local typing does not depend on Mesh. Canonical GoreeCloud Mesh registration, capability publication, producer evidence, and runtime acceptance are not established for Keyboard.
+    notes: Current local typing does not depend on Mesh, but canonical GoreeCloud Mesh registration, capability publication, producer evidence, and runtime acceptance are not established for Keyboard.
     capabilities: []
     dependencies: []
     published_events: []
     consumed_events: []
   identity:
-    status: planned
+    result: applicable-blocked
     version: null
     evidence:
       - SPECIFICATIONS.md
-    notes: Core typing and the local category-only transfer flow require no GoreeCloud account. Any future account-backed personalization or synchronization must use GoreeCloud Identity, and accepted Identity integration is not established.
+    notes: Core typing and the local category-only transfer flow require no GoreeCloud account, but accepted Identity integration for any future account-backed personalization or synchronization is not established.
 
 health:
   health_endpoint: null
@@ -110,14 +109,21 @@ external_dependencies:
   - name: Android platform
     purpose: InputMethodService lifecycle, editor metadata, InputConnection, Storage Access Framework document selection, native confirmation UI, accessibility, configuration, and application execution environment.
     required: true
+    version_constraint: ">=26"
 
 compatibility:
+  platform_contract: "0.2"
+  glaze_ui_required: "1.1.0"
   requires:
-    - goreecloud-platform-contract>=0.1
-    - glaze-ui==1.0.0
+    - goreecloud-platform-contract==0.2
+    - glaze-ui==1.1.0
     - android-api>=26
   provides:
     - goreecloud-keyboard-preferences/1
+
+evidence:
+  acceptance_tests: []
+  release: []
 
 conformance:
   status: nonconformant
@@ -127,16 +133,13 @@ conformance:
     - SPECIFICATIONS.md
     - docs/glaze-ui-adoption.md
     - scripts/check_glaze_motion_evaluation.py
-    - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
-    - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
-    - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferenceTransfer.kt
     - docs/development/portable-preference-snapshot.md
     - docs/development/portable-preference-import.md
     - docs/development/portable-preference-export.md
     - docs/development/portable-preference-user-transfer.md
     - docs/development/portable-preference-import-preview.md
   blockers:
-    - GLAZE UI V1.0 application acceptance is incomplete; the Application settings transfer surface also requires rendered/accessibility/device acceptance in addition to Deep Dark and complete component/state mapping.
+    - GLAZE UI V1.1 / 1.1.0 migration and application-specific rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
@@ -145,4 +148,3 @@ conformance:
     - Manager platform visibility and administrative integration acceptance are not established.
     - Current portability covers only one explicit emoji-category preference and does not include product-wide Keyboard state.
     - Production signing, distribution, representative-device acceptance, release approval, and Stable qualification remain outstanding.
-    - Platform Contract adoption and Android CI do not by themselves authorize production or Stable qualification.
