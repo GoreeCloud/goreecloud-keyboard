@@ -21,6 +21,30 @@ class KeyboardPortablePreferenceTransferTest {
     }
 
     @Test
+    fun exportPreviewFreezesReviewedCategoryBeforeDestinationSelection() {
+        var currentCategory = EmojiCategory.NATURE
+        val preview = KeyboardPortablePreferenceTransfer.previewExport(
+            EmojiCategoryPreferenceReader { currentCategory }
+        )
+
+        currentCategory = EmojiCategory.FOOD
+        val encoded = KeyboardPortablePreferenceTransfer.exportPreviewBytes(preview)
+            .toString(Charsets.UTF_8)
+
+        assertTrue(encoded.contains("emoji_category=NATURE"))
+        assertFalse(encoded.contains("emoji_category=FOOD"))
+    }
+
+    @Test
+    fun exportPreviewShapeContainsOnlyOneCategoryField() {
+        val fields = KeyboardPortablePreferenceTransfer.ExportPreview::class.java.declaredFields
+            .filterNot { it.isSynthetic }
+
+        assertEquals(1, fields.size)
+        assertEquals(EmojiCategory::class.java, fields.single().type)
+    }
+
+    @Test
     fun validBytesPreviewWithoutAnyPreferenceWrite() {
         val bytes = KeyboardPortablePreferenceTransfer.exportBytes(
             EmojiCategoryPreferenceReader { EmojiCategory.FOOD }
