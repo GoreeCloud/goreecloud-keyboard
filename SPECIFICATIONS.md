@@ -16,8 +16,9 @@ GoreeCloud Keyboard is an original GoreeCloud-owned keyboard implementation. The
 - Local-only GoreeCloud Quill suggestion boundary with deterministic prefix suggestions and bounded typo-correction candidates.
 - Sensitive-editor classification that clears composing context and suppresses suggestion collection, display, and acceptance for protected input variations.
 - No Android network permission in the current application foundation.
-- GLAZE UI V1.0 (`1.0.0`) Development source mapping pinned to exact post-reset authority `70909bbdccad378fb7281ae1842e2f5beed64c38`, with the consumed 4/8 dp spacing steps, V1 12 dp small/control radius tier, 48 dp normal and 56 dp Touch Assistance / far-view interaction floors, Light/Dark foundation values, and current Application/System Shell classification.
-- Experimental Glaze Motion evaluation remains historical/test-only and is not a production dependency or V1 acceptance source.
+- GLAZE UI V1.1 (`1.1.0`) Development source mapping pinned to exact Stable release authority `15cc76d2bcd4065552dc31c77145b63f34d9e7b2`, preserving inherited 4/8 dp spacing, the 12 dp structural small/control radius, 48/56 dp interaction floors and Light/Dark foundation values while adding separate V1.1 optical geometry and an explicit Deep Dark source palette.
+- A non-semantic V1.1 Deep Teal + Soft Amber atmosphere source contract exists but is not rendered by `KeyboardView`; Environmental Color Memory, editor/content sampling, remote color derivation, persistent sample history, semantic inference, and animated atmosphere are not enabled.
+- Experimental Glaze Motion evaluation remains historical/test-only and is not a production dependency or V1.1 acceptance source.
 - Android unit/build and emulator validation infrastructure, including native rendered secondary-symbol navigation and character hit testing.
 
 ## Native input behavior
@@ -44,7 +45,7 @@ Starting or finishing an input view resets the keyboard to the letters layer, cl
 
 ### Privacy Shield / Privacy Center
 
-Keyboard input is minimized by default. The current suggestion path is local-only, and sensitive-editor handling fails closed by suppressing suggestion capture and presentation. The portable preference format is deliberately constrained to the last explicitly selected emoji category; typed text, composing/surrounding editor context, suggestions or learned input, emoji recents/frequency history, emoji search queries, clipboard data, key history, sensitive-editor contents, telemetry, Identity data, and cryptographic secrets are excluded. No production claim is made for future cloud-assisted input until an explicit Privacy Shield contract and acceptance evidence exist.
+Keyboard input is minimized by default. The current suggestion path is local-only, and sensitive-editor handling fails closed by suppressing suggestion capture and presentation. The portable preference format is deliberately constrained to the last explicitly selected emoji category; typed text, composing/surrounding editor context, suggestions or learned input, emoji recents/frequency history, emoji search queries, clipboard data, key history, sensitive-editor contents, telemetry, Identity data, and cryptographic secrets are excluded. The V1.1 source mapping adds no editor/content sampling or atmosphere-derived observation. No production claim is made for future cloud-assisted input until an explicit Privacy Shield contract and acceptance evidence exist.
 
 ### Wardveil Security / Security Center
 
@@ -64,13 +65,15 @@ Future cross-application capabilities must use governed GoreeCloud integration c
 
 ### GLAZE UI / Design Center
 
-GLAZE UI V1.0 (`1.0.0`) is the official and only current GoreeCloud design-system target. This repository maps the applicable V1 foundation to the native Android keyboard at exact source authority `70909bbdccad378fb7281ae1842e2f5beed64c38`; no pre-reset Glaze UI 2.x acceptance is inherited as V1 evidence.
+GLAZE UI V1.1 (`1.1.0`) is the current Stable GoreeCloud design-system target. This repository maps the applicable V1.1 foundation to the native Android keyboard at exact Stable release commit `15cc76d2bcd4065552dc31c77145b63f34d9e7b2`; earlier V1.0 and pre-reset Glaze UI 2.x acceptance are not inherited as V1.1 consumer evidence.
 
-The current source maps Light/Dark foundation colors, the V1 12 dp small/control radius tier through the source-compatible `RadiusMediumDp` name, and 48/56 dp normal/Touch-Assistance interaction floors. Deep Dark remains unimplemented. Complete rendered/native/accessibility/V1 component-state/material-role/tablet-foldable/representative-device/Human Visual Excellence acceptance remains pending. Reduced Motion/Transparency, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, production packaging, release, and Stable qualification remain separate gates.
+The current source preserves Light/Dark foundation colors, the inherited 12 dp structural small/control radius through the source-compatible `RadiusMediumDp` name, and 48/56 dp normal/Touch-Assistance interaction floors. V1.1 optical geometry references 8/16/24/32 dp plus capsule are represented separately from structural geometry. Deep Dark is explicitly defined from the V1.1 appearance contract, but `KeyboardView` still selects only Light/Dark from Android night mode and does not infer or auto-select Deep Dark. A runtime Deep Dark policy remains separate application work.
+
+The V1.1 atmospheric source contract is explicitly non-semantic and currently unrendered. Deep Teal/Soft Amber cannot communicate sensitive-editor state, privacy, security, protection, focus, selection, identity, recovery, synchronization, or availability. Accessibility and authoritative semantics resolve before atmosphere. Complete rendered/native/accessibility/V1.1 component-state/material-role/tablet-foldable/representative-device/Human Visual Excellence acceptance remains pending. Reduced Motion/Transparency, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, production packaging, release, and Stable qualification remain separate gates.
 
 Local emoji search remains an application-local input-navigation capability and is not GoreeCloud Universal Search. GLAZE UI presentation semantics do not grant Universal Search, Control Center, security, privacy, identity, recovery, or other platform authority to Keyboard.
 
-Historical Glaze Motion 0.5 evaluation remains test-only and provides no current V1 production/conformance evidence.
+Historical Glaze Motion 0.5 evaluation remains test-only and provides no current V1.1 production/conformance evidence.
 
 ## Target capability families — not yet complete
 
@@ -92,4 +95,4 @@ These targets are product scope, not current implementation claims.
 
 ## Production and Stable acceptance gates
 
-Development source or passing CI is not equivalent to production acceptance or Stable qualification. Production promotion requires evidence appropriate to the shipped platform, including native runtime behavior, privacy/security boundaries, GLAZE UI V1.0 conformance, accessibility, representative devices/form factors, performance and power behavior, signed packaging, release/distribution controls, rollback/recovery, and any applicable GoreeCloud platform-system acceptance.
+Development source or passing CI is not equivalent to production acceptance or Stable qualification. Production promotion requires evidence appropriate to the shipped platform, including native runtime behavior, privacy/security boundaries, GLAZE UI V1.1 conformance, accessibility, representative devices/form factors, performance and power behavior, signed packaging, release/distribution controls, rollback/recovery, and any applicable GoreeCloud platform-system acceptance.

@@ -77,9 +77,11 @@ Future network-backed capabilities, if implemented, require separate user-contro
 
 ## Appearance
 
-The current native surface uses a Glaze UI 2.0.0 Adoption Candidate mapping for Light and Dark appearance source values. Android night mode selects the current Light/Dark mapping at draw time.
+The current Development source targets GLAZE UI V1.1 (`1.1.0`) at Stable release commit `15cc76d2bcd4065552dc31c77145b63f34d9e7b2`. The live keyboard continues to follow Android night mode using inherited Light/Dark structural values.
 
-Complete rendered Glaze UI conformance, Deep Dark, accessibility configurations, representative physical-device acceptance, and production design acceptance remain incomplete.
+The source also defines the current V1.1 Deep Dark structural palette, but the IME does **not** automatically select Deep Dark and this Development slice adds no new appearance preference. The V1.1 Deep Teal + Soft Amber atmosphere contract is also present as non-semantic source metadata but is not rendered by the typing surface and does not inspect editor or typed content.
+
+Complete rendered/accessibility GLAZE UI V1.1 acceptance, runtime Deep Dark policy, Reduced Transparency/Motion, Increased Contrast/native equivalents, TalkBack/Switch Access, adaptive/form-factor validation, representative physical-device acceptance, Human Visual Excellence review, and production design acceptance remain incomplete.
 
 ## Current limitations
 

@@ -19,11 +19,12 @@ The current Android source includes:
 - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates and bounded typo correction.
 - Sensitive-editor privacy gating that suppresses suggestion capture, display, acceptance, and backspace look-behind inspection.
 - Privacy-by-default behavior with no Android network permission.
-- GLAZE UI V1.0 (`1.0.0`) Development source mapping pinned to exact post-reset authority `70909bbdccad378fb7281ae1842e2f5beed64c38`, including the consumed 4/8 dp spacing steps, V1 12 dp small/control radius tier, 48 dp normal and 56 dp Touch Assistance / far-view interaction floors, Light/Dark foundation values, and Application/System Shell classification.
+- GLAZE UI V1.1 (`1.1.0`) Development source mapping pinned to Stable release authority `15cc76d2bcd4065552dc31c77145b63f34d9e7b2`, preserving inherited 4/8 dp spacing, the 12 dp structural small/control radius, 48/56 dp interaction floors and Light/Dark mappings while adding separate V1.1 optical geometry references and an explicit Deep Dark source palette.
+- A bounded non-semantic V1.1 Deep Teal + Soft Amber atmosphere source contract that is not rendered by `KeyboardView` and enables no editor/content sampling, remote derivation, persistence, semantic inference, or animated atmosphere.
 - Explicit Wardveil Security, Privacy Shield, Everkeep, GoreeCloud Identity, and GoreeCloud Mesh integration boundaries.
 - Android unit/build/governance and emulator validation infrastructure, including rendered native symbol-page hit testing and pure recency/serialization coverage.
 
-The GLAZE UI V1.0 mapping remains Development/migration evidence only. Deep Dark, complete V1 component/state and material-role mapping, Reduced Motion/Transparency, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, representative-device ergonomics, Human Visual Excellence, signed distribution, release, and Stable qualification remain separate gates. Pre-reset Glaze UI 2.x evidence is historical implementation ancestry only and is not current V1 acceptance.
+The GLAZE UI V1.1 mapping remains Development/migration evidence only. `KeyboardView` still selects inherited Light/Dark from Android night mode; it does not infer or auto-select Deep Dark, and this slice adds no appearance preference. Complete V1.1 component/state/material-role mapping, Reduced Motion/Transparency, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance resolution, RTL/localization, TalkBack/Switch Access, representative-device/form-factor ergonomics, Human Visual Excellence, signed distribution, release, and Stable qualification remain separate gates. Earlier V1.0 and pre-reset Glaze UI 2.x evidence is historical implementation ancestry only and is not current V1.1 acceptance.
 
 ## Product direction
 
@@ -41,7 +42,7 @@ Private on-device recents are a convenience cache, not a general learned-languag
 - `COMPETITIVE-OBJECTIVES.md` — product-quality objectives and evidence discipline.
 - `USER-MANUAL.md` — current Development user guidance.
 - `docs/native-architecture.md` — native implementation architecture.
-- `docs/glaze-ui-adoption.md` — current GLAZE UI V1.0 migration evidence and remaining gates.
+- `docs/glaze-ui-adoption.md` — current GLAZE UI V1.1 source-migration evidence and remaining gates.
 - `docs/glaze-motion-evaluation.md` — historical/test-only Experimental Glaze Motion evaluation.
 
 ## Development model
