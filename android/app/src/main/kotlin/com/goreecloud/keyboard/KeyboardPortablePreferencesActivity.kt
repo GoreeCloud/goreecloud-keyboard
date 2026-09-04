@@ -16,7 +16,8 @@ import java.io.IOException
  * Explicit user-controlled file transfer surface for the one-field portable Keyboard preference.
  *
  * The activity uses Android's Storage Access Framework so the user chooses every source or
- * destination document. Import selection validates and previews the one category before any local
+ * destination document. Export is reviewed and frozen to one typed category before a destination
+ * document is requested. Import selection validates and previews the one category before any local
  * preference write. It requests no broad storage or network permission and does not expose typed
  * text, emoji recents, clipboard state, search history, learned input, telemetry, Identity data,
  * or credentials.
@@ -25,6 +26,7 @@ class KeyboardPortablePreferencesActivity : Activity() {
     private lateinit var categoryStore: LocalEmojiCategoryStore
     private lateinit var categoryView: TextView
     private lateinit var statusView: TextView
+    private var pendingExportPreview: KeyboardPortablePreferenceTransfer.ExportPreview? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +57,7 @@ class KeyboardPortablePreferencesActivity : Activity() {
         content.addView(Button(this).apply {
             text = getString(R.string.portable_preferences_export)
             minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
-            setOnClickListener { launchExport() }
+            setOnClickListener { showExportPreview() }
         }, matchWidth())
 
         content.addView(Button(this).apply {
@@ -90,7 +92,24 @@ class KeyboardPortablePreferencesActivity : Activity() {
         }
     }
 
-    private fun launchExport() {
+    private fun showExportPreview() {
+        val preview = KeyboardPortablePreferenceTransfer.previewExport(categoryStore)
+        val category = displayCategory(preview.emojiCategory)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.portable_preferences_export_preview_title)
+            .setMessage(getString(R.string.portable_preferences_export_preview_message, category))
+            .setNegativeButton(R.string.portable_preferences_export_cancel) { _, _ ->
+                pendingExportPreview = null
+                statusView.text = getString(R.string.portable_preferences_export_cancelled)
+            }
+            .setPositiveButton(R.string.portable_preferences_export_continue) { _, _ ->
+                pendingExportPreview = preview
+                launchExportDocument()
+            }
+            .show()
+    }
+
+    private fun launchExportDocument() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = KeyboardPortablePreferenceTransfer.MIME_TYPE
@@ -110,8 +129,15 @@ class KeyboardPortablePreferencesActivity : Activity() {
     }
 
     private fun exportTo(uri: Uri) {
+        val preview = pendingExportPreview
+        pendingExportPreview = null
+        if (preview == null) {
+            statusView.text = getString(R.string.portable_preferences_export_failed)
+            return
+        }
+
         try {
-            val bytes = KeyboardPortablePreferenceTransfer.exportBytes(categoryStore)
+            val bytes = KeyboardPortablePreferenceTransfer.exportPreviewBytes(preview)
             contentResolver.openOutputStream(uri, "wt")?.use { output ->
                 output.write(bytes)
                 output.flush()
