@@ -34,7 +34,7 @@ platform_systems:
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: Typed content is highly sensitive. Current source keeps explicit user file-transfer scope to one emoji-category choice, previews imports before any write, and reviews and freezes exports before destination selection, while the V1.1 atmosphere contract adds no editor/content sampling or telemetry; accepted Privacy Shield integration and production privacy validation are not established.
+    notes: Typed content is highly sensitive. Current source keeps explicit user file-transfer scope to one emoji-category choice, previews imports before any write, reviews and freezes exports before destination selection, and preserves only that already-reviewed category across ordinary Activity recreation while the document picker owns the flow; accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     result: applicable-blocked
     version: null
@@ -42,7 +42,7 @@ platform_systems:
       - SPECIFICATIONS.md
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior, but accepted Wardveil Security integration and validation are not established.
+    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior with fail-closed restoration of the reviewed category after Activity recreation, but accepted Wardveil Security integration and validation are not established.
   everkeep:
     result: applicable-blocked
     version: null
@@ -53,7 +53,7 @@ platform_systems:
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, including import preview/Apply and export review/freeze boundaries, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
+    notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, including import preview/Apply, export review/freeze, and minimized reviewed-export lifecycle restoration, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
   glaze_ui:
     result: applicable-migration-required
     version: "1.1.0"
@@ -61,11 +61,11 @@ platform_systems:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
-      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard//KeyboardPortablePreferencesActivity.kt
       - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: Repository-local Development source targets current Stable GLAZE UI V1.1 / 1.1.0, including explicit Deep Dark source values and bounded non-semantic atmosphere. KeyboardView still selects inherited Light/Dark from Android night mode and complete rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain required.
+    notes: Repository-local Development source targets GLAZE UI V1.1 / 1.1.0 source semantics, including explicit Deep Dark source values and bounded non-semantic atmosphere. The authoritative current-Stable Glaze correction/re-pin and application-specific rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain required before current conformance can be claimed.
   mesh:
     result: applicable-blocked
     version: null
@@ -105,11 +105,12 @@ continuity:
       - Keep typed text, composing context, learned input, suggestion state, emoji recents, search queries, clipboard data, key history, credentials, secrets, and sensitive-editor contents out of portable output.
       - Keep file export user-initiated through Android's document picker without background URI retention or automatic synchronization.
       - Review and freeze the one category into a typed export preview before destination selection so mutable local preference changes cannot silently alter the reviewed file contents.
+      - Preserve only the already-reviewed category across Activity recreation while the Android picker owns the flow, and fail closed on missing or altered saved preview state.
   portability:
     required: true
     requirements:
       - Keep schema expansion explicit and separately reviewed for privacy, retention, user control, and recovery authority.
-      - Preserve the category-only reader, codec, writer, explicit file-transfer, import-preview/confirmation, and export-review/freeze boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
+      - Preserve the category-only reader, codec, writer, explicit file-transfer, import-preview/confirmation, export-review/freeze, and minimized lifecycle-restoration boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
 
 external_dependencies:
   - name: Android platform
@@ -146,7 +147,7 @@ conformance:
     - docs/development/portable-preference-import-preview.md
     - docs/development/portable-preference-export-review.md
   blockers:
-    - GLAZE UI V1.1 / 1.1.0 source mapping exists, but application-specific rendered, runtime Deep Dark policy, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GLAZE UI V1.1 / 1.1.0 source mapping exists, but the authoritative current-Stable Glaze correction/re-pin plus application-specific rendered, runtime Deep Dark policy, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
