@@ -10,6 +10,11 @@
     <string name="portable_preferences_export">Export category preference</string>
     <string name="portable_preferences_import">Import category preference</string>
     <string name="portable_preferences_privacy_note">Only this one category choice is portable. Typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, and sensitive editor content are not included.</string>
+    <string name="portable_preferences_export_preview_title">Review category export</string>
+    <string name="portable_preferences_export_preview_message">This export will contain only the selected emoji category %1$s. The category is frozen now so the file cannot silently change while you choose its destination.</string>
+    <string name="portable_preferences_export_continue">Choose file</string>
+    <string name="portable_preferences_export_cancel">Cancel</string>
+    <string name="portable_preferences_export_cancelled">Export cancelled. No document was created by GoreeCloud Keyboard.</string>
     <string name="portable_preferences_exported">Category preference exported.</string>
     <string name="portable_preferences_export_failed">The category preference could not be exported.</string>
     <string name="portable_preferences_import_preview_title">Review category import</string>
