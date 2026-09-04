@@ -12,6 +12,11 @@
     <string name="portable_preferences_privacy_note">Only this one category choice is portable. Typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, and sensitive editor content are not included.</string>
     <string name="portable_preferences_exported">Category preference exported.</string>
     <string name="portable_preferences_export_failed">The category preference could not be exported.</string>
+    <string name="portable_preferences_import_preview_title">Review category import</string>
+    <string name="portable_preferences_import_preview_message">This file will change the selected emoji category to %1$s. No preference is changed until you choose Apply.</string>
+    <string name="portable_preferences_import_apply">Apply</string>
+    <string name="portable_preferences_import_cancel">Cancel</string>
+    <string name="portable_preferences_import_cancelled">Import cancelled. No preference was changed.</string>
     <string name="portable_preferences_imported">Category preference imported.</string>
     <string name="portable_preferences_import_rejected">Import rejected: %1$s</string>
     <string name="portable_preferences_import_too_large">Import rejected: the file exceeds the bounded size limit.</string>

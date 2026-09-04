@@ -32,13 +32,15 @@ platform_systems:
       - docs/development/portable-preference-import.md
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
-    notes: Typed content is highly sensitive. Current source minimizes editor observation, suppresses suggestion behavior in sensitive editors, and keeps the explicit user file-transfer scope to one emoji-category choice while excluding typed and usage-derived state, but accepted Privacy Shield integration and production privacy validation are not established.
+      - docs/development/portable-preference-import-preview.md
+    notes: Typed content is highly sensitive. Current source minimizes editor observation and keeps the explicit user file-transfer scope to one emoji-category choice. Import now validates and previews that one category before any local preference write, but accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     status: planned
     version: null
     evidence:
       - SPECIFICATIONS.md
-    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, and bounded explicit file transfer through the platform document picker, but these repository controls do not establish accepted Wardveil Security integration or validation.
+      - docs/development/portable-preference-import-preview.md
+    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer through the platform document picker, and preview-before-write behavior, but these repository controls do not establish accepted Wardveil Security integration or validation.
   everkeep:
     status: planned
     version: null
@@ -47,7 +49,8 @@ platform_systems:
       - docs/development/portable-preference-import.md
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
-    notes: A one-field versioned portable preference format, category-only local export/apply seams, and an explicit user-controlled Storage Access Framework transfer surface exist, but complete approved Keyboard backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration remain incomplete.
+      - docs/development/portable-preference-import-preview.md
+    notes: A one-field versioned portable preference format, category-only local export/apply seams, and an explicit user-controlled Storage Access Framework transfer surface exist. Preview-before-write improves user control but does not provide complete approved Keyboard backup/restore scope, clean-target recovery, automatic continuity, or accepted Everkeep integration.
   glaze_ui:
     status: partial
     version: "1.0.0"
@@ -58,7 +61,7 @@ platform_systems:
       - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: Repository-local GLAZE UI V1.0 Light/Dark geometry, palette, interaction-floor, native input, and Application settings mappings target exact canonical post-reset source revision 70909bbdccad378fb7281ae1842e2f5beed64c38. The parent V1 source line passed exact-head Android CI #96; the new transfer surface still requires fresh exact-head CI and does not complete Deep Dark, component/state, accessibility, adaptive, representative-device, Human Visual Excellence, release, or production acceptance.
+    notes: Repository-local GLAZE UI V1.0 Light/Dark geometry, palette, interaction-floor, native input, and Application settings mappings target exact canonical post-reset source revision 70909bbdccad378fb7281ae1842e2f5beed64c38. The parent user-transfer head passed exact-head Android CI #97; this preview child still requires fresh exact-head CI and does not complete Deep Dark, component/state, accessibility, adaptive, representative-device, Human Visual Excellence, release, or production acceptance.
   mesh:
     status: planned
     version: null
@@ -89,6 +92,7 @@ continuity:
     required: true
     requirements:
       - Preserve validation-before-write for the supported category-only portable preference import.
+      - Require the native user transfer flow to preview the decoded category and obtain explicit Apply confirmation before invoking the category writer.
       - Treat the explicit Storage Access Framework import as one-field portability, not product-wide clean-target recovery or Everkeep restore acceptance.
   export:
     required: true
@@ -100,11 +104,11 @@ continuity:
     required: true
     requirements:
       - Keep schema expansion explicit and separately reviewed for privacy, retention, user control, and recovery authority.
-      - Preserve the category-only reader, codec, writer, and explicit file-transfer boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
+      - Preserve the category-only reader, codec, writer, explicit file-transfer, and preview-confirmation boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
 
 external_dependencies:
   - name: Android platform
-    purpose: InputMethodService lifecycle, editor metadata, InputConnection, Storage Access Framework document selection, accessibility, configuration, and application execution environment.
+    purpose: InputMethodService lifecycle, editor metadata, InputConnection, Storage Access Framework document selection, native confirmation UI, accessibility, configuration, and application execution environment.
     required: true
 
 compatibility:
@@ -130,8 +134,9 @@ conformance:
     - docs/development/portable-preference-import.md
     - docs/development/portable-preference-export.md
     - docs/development/portable-preference-user-transfer.md
+    - docs/development/portable-preference-import-preview.md
   blockers:
-    - GLAZE UI V1.0 application acceptance is incomplete; the new Application settings transfer surface also requires fresh rendered/accessibility/device acceptance in addition to Deep Dark and complete component/state mapping.
+    - GLAZE UI V1.0 application acceptance is incomplete; the Application settings transfer surface also requires rendered/accessibility/device acceptance in addition to Deep Dark and complete component/state mapping.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.

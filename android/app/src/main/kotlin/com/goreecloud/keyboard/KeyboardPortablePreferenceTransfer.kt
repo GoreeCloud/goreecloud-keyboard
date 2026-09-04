@@ -12,32 +12,46 @@ object KeyboardPortablePreferenceTransfer {
     const val EXPORT_FILE_NAME = "goreecloud-keyboard-preferences.txt"
     const val MAX_IMPORT_BYTES = 4096
 
-    sealed interface ImportResult {
-        data class Applied(val emojiCategory: EmojiCategory) : ImportResult
-        data class Rejected(val reason: String) : ImportResult
+    data class ImportPreview internal constructor(val emojiCategory: EmojiCategory)
+
+    sealed interface PreviewResult {
+        data class Ready(val preview: ImportPreview) : PreviewResult
+        data class Rejected(val reason: String) : PreviewResult
     }
 
     fun exportBytes(reader: EmojiCategoryPreferenceReader): ByteArray =
         KeyboardPortablePreferenceExport.create(reader).toByteArray(Charsets.UTF_8)
 
-    fun importBytes(
-        bytes: ByteArray,
-        writer: EmojiCategoryPreferenceWriter,
-    ): ImportResult {
+    /**
+     * Validate and decode an explicitly selected file without invoking any preference writer.
+     */
+    fun previewImportBytes(bytes: ByteArray): PreviewResult {
         if (bytes.size > MAX_IMPORT_BYTES) {
-            return ImportResult.Rejected("portable preference file exceeds the bounded size limit")
+            return PreviewResult.Rejected("portable preference file exceeds the bounded size limit")
         }
 
         val encoded = bytes.toString(Charsets.UTF_8)
         if (!encoded.toByteArray(Charsets.UTF_8).contentEquals(bytes)) {
-            return ImportResult.Rejected("portable preference file must be canonical UTF-8")
+            return PreviewResult.Rejected("portable preference file must be canonical UTF-8")
         }
 
-        return when (val result = KeyboardPortablePreferenceImport.apply(encoded, writer)) {
-            is KeyboardPortablePreferenceImport.ApplyResult.Applied ->
-                ImportResult.Applied(result.emojiCategory)
-            is KeyboardPortablePreferenceImport.ApplyResult.Invalid ->
-                ImportResult.Rejected(result.reason)
+        return when (val decoded = KeyboardPortablePreferences.decode(encoded)) {
+            is KeyboardPortablePreferences.DecodeResult.Invalid ->
+                PreviewResult.Rejected(decoded.reason)
+
+            is KeyboardPortablePreferences.DecodeResult.Success ->
+                PreviewResult.Ready(ImportPreview(decoded.snapshot.emojiCategory))
         }
+    }
+
+    /**
+     * Apply only a previously validated typed preview after an explicit user confirmation.
+     */
+    fun applyPreview(
+        preview: ImportPreview,
+        writer: EmojiCategoryPreferenceWriter,
+    ): EmojiCategory {
+        writer.save(preview.emojiCategory)
+        return preview.emojiCategory
     }
 }
