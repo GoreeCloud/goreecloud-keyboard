@@ -2,6 +2,7 @@ package com.goreecloud.keyboard
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -33,6 +34,26 @@ class KeyboardPortablePreferenceTransferTest {
 
         assertTrue(encoded.contains("emoji_category=NATURE"))
         assertFalse(encoded.contains("emoji_category=FOOD"))
+    }
+
+    @Test
+    fun reviewedExportStateRoundTripsOnlyTheFrozenCategory() {
+        val preview = KeyboardPortablePreferenceTransfer.previewExport(
+            EmojiCategoryPreferenceReader { EmojiCategory.TRAVEL }
+        )
+
+        val persisted = KeyboardPortablePreferenceTransfer.exportPreviewStateValue(preview)
+        val restored = KeyboardPortablePreferenceTransfer.restoreExportPreviewState(persisted)
+
+        assertEquals("TRAVEL", persisted)
+        assertEquals(EmojiCategory.TRAVEL, restored?.emojiCategory)
+    }
+
+    @Test
+    fun alteredReviewedExportStateFailsClosed() {
+        assertNull(KeyboardPortablePreferenceTransfer.restoreExportPreviewState(null))
+        assertNull(KeyboardPortablePreferenceTransfer.restoreExportPreviewState(""))
+        assertNull(KeyboardPortablePreferenceTransfer.restoreExportPreviewState("not-a-category"))
     }
 
     @Test
