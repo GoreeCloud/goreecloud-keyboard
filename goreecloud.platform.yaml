@@ -61,7 +61,7 @@ platform_systems:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
-      - android/app/src/main/kotlin/com/goreecloud/keyboard//KeyboardPortablePreferencesActivity.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
       - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
