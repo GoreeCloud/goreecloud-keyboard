@@ -12,11 +12,12 @@ TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
 V1_VERSION = "1.0.0"
 V1_SOURCE_REVISION = "70909bbdccad378fb7281ae1842e2f5beed64c38"
+CURRENT_REQUIRED_VERSION = "1.1.0"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"Keyboard GLAZE UI V1.0 / Glaze Motion boundary failed: {message}")
+    raise SystemExit(f"Keyboard GLAZE UI V1.0 source / Platform Contract v0.2 boundary failed: {message}")
 
 
 def main() -> None:
@@ -94,16 +95,19 @@ def main() -> None:
             fail(f"missing GLAZE UI V1.0 source mapping `{evidence}`")
 
     platform_markers = (
-        'schema_version: "0.1"',
+        'schema_version: "0.2"',
         "  id: goreecloud-keyboard",
-        '  glaze_ui:\n    status: partial\n    version: "1.0.0"',
-        "GLAZE UI V1.0",
+        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.0.0"',
+        "current Stable GLAZE UI V1.1 / 1.1.0",
+        '  platform_contract: "0.2"',
+        f'  glaze_ui_required: "{CURRENT_REQUIRED_VERSION}"',
+        "goreecloud-platform-contract==0.2",
+        "glaze-ui==1.1.0",
         "conformance:\n  status: nonconformant",
-        "glaze-ui==1.0.0",
     )
     for marker in platform_markers:
         if marker not in platform_text:
-            fail(f"Platform Contract v0.1 is missing current V1 boundary `{marker}`")
+            fail(f"Platform Contract v0.2 is missing the V1 source / V1.1 required boundary `{marker}`")
 
     active_records = {
         "adoption record": adoption_text,
@@ -115,7 +119,11 @@ def main() -> None:
         "Glaze UI 2.2.0 Stable is the production design-system authority.",
         "Required Stable baseline: **Glaze UI 2.2.0**",
         "Glaze UI 2.2 Adoption Candidate",
+        'schema_version: "0.1"',
         'schema_version: "1.0"',
+        '  glaze_ui:\n    status: partial',
+        "goreecloud-platform-contract>=0.1",
+        "glaze-ui==1.0.0",
         'required_version: "1.0.0"',
         'implemented_version: "1.0.0"',
         'required_version: "2.2.0"',
@@ -171,8 +179,9 @@ def main() -> None:
 
     print(
         "Keyboard GLAZE UI V1.0 source mapping + Glaze Motion 0.5 test-only boundary passed: "
-        f"target {V1_VERSION}, source {V1_SOURCE_REVISION}; Platform Contract v0.1 remains nonconformant; "
-        "Experimental Motion remains quarantined; runtime/accessibility/device/release acceptance remains separate."
+        f"source target {V1_VERSION}, source {V1_SOURCE_REVISION}; Platform Contract v0.2 requires {CURRENT_REQUIRED_VERSION} "
+        "and remains migration-required/nonconformant; Experimental Motion remains quarantined; "
+        "runtime/accessibility/device/release acceptance remains separate."
     )
 
 
