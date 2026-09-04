@@ -28,6 +28,21 @@ object KeyboardPortablePreferenceTransfer {
             KeyboardPortablePreferences.Snapshot(preview.emojiCategory)
         ).toByteArray(Charsets.UTF_8)
 
+    /**
+     * Persist only the already-reviewed category while Android temporarily owns the export flow.
+     *
+     * The saved value deliberately excludes editor state, recents, clipboard contents, search
+     * history, and every other Keyboard-owned state category. Unknown or altered values fail
+     * closed instead of being coerced into another export category.
+     */
+    fun exportPreviewStateValue(preview: ExportPreview): String = preview.emojiCategory.name
+
+    fun restoreExportPreviewState(value: String?): ExportPreview? {
+        if (value.isNullOrBlank()) return null
+        val category = EmojiCategory.entries.firstOrNull { it.name == value } ?: return null
+        return ExportPreview(category)
+    }
+
     fun exportBytes(reader: EmojiCategoryPreferenceReader): ByteArray =
         exportPreviewBytes(previewExport(reader))
 
