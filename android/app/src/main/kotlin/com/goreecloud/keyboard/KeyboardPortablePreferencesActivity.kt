@@ -32,6 +32,9 @@ class KeyboardPortablePreferencesActivity : Activity() {
         super.onCreate(savedInstanceState)
         title = getString(R.string.portable_preferences_title)
         categoryStore = LocalEmojiCategoryStore(this)
+        pendingExportPreview = KeyboardPortablePreferenceTransfer.restoreExportPreviewState(
+            savedInstanceState?.getString(STATE_PENDING_EXPORT_CATEGORY),
+        )
 
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -80,15 +83,41 @@ class KeyboardPortablePreferencesActivity : Activity() {
         refreshCategory()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        pendingExportPreview?.let { preview ->
+            outState.putString(
+                STATE_PENDING_EXPORT_CATEGORY,
+                KeyboardPortablePreferenceTransfer.exportPreviewStateValue(preview),
+            )
+        }
+        super.onSaveInstanceState(outState)
+    }
+
     @Deprecated("Uses the platform result callback to preserve the current minimal Activity dependency surface")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != RESULT_OK) return
-        val uri = data?.data ?: return
 
         when (requestCode) {
-            REQUEST_EXPORT -> exportTo(uri)
-            REQUEST_IMPORT -> previewImportFrom(uri)
+            REQUEST_EXPORT -> {
+                if (resultCode != RESULT_OK) {
+                    pendingExportPreview = null
+                    statusView.text = getString(R.string.portable_preferences_export_cancelled)
+                    return
+                }
+                val uri = data?.data
+                if (uri == null) {
+                    pendingExportPreview = null
+                    statusView.text = getString(R.string.portable_preferences_export_failed)
+                    return
+                }
+                exportTo(uri)
+            }
+
+            REQUEST_IMPORT -> {
+                if (resultCode != RESULT_OK) return
+                val uri = data?.data ?: return
+                previewImportFrom(uri)
+            }
         }
     }
 
@@ -237,5 +266,6 @@ class KeyboardPortablePreferencesActivity : Activity() {
     private companion object {
         const val REQUEST_EXPORT = 501
         const val REQUEST_IMPORT = 502
+        const val STATE_PENDING_EXPORT_CATEGORY = "pending_export_category"
     }
 }
