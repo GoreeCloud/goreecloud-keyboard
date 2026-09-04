@@ -33,14 +33,16 @@ platform_systems:
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
-    notes: Typed content is highly sensitive. Current source keeps the explicit user file-transfer scope to one emoji-category choice and validates and previews it before any write, while the V1.1 atmosphere contract adds no editor/content sampling or telemetry; accepted Privacy Shield integration and production privacy validation are not established.
+      - docs/development/portable-preference-export-review.md
+    notes: Typed content is highly sensitive. Current source keeps explicit user file-transfer scope to one emoji-category choice, previews imports before any write, and reviews and freezes exports before destination selection, while the V1.1 atmosphere contract adds no editor/content sampling or telemetry; accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     result: applicable-blocked
     version: null
     evidence:
       - SPECIFICATIONS.md
       - docs/development/portable-preference-import-preview.md
-    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer, and preview-before-write behavior, but accepted Wardveil Security integration and validation are not established.
+      - docs/development/portable-preference-export-review.md
+    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior, but accepted Wardveil Security integration and validation are not established.
   everkeep:
     result: applicable-blocked
     version: null
@@ -50,7 +52,8 @@ platform_systems:
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
-    notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
+      - docs/development/portable-preference-export-review.md
+    notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, including import preview/Apply and export review/freeze boundaries, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
   glaze_ui:
     result: applicable-migration-required
     version: "1.1.0"
@@ -101,11 +104,12 @@ continuity:
       - Preserve goreecloud-keyboard-preferences/1 as a privacy-minimized format whose current version contains only the explicitly selected emoji category.
       - Keep typed text, composing context, learned input, suggestion state, emoji recents, search queries, clipboard data, key history, credentials, secrets, and sensitive-editor contents out of portable output.
       - Keep file export user-initiated through Android's document picker without background URI retention or automatic synchronization.
+      - Review and freeze the one category into a typed export preview before destination selection so mutable local preference changes cannot silently alter the reviewed file contents.
   portability:
     required: true
     requirements:
       - Keep schema expansion explicit and separately reviewed for privacy, retention, user control, and recovery authority.
-      - Preserve the category-only reader, codec, writer, explicit file-transfer, and preview-confirmation boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
+      - Preserve the category-only reader, codec, writer, explicit file-transfer, import-preview/confirmation, and export-review/freeze boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
 
 external_dependencies:
   - name: Android platform
@@ -140,6 +144,7 @@ conformance:
     - docs/development/portable-preference-export.md
     - docs/development/portable-preference-user-transfer.md
     - docs/development/portable-preference-import-preview.md
+    - docs/development/portable-preference-export-review.md
   blockers:
     - GLAZE UI V1.1 / 1.1.0 source mapping exists, but application-specific rendered, runtime Deep Dark policy, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
