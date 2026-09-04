@@ -33,7 +33,7 @@ platform_systems:
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
-    notes: Typed content is highly sensitive. Current source keeps the explicit user file-transfer scope to one emoji-category choice and validates and previews it before any write, but accepted Privacy Shield integration and production privacy validation are not established.
+    notes: Typed content is highly sensitive. Current source keeps the explicit user file-transfer scope to one emoji-category choice and validates and previews it before any write, while the V1.1 atmosphere contract adds no editor/content sampling or telemetry; accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     result: applicable-blocked
     version: null
@@ -53,14 +53,16 @@ platform_systems:
     notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
   glaze_ui:
     result: applicable-migration-required
-    version: "1.0.0"
+    version: "1.1.0"
     evidence:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: Repository-local source targets historical GLAZE UI V1.0. Migration and application-specific acceptance against current Stable GLAZE UI V1.1 / 1.1.0 remain required.
+    notes: Repository-local Development source targets current Stable GLAZE UI V1.1 / 1.1.0, including explicit Deep Dark source values and bounded non-semantic atmosphere. KeyboardView still selects inherited Light/Dark from Android night mode and complete rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain required.
   mesh:
     result: applicable-blocked
     version: null
@@ -139,7 +141,7 @@ conformance:
     - docs/development/portable-preference-user-transfer.md
     - docs/development/portable-preference-import-preview.md
   blockers:
-    - GLAZE UI V1.1 / 1.1.0 migration and application-specific rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GLAZE UI V1.1 / 1.1.0 source mapping exists, but application-specific rendered, runtime Deep Dark policy, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
