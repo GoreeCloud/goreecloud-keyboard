@@ -41,6 +41,14 @@ def main() -> None:
         fail(f"missing {SERVICE.relative_to(ROOT)}")
 
     source = SERVICE.read_text(encoding="utf-8")
+    require_all(
+        "inactive process default",
+        source,
+        (
+            "private var sensitiveInput = true",
+            "private var suggestionsSuppressed = true",
+        ),
+    )
 
     start_input = function_body(
         source,
@@ -127,22 +135,24 @@ def main() -> None:
         reset_session,
         (
             "shifted = false",
-            "sensitiveInput = false",
-            "suggestionsSuppressed = false",
+            "sensitiveInput = true",
+            "suggestionsSuppressed = true",
             "composingWord.clear()",
             "keyboardView?.setLayer(KeyboardLayer.LETTERS)",
             "keyboardView?.setShifted(false)",
             "keyboardView?.setSuggestions(emptyList())",
         ),
     )
+    if "sensitiveInput = false" in reset_session or "suggestionsSuppressed = false" in reset_session:
+        fail("inactive editor teardown must not relax the fail-closed transient privacy policy")
     if "updateSuggestions()" in reset_session:
         fail("editor-session teardown must clear the suggestion strip instead of repopulating candidates")
 
     print(
-        "Keyboard editor privacy lifecycle boundary passed: current editor policy is applied at "
-        "onStartInput/onStartInputView; null editor metadata fails closed as sensitive and "
-        "suggestions-suppressed; transient composing, policy, shift, layer, and visible candidates "
-        "are cleared at both onFinishInput and onFinishInputView."
+        "Keyboard editor privacy lifecycle boundary passed: inactive/no-editor state is fail-closed; "
+        "current editor policy is applied at onStartInput/onStartInputView; null editor metadata "
+        "remains sensitive and suggestions-suppressed; transient composing, shift, layer, and visible "
+        "candidates are cleared at both onFinishInput and onFinishInputView."
     )
 
 
