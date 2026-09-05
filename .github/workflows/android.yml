@@ -32,6 +32,9 @@ jobs:
       - name: Validate Glaze UI and Motion evaluation boundary
         run: python3 scripts/check_glaze_motion_evaluation.py
 
+      - name: Validate editor privacy lifecycle boundary
+        run: python3 scripts/check_editor_privacy_lifecycle.py
+
       - name: Run unit tests
         run: gradle :android:app:testDebugUnitTest --stacktrace
 
