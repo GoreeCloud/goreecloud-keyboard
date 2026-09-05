@@ -7,8 +7,10 @@ import android.view.inputmethod.EditorInfo
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var shifted = false
-    private var sensitiveInput = false
-    private var suggestionsSuppressed = false
+    // No active editor has granted ordinary-field behavior yet. Keep the process default fail-closed
+    // until onStartInput/onStartInputView provide concrete EditorInfo for the current session.
+    private var sensitiveInput = true
+    private var suggestionsSuppressed = true
     private var keyboardView: KeyboardView? = null
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
@@ -164,8 +166,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     private fun resetEditorSession() {
         shifted = false
-        sensitiveInput = false
-        suggestionsSuppressed = false
+        // With no active editor, retain the most restrictive transient policy. A subsequent concrete
+        // EditorInfo is the only authority that may enable ordinary-field composing/surrounding text.
+        sensitiveInput = true
+        suggestionsSuppressed = true
         composingWord.clear()
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
