@@ -29,6 +29,7 @@ class EmojiSearchSession(
     }
 
     fun replaceQuery(value: String): EmojiSearchSnapshot {
+        if (!active) return snapshot()
         query = value.trimStart().takeCodePoints(maxQueryCodePoints)
         return snapshot()
     }
