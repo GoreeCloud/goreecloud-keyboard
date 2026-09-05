@@ -114,7 +114,18 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             1
         } else {
             val beforeCursor = connection.getTextBeforeCursor(BACKSPACE_LOOKBEHIND_UTF16, 0)
-            TextDeletion.previousTextUnitCodePointCount(beforeCursor ?: "").takeIf { it > 0 } ?: 1
+                ?: return failClosedBackspaceContext()
+            TextDeletion.previousTextUnitCodePointCount(
+                textBeforeCursor = beforeCursor,
+                contextMayBeTruncated = beforeCursor.length >= BACKSPACE_LOOKBEHIND_UTF16,
+            )
+        }
+
+        if (deleteCodePoints <= 0) {
+            // The bounded lookbehind did not establish a safe complete prior text unit. Do not
+            // partially delete host text or guess a replacement composing prefix.
+            failClosedBackspaceContext()
+            return
         }
         connection.deleteSurroundingTextInCodePoints(deleteCodePoints, 0)
 
@@ -210,6 +221,12 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private fun clearComposingBoundary() {
         composingWord.clear()
         composingCaptureExhausted = false
+    }
+
+    private fun failClosedBackspaceContext() {
+        composingWord.clear()
+        composingCaptureExhausted = true
+        keyboardView?.setSuggestions(emptyList())
     }
 
     private fun updateSuggestions() {
