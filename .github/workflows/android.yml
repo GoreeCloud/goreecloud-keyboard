@@ -73,6 +73,9 @@ jobs:
           disable-animations: true
           script: |
             gradle --no-daemon :android:app:connectedDebugAndroidTest --stacktrace
+            # connectedDebugAndroidTest removes its target package during cleanup. Reinstall the
+            # exact branch build before validating Android's enabled/default IME state.
+            gradle --no-daemon :android:app:installDebug --stacktrace
             adb shell ime enable com.goreecloud.keyboard/.KeyboardService
             adb shell ime set com.goreecloud.keyboard/.KeyboardService
             DEFAULT_IME="$(adb shell settings get secure default_input_method | tr -d '\r')"
