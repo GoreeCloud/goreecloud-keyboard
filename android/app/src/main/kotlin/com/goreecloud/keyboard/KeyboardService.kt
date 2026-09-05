@@ -147,10 +147,19 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     private fun beginEditorSession(info: EditorInfo?) {
         shifted = false
-        val inputType = info?.inputType ?: 0
+        composingWord.clear()
+        if (info == null) {
+            // Unknown editor metadata must not silently receive ordinary-field privileges. Treat it
+            // as sensitive so backspace avoids surrounding-text inspection and suggestions remain
+            // suppressed until Android provides a concrete EditorInfo for the active session.
+            sensitiveInput = true
+            suggestionsSuppressed = true
+            return
+        }
+
+        val inputType = info.inputType
         sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
         suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType)
-        composingWord.clear()
     }
 
     private fun resetEditorSession() {
