@@ -7,7 +7,10 @@ import android.view.inputmethod.EditorInfo
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var shifted = false
-    private var sensitiveInput = false
+    // No active editor has granted ordinary-field behavior yet. Keep the process default fail-closed
+    // until onStartInput/onStartInputView provide concrete EditorInfo for the current session.
+    private var sensitiveInput = true
+    private var suggestionsSuppressed = true
     private var keyboardView: KeyboardView? = null
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
@@ -29,24 +32,36 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
     }
 
+    override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
+        super.onStartInput(attribute, restarting)
+        // Editor authority changes before the input view is necessarily shown. Reset the privacy
+        // policy and transient composing state here so an editor switch cannot temporarily retain
+        // the previous field's sensitive/no-suggestions decision while the IME UI is hidden.
+        beginEditorSession(attribute)
+    }
+
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        shifted = false
-        sensitiveInput = InputPrivacyClassifier.isSensitive(info?.inputType ?: 0)
-        composingWord.clear()
+        // Android can show/restart the input view after onStartInput. Re-evaluate from the current
+        // EditorInfo rather than trusting cached policy from a previous visible field.
+        beginEditorSession(info)
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         updateSuggestions()
     }
 
+    override fun onFinishInput() {
+        super.onFinishInput()
+        // onFinishInput is Android's editor-session boundary. Do not rely only on the input view
+        // being hidden to clear transient composing context or the previous editor's policy state.
+        resetEditorSession()
+    }
+
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
-        shifted = false
-        sensitiveInput = false
-        composingWord.clear()
-        keyboardView?.setLayer(KeyboardLayer.LETTERS)
-        keyboardView?.setShifted(false)
-        updateSuggestions()
+        // The view can finish independently of the editor session. Clear the same transient state
+        // here as a defense-in-depth UI boundary; onStartInputView will reapply current policy.
+        resetEditorSession()
     }
 
     override fun onDestroy() {
@@ -60,7 +75,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
         val output = if (shifted && isLetterText) value.uppercase() else value
         currentInputConnection?.commitText(output, 1)
-        if (!sensitiveInput) {
+        if (!suggestionsSuppressed) {
             if (isLetterText) {
                 composingWord.append(output.lowercase())
             } else {
@@ -91,7 +106,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
         connection.deleteSurroundingTextInCodePoints(deleteCodePoints, 0)
 
-        if (!sensitiveInput && composingWord.isNotEmpty()) {
+        if (!suggestionsSuppressed && composingWord.isNotEmpty()) {
             val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
             composingWord.delete(lastCodePointStart, composingWord.length)
         }
@@ -112,10 +127,20 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onSuggestion(value: String) {
-        if (sensitiveInput) return
+        // Keep a second sensitive-input check here so a future policy regression cannot turn
+        // candidate acceptance into surrounding-text access for a protected editor.
+        if (suggestionsSuppressed || sensitiveInput) return
         val connection = currentInputConnection ?: return
         val prefixCodePoints = composingWord.codePointCount(0, composingWord.length)
         if (prefixCodePoints > 0) {
+            val beforeCursor = connection.getTextBeforeCursor(composingWord.length, 0)
+            if (!SuggestionCommitPolicy.matchesExpectedPrefix(composingWord.toString(), beforeCursor)) {
+                // The host editor is authoritative for cursor/text state. If it no longer matches
+                // the local candidate prefix, do not delete or commit against stale context.
+                composingWord.clear()
+                keyboardView?.setSuggestions(emptyList())
+                return
+            }
             connection.deleteSurroundingTextInCodePoints(prefixCodePoints, 0)
         }
         connection.commitText("$value ", 1)
@@ -132,8 +157,39 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         updateSuggestions()
     }
 
+    private fun beginEditorSession(info: EditorInfo?) {
+        shifted = false
+        composingWord.clear()
+        if (info == null) {
+            // Unknown editor metadata must not silently receive ordinary-field privileges. Treat it
+            // as sensitive so backspace avoids surrounding-text inspection and suggestions remain
+            // suppressed until Android provides a concrete EditorInfo for the active session.
+            sensitiveInput = true
+            suggestionsSuppressed = true
+            return
+        }
+
+        val inputType = info.inputType
+        sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
+        suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType)
+    }
+
+    private fun resetEditorSession() {
+        shifted = false
+        // With no active editor, retain the most restrictive transient policy. A subsequent concrete
+        // EditorInfo is the only authority that may enable ordinary-field composing/surrounding text.
+        sensitiveInput = true
+        suggestionsSuppressed = true
+        composingWord.clear()
+        keyboardView?.setLayer(KeyboardLayer.LETTERS)
+        keyboardView?.setShifted(false)
+        // No active editor owns suggestion presentation after teardown. Clear the visible strip
+        // rather than repopulating bootstrap candidates until a subsequent editor session starts.
+        keyboardView?.setSuggestions(emptyList())
+    }
+
     private fun updateSuggestions() {
-        if (sensitiveInput) {
+        if (suggestionsSuppressed) {
             keyboardView?.setSuggestions(emptyList())
             return
         }

@@ -32,6 +32,9 @@ jobs:
       - name: Validate Glaze UI and Motion evaluation boundary
         run: python3 scripts/check_glaze_motion_evaluation.py
 
+      - name: Validate editor privacy lifecycle boundary
+        run: python3 scripts/check_editor_privacy_lifecycle.py
+
       - name: Run unit tests
         run: gradle :android:app:testDebugUnitTest --stacktrace
 
@@ -64,11 +67,18 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Verify Keyboard native interaction evaluation on Android 15
+      - name: Verify Keyboard native interaction and IME activation on Android 15
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         with:
           api-level: 35
           target: default
           arch: x86_64
           disable-animations: true
-          script: gradle --no-daemon :android:app:connectedDebugAndroidTest --stacktrace
+          script: |
+            gradle --no-daemon :android:app:connectedDebugAndroidTest --stacktrace
+            # connectedDebugAndroidTest removes its target package during cleanup. Reinstall the exact branch build before validating Android's enabled/default IME state.
+            gradle --no-daemon :android:app:installDebug --stacktrace
+            adb shell ime enable com.goreecloud.keyboard/.KeyboardService
+            adb shell ime set com.goreecloud.keyboard/.KeyboardService
+            DEFAULT_IME="$(adb shell settings get secure default_input_method | tr -d '\r')"; echo "Android default IME: $DEFAULT_IME"; { [ "$DEFAULT_IME" = "com.goreecloud.keyboard/.KeyboardService" ] || [ "$DEFAULT_IME" = "com.goreecloud.keyboard/com.goreecloud.keyboard.KeyboardService" ]; }
+            adb shell ime list -s | tr -d '\r' | grep -E -x 'com\.goreecloud\.keyboard/(\.KeyboardService|com\.goreecloud\.keyboard\.KeyboardService)'

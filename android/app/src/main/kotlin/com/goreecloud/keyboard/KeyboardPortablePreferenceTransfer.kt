@@ -12,6 +12,10 @@ object KeyboardPortablePreferenceTransfer {
     const val EXPORT_FILE_NAME = "goreecloud-keyboard-preferences.txt"
     const val MAX_IMPORT_BYTES = 4096
 
+    @ConsistentCopyVisibility
+    data class ExportPreview internal constructor(val emojiCategory: EmojiCategory)
+
+    @ConsistentCopyVisibility
     data class ImportPreview internal constructor(val emojiCategory: EmojiCategory)
 
     sealed interface PreviewResult {
@@ -19,8 +23,31 @@ object KeyboardPortablePreferenceTransfer {
         data class Rejected(val reason: String) : PreviewResult
     }
 
+    fun previewExport(reader: EmojiCategoryPreferenceReader): ExportPreview =
+        ExportPreview(reader.loadEmojiCategory())
+
+    fun exportPreviewBytes(preview: ExportPreview): ByteArray =
+        KeyboardPortablePreferences.encode(
+            KeyboardPortablePreferences.Snapshot(preview.emojiCategory)
+        ).toByteArray(Charsets.UTF_8)
+
+    /**
+     * Persist only the already-reviewed category while Android temporarily owns the export flow.
+     *
+     * The saved value deliberately excludes editor state, recents, clipboard contents, search
+     * history, and every other Keyboard-owned state category. Unknown or altered values fail
+     * closed instead of being coerced into another export category.
+     */
+    fun exportPreviewStateValue(preview: ExportPreview): String = preview.emojiCategory.name
+
+    fun restoreExportPreviewState(value: String?): ExportPreview? {
+        if (value.isNullOrBlank()) return null
+        val category = EmojiCategory.entries.firstOrNull { it.name == value } ?: return null
+        return ExportPreview(category)
+    }
+
     fun exportBytes(reader: EmojiCategoryPreferenceReader): ByteArray =
-        KeyboardPortablePreferenceExport.create(reader).toByteArray(Charsets.UTF_8)
+        exportPreviewBytes(previewExport(reader))
 
     /**
      * Validate and decode an explicitly selected file without invoking any preference writer.

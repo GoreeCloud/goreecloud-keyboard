@@ -2,6 +2,7 @@ package com.goreecloud.keyboard
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -18,6 +19,50 @@ class KeyboardPortablePreferenceTransferTest {
         assertFalse(encoded.contains("typed_text"))
         assertFalse(encoded.contains("search_query"))
         assertFalse(encoded.contains("clipboard"))
+    }
+
+    @Test
+    fun exportPreviewFreezesReviewedCategoryBeforeDestinationSelection() {
+        var currentCategory = EmojiCategory.NATURE
+        val preview = KeyboardPortablePreferenceTransfer.previewExport(
+            EmojiCategoryPreferenceReader { currentCategory }
+        )
+
+        currentCategory = EmojiCategory.FOOD
+        val encoded = KeyboardPortablePreferenceTransfer.exportPreviewBytes(preview)
+            .toString(Charsets.UTF_8)
+
+        assertTrue(encoded.contains("emoji_category=NATURE"))
+        assertFalse(encoded.contains("emoji_category=FOOD"))
+    }
+
+    @Test
+    fun reviewedExportStateRoundTripsOnlyTheFrozenCategory() {
+        val preview = KeyboardPortablePreferenceTransfer.previewExport(
+            EmojiCategoryPreferenceReader { EmojiCategory.TRAVEL }
+        )
+
+        val persisted = KeyboardPortablePreferenceTransfer.exportPreviewStateValue(preview)
+        val restored = KeyboardPortablePreferenceTransfer.restoreExportPreviewState(persisted)
+
+        assertEquals("TRAVEL", persisted)
+        assertEquals(EmojiCategory.TRAVEL, restored?.emojiCategory)
+    }
+
+    @Test
+    fun alteredReviewedExportStateFailsClosed() {
+        assertNull(KeyboardPortablePreferenceTransfer.restoreExportPreviewState(null))
+        assertNull(KeyboardPortablePreferenceTransfer.restoreExportPreviewState(""))
+        assertNull(KeyboardPortablePreferenceTransfer.restoreExportPreviewState("not-a-category"))
+    }
+
+    @Test
+    fun exportPreviewShapeContainsOnlyOneCategoryField() {
+        val fields = KeyboardPortablePreferenceTransfer.ExportPreview::class.java.declaredFields
+            .filterNot { it.isSynthetic }
+
+        assertEquals(1, fields.size)
+        assertEquals(EmojiCategory::class.java, fields.single().type)
     }
 
     @Test
