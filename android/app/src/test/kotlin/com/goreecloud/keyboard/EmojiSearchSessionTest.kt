@@ -29,6 +29,21 @@ class EmojiSearchSessionTest {
     }
 
     @Test
+    fun closedSessionDoesNotAcceptReplacementQuery() {
+        val session = EmojiSearchSession()
+
+        val closed = session.replaceQuery("heart")
+        val opened = session.open()
+
+        assertFalse(closed.active)
+        assertEquals("", closed.query)
+        assertTrue(closed.results.isEmpty())
+        assertTrue(opened.active)
+        assertEquals("", opened.query)
+        assertTrue(opened.results.isEmpty())
+    }
+
+    @Test
     fun backspaceRemovesOneCompleteCodePoint() {
         val session = EmojiSearchSession()
         session.open()
