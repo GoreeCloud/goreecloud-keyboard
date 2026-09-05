@@ -28,21 +28,29 @@ platform_systems:
     version: null
     evidence:
       - SPECIFICATIONS.md
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/InputPrivacyClassifier.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/InputPrivacyClassifierTest.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicyTest.kt
       - docs/development/portable-preference-snapshot.md
       - docs/development/portable-preference-import.md
       - docs/development/portable-preference-export.md
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: Typed content is highly sensitive. Current source keeps explicit user file-transfer scope to one emoji-category choice, previews imports before any write, reviews and freezes exports before destination selection, and preserves only that already-reviewed category across ordinary Activity recreation while the document picker owns the flow; accepted Privacy Shield integration and production privacy validation are not established.
+    notes: Typed content is highly sensitive. Current source keeps password/sensitive editor handling fail-closed, suppresses local composing/suggestion handling when a host text editor requests no suggestions, keeps explicit user file-transfer scope to one emoji-category choice, previews imports before any write, reviews and freezes exports before destination selection, and preserves only that already-reviewed category across ordinary Activity recreation while the document picker owns the flow; accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     result: applicable-blocked
     version: null
     evidence:
       - SPECIFICATIONS.md
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/InputPrivacyClassifier.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/InputPrivacyClassifierTest.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicyTest.kt
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: Keyboard has local sensitive-editor safeguards, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior with fail-closed restoration of the reviewed category after Activity recreation, but accepted Wardveil Security integration and validation are not established.
+    notes: Keyboard has local sensitive-editor safeguards, host no-suggestions suppression, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior with fail-closed restoration of the reviewed category after Activity recreation, but accepted Wardveil Security integration and validation are not established.
   everkeep:
     result: applicable-blocked
     version: null
@@ -138,6 +146,10 @@ conformance:
   evidence:
     - README.md
     - SPECIFICATIONS.md
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/InputPrivacyClassifier.kt
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt
+    - android/app/src/test/kotlin/com/goreecloud/keyboard/InputPrivacyClassifierTest.kt
+    - android/app/src/test/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicyTest.kt
     - docs/glaze-ui-adoption.md
     - scripts/check_glaze_motion_evaluation.py
     - docs/development/portable-preference-snapshot.md
