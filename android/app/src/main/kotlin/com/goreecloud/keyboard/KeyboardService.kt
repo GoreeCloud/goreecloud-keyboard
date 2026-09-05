@@ -127,10 +127,20 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onSuggestion(value: String) {
-        if (suggestionsSuppressed) return
+        // Keep a second sensitive-input check here so a future policy regression cannot turn
+        // candidate acceptance into surrounding-text access for a protected editor.
+        if (suggestionsSuppressed || sensitiveInput) return
         val connection = currentInputConnection ?: return
         val prefixCodePoints = composingWord.codePointCount(0, composingWord.length)
         if (prefixCodePoints > 0) {
+            val beforeCursor = connection.getTextBeforeCursor(composingWord.length, 0)
+            if (!SuggestionCommitPolicy.matchesExpectedPrefix(composingWord.toString(), beforeCursor)) {
+                // The host editor is authoritative for cursor/text state. If it no longer matches
+                // the local candidate prefix, do not delete or commit against stale context.
+                composingWord.clear()
+                keyboardView?.setSuggestions(emptyList())
+                return
+            }
             connection.deleteSurroundingTextInCodePoints(prefixCodePoints, 0)
         }
         connection.commitText("$value ", 1)
