@@ -12,7 +12,10 @@ object KeyboardPortablePreferenceTransfer {
     const val EXPORT_FILE_NAME = "goreecloud-keyboard-preferences.txt"
     const val MAX_IMPORT_BYTES = 4096
 
+    @ConsistentCopyVisibility
     data class ExportPreview internal constructor(val emojiCategory: EmojiCategory)
+
+    @ConsistentCopyVisibility
     data class ImportPreview internal constructor(val emojiCategory: EmojiCategory)
 
     sealed interface PreviewResult {
