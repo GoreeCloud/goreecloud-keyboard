@@ -11,6 +11,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     // until onStartInput/onStartInputView provide concrete EditorInfo for the current session.
     private var sensitiveInput = true
     private var suggestionsSuppressed = true
+    private var composingCaptureExhausted = false
     private var keyboardView: KeyboardView? = null
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
@@ -66,6 +67,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onDestroy() {
         composingWord.clear()
+        composingCaptureExhausted = false
         keyboardView = null
         super.onDestroy()
     }
@@ -77,9 +79,19 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         currentInputConnection?.commitText(output, 1)
         if (!suggestionsSuppressed) {
             if (isLetterText) {
-                composingWord.append(output.lowercase())
+                val normalized = output.lowercase()
+                if (!composingCaptureExhausted &&
+                    SuggestionCapturePolicy.canAppend(composingWord.toString(), normalized)
+                ) {
+                    composingWord.append(normalized)
+                } else {
+                    // Keep committed typing authoritative in the host, but stop retaining local
+                    // mid-word context once the bounded suggestion observation window is exhausted.
+                    composingWord.clear()
+                    composingCaptureExhausted = true
+                }
             } else {
-                composingWord.clear()
+                clearComposingBoundary()
             }
         }
         updateSuggestions()
@@ -92,7 +104,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onSpace() {
         currentInputConnection?.commitText(" ", 1)
-        composingWord.clear()
+        clearComposingBoundary()
         updateSuggestions()
     }
 
@@ -106,10 +118,12 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
         connection.deleteSurroundingTextInCodePoints(deleteCodePoints, 0)
 
-        if (!suggestionsSuppressed && composingWord.isNotEmpty()) {
+        if (!suggestionsSuppressed && !composingCaptureExhausted && composingWord.isNotEmpty()) {
             val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
             composingWord.delete(lastCodePointStart, composingWord.length)
         }
+        // If capture was exhausted, do not guess that backspace reconstructed a complete prefix.
+        // Stay suppressed until a word/editor boundary provides a clean local observation start.
         updateSuggestions()
     }
 
@@ -117,7 +131,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         val connection = currentInputConnection ?: return
         connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
         connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
-        composingWord.clear()
+        clearComposingBoundary()
         updateSuggestions()
     }
 
@@ -129,22 +143,25 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onSuggestion(value: String) {
         // Keep a second sensitive-input check here so a future policy regression cannot turn
         // candidate acceptance into surrounding-text access for a protected editor.
-        if (suggestionsSuppressed || sensitiveInput) return
+        if (suggestionsSuppressed || sensitiveInput || composingCaptureExhausted) return
         val connection = currentInputConnection ?: return
-        val prefixCodePoints = composingWord.codePointCount(0, composingWord.length)
+        val prefix = composingWord.toString()
+        val prefixCodePoints = prefix.codePointCount(0, prefix.length)
         if (prefixCodePoints > 0) {
-            val beforeCursor = connection.getTextBeforeCursor(composingWord.length, 0)
-            if (!SuggestionCommitPolicy.matchesExpectedPrefix(composingWord.toString(), beforeCursor)) {
+            val beforeCursor = connection.getTextBeforeCursor(prefix.length, 0)
+            if (!SuggestionCommitPolicy.matchesExpectedPrefix(prefix, beforeCursor)) {
                 // The host editor is authoritative for cursor/text state. If it no longer matches
-                // the local candidate prefix, do not delete or commit against stale context.
+                // the local candidate prefix, do not delete or commit against stale context, and do
+                // not start a new mid-word prefix until the user reaches a clean boundary.
                 composingWord.clear()
+                composingCaptureExhausted = true
                 keyboardView?.setSuggestions(emptyList())
                 return
             }
             connection.deleteSurroundingTextInCodePoints(prefixCodePoints, 0)
         }
         connection.commitText("$value ", 1)
-        composingWord.clear()
+        clearComposingBoundary()
         shifted = false
         keyboardView?.setShifted(false)
         updateSuggestions()
@@ -152,7 +169,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onLayerChanged(layer: KeyboardLayer) {
         shifted = false
-        composingWord.clear()
+        clearComposingBoundary()
         keyboardView?.setShifted(false)
         updateSuggestions()
     }
@@ -160,6 +177,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private fun beginEditorSession(info: EditorInfo?) {
         shifted = false
         composingWord.clear()
+        composingCaptureExhausted = false
         if (info == null) {
             // Unknown editor metadata must not silently receive ordinary-field privileges. Treat it
             // as sensitive so backspace avoids surrounding-text inspection and suggestions remain
@@ -181,6 +199,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         sensitiveInput = true
         suggestionsSuppressed = true
         composingWord.clear()
+        composingCaptureExhausted = false
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         // No active editor owns suggestion presentation after teardown. Clear the visible strip
@@ -188,8 +207,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         keyboardView?.setSuggestions(emptyList())
     }
 
+    private fun clearComposingBoundary() {
+        composingWord.clear()
+        composingCaptureExhausted = false
+    }
+
     private fun updateSuggestions() {
-        if (suggestionsSuppressed) {
+        if (suggestionsSuppressed || composingCaptureExhausted) {
             keyboardView?.setSuggestions(emptyList())
             return
         }
