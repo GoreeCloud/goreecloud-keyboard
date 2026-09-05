@@ -15,6 +15,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var keyboardView: KeyboardView? = null
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
+    private var presentedSuggestions: List<String> = emptyList()
 
     private val bootstrapDictionary = listOf(
         "about", "after", "again", "because", "before", "cloud", "could", "family",
@@ -68,6 +69,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onDestroy() {
         composingWord.clear()
         composingCaptureExhausted = false
+        presentedSuggestions = emptyList()
         keyboardView = null
         super.onDestroy()
     }
@@ -155,6 +157,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         // Keep a second sensitive-input check here so a future policy regression cannot turn
         // candidate acceptance into surrounding-text access for a protected editor.
         if (suggestionsSuppressed || sensitiveInput || composingCaptureExhausted) return
+        // The callback value itself is not replacement authority. It must still be one of the exact
+        // candidates presented for this editor session; a stale/forged callback cannot delete text.
+        if (!SuggestionCommitPolicy.isPresentedCandidate(value, presentedSuggestions)) return
         val connection = currentInputConnection ?: return
         val prefix = composingWord.toString()
         val prefixCodePoints = prefix.codePointCount(0, prefix.length)
@@ -166,6 +171,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
                 // not start a new mid-word prefix until the user reaches a clean boundary.
                 composingWord.clear()
                 composingCaptureExhausted = true
+                presentedSuggestions = emptyList()
                 keyboardView?.setSuggestions(emptyList())
                 return
             }
@@ -189,6 +195,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         shifted = false
         composingWord.clear()
         composingCaptureExhausted = false
+        // Presentation belongs to the previous editor until this exact session is evaluated. Clear
+        // both the service-side acceptance set and any visible strip before granting new candidates.
+        presentedSuggestions = emptyList()
+        keyboardView?.setSuggestions(emptyList())
         if (info == null) {
             // Unknown editor metadata must not silently receive ordinary-field privileges. Treat it
             // as sensitive so backspace avoids surrounding-text inspection and suggestions remain
@@ -211,6 +221,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         suggestionsSuppressed = true
         composingWord.clear()
         composingCaptureExhausted = false
+        presentedSuggestions = emptyList()
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         // No active editor owns suggestion presentation after teardown. Clear the visible strip
@@ -226,19 +237,21 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private fun failClosedBackspaceContext() {
         composingWord.clear()
         composingCaptureExhausted = true
+        presentedSuggestions = emptyList()
         keyboardView?.setSuggestions(emptyList())
     }
 
     private fun updateSuggestions() {
         if (suggestionsSuppressed || composingCaptureExhausted) {
+            presentedSuggestions = emptyList()
             keyboardView?.setSuggestions(emptyList())
             return
         }
-        val suggestions = suggestionEngine.suggest(
+        presentedSuggestions = suggestionEngine.suggest(
             prefix = composingWord.toString(),
             dictionary = bootstrapDictionary
-        )
-        keyboardView?.setSuggestions(suggestions)
+        ).toList()
+        keyboardView?.setSuggestions(presentedSuggestions)
     }
 
     private companion object {

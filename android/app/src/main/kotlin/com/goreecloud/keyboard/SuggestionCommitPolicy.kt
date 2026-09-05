@@ -5,11 +5,17 @@ package com.goreecloud.keyboard
  *
  * GoreeCloud Keyboard's current suggestion engine tracks only keys committed by this IME. The host
  * editor remains authoritative for the actual text/cursor state and can change it independently.
- * Before deleting a local prefix, the service must therefore confirm that the immediately preceding
- * ordinary-field text still matches that prefix. A stale or unavailable host view is never treated
- * as permission to delete text.
+ * Before deleting a local prefix, the service must therefore confirm both that the callback refers
+ * to one of the exact candidates currently presented by this editor session and that the immediately
+ * preceding ordinary-field text still matches the tracked prefix. Stale or unavailable evidence is
+ * never treated as permission to delete text.
  */
 object SuggestionCommitPolicy {
+    fun isPresentedCandidate(
+        candidate: String,
+        presentedCandidates: Collection<String>,
+    ): Boolean = candidate.isNotEmpty() && presentedCandidates.any { it == candidate }
+
     fun matchesExpectedPrefix(
         expectedPrefix: String,
         actualTextBeforeCursor: CharSequence?,
