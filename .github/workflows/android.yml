@@ -73,16 +73,9 @@ jobs:
           disable-animations: true
           script: |
             gradle --no-daemon :android:app:connectedDebugAndroidTest --stacktrace
-            # connectedDebugAndroidTest removes its target package during cleanup. Reinstall the
-            # exact branch build before validating Android's enabled/default IME state.
+            # connectedDebugAndroidTest removes its target package during cleanup. Reinstall the exact branch build before validating Android's enabled/default IME state.
             gradle --no-daemon :android:app:installDebug --stacktrace
             adb shell ime enable com.goreecloud.keyboard/.KeyboardService
             adb shell ime set com.goreecloud.keyboard/.KeyboardService
-            DEFAULT_IME="$(adb shell settings get secure default_input_method | tr -d '\r')"
-            echo "Android default IME: $DEFAULT_IME"
-            case "$DEFAULT_IME" in
-              "com.goreecloud.keyboard/.KeyboardService"|"com.goreecloud.keyboard/com.goreecloud.keyboard.KeyboardService") ;;
-              *) echo "Unexpected default IME component: $DEFAULT_IME" >&2; exit 1 ;;
-            esac
-            IME_LIST="$(adb shell ime list -s | tr -d '\r')"
-            echo "$IME_LIST" | grep -E -x 'com\.goreecloud\.keyboard/(\.KeyboardService|com\.goreecloud\.keyboard\.KeyboardService)'
+            DEFAULT_IME="$(adb shell settings get secure default_input_method | tr -d '\r')"; echo "Android default IME: $DEFAULT_IME"; { [ "$DEFAULT_IME" = "com.goreecloud.keyboard/.KeyboardService" ] || [ "$DEFAULT_IME" = "com.goreecloud.keyboard/com.goreecloud.keyboard.KeyboardService" ]; }
+            adb shell ime list -s | tr -d '\r' | grep -E -x 'com\.goreecloud\.keyboard/(\.KeyboardService|com\.goreecloud\.keyboard\.KeyboardService)'
