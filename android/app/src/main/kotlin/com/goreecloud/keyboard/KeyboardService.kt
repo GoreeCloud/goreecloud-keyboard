@@ -48,15 +48,18 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         updateSuggestions()
     }
 
+    override fun onFinishInput() {
+        super.onFinishInput()
+        // onFinishInput is Android's editor-session boundary. Do not rely only on the input view
+        // being hidden to clear transient composing context or the previous editor's policy state.
+        resetEditorSession()
+    }
+
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
-        shifted = false
-        sensitiveInput = false
-        suggestionsSuppressed = false
-        composingWord.clear()
-        keyboardView?.setLayer(KeyboardLayer.LETTERS)
-        keyboardView?.setShifted(false)
-        updateSuggestions()
+        // The view can finish independently of the editor session. Clear the same transient state
+        // here as a defense-in-depth UI boundary; onStartInputView will reapply current policy.
+        resetEditorSession()
     }
 
     override fun onDestroy() {
@@ -148,6 +151,18 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
         suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType)
         composingWord.clear()
+    }
+
+    private fun resetEditorSession() {
+        shifted = false
+        sensitiveInput = false
+        suggestionsSuppressed = false
+        composingWord.clear()
+        keyboardView?.setLayer(KeyboardLayer.LETTERS)
+        keyboardView?.setShifted(false)
+        // No active editor owns suggestion presentation after teardown. Clear the visible strip
+        // rather than repopulating bootstrap candidates until a subsequent editor session starts.
+        keyboardView?.setSuggestions(emptyList())
     }
 
     private fun updateSuggestions() {
