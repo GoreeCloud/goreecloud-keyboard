@@ -146,6 +146,7 @@ evidence:
 
 conformance:
   status: nonconformant
+  validated_at: null
   evidence:
     - README.md
     - SPECIFICATIONS.md
