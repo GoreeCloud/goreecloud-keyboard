@@ -30,13 +30,19 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
     }
 
+    override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
+        super.onStartInput(attribute, restarting)
+        // Editor authority changes before the input view is necessarily shown. Reset the privacy
+        // policy and transient composing state here so an editor switch cannot temporarily retain
+        // the previous field's sensitive/no-suggestions decision while the IME UI is hidden.
+        beginEditorSession(attribute)
+    }
+
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        shifted = false
-        val inputType = info?.inputType ?: 0
-        sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
-        suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType)
-        composingWord.clear()
+        // Android can show/restart the input view after onStartInput. Re-evaluate from the current
+        // EditorInfo rather than trusting cached policy from a previous visible field.
+        beginEditorSession(info)
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         updateSuggestions()
@@ -134,6 +140,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         composingWord.clear()
         keyboardView?.setShifted(false)
         updateSuggestions()
+    }
+
+    private fun beginEditorSession(info: EditorInfo?) {
+        shifted = false
+        val inputType = info?.inputType ?: 0
+        sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
+        suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType)
+        composingWord.clear()
     }
 
     private fun updateSuggestions() {
