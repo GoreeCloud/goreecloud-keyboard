@@ -9,18 +9,27 @@ package com.goreecloud.keyboard
  * Unicode pair-from-the-start rule, so an odd trailing indicator is not incorrectly merged with
  * the preceding completed flag pair. It does not claim full UAX #29 grapheme segmentation for
  * every script.
+ *
+ * When [contextMayBeTruncated] is true, zero means the available lookbehind cannot prove the start
+ * of the previous text unit. Callers must fail closed rather than deleting a partial sequence.
  */
 object TextDeletion {
-    fun previousTextUnitCodePointCount(textBeforeCursor: CharSequence): Int {
+    fun previousTextUnitCodePointCount(
+        textBeforeCursor: CharSequence,
+        contextMayBeTruncated: Boolean = false,
+    ): Int {
         if (textBeforeCursor.isEmpty()) return 0
 
         val codePoints = textBeforeCursor.toString().codePoints().toArray()
         if (codePoints.isEmpty()) return 0
 
         var start = baseStart(codePoints, codePoints.lastIndex)
+        var trailingRegionalRunTouchesBoundary = false
 
         if (isRegionalIndicator(codePoints[start])) {
-            val runLength = trailingRegionalIndicatorRunLength(codePoints, start)
+            val runStart = trailingRegionalIndicatorRunStart(codePoints, start)
+            trailingRegionalRunTouchesBoundary = runStart == 0
+            val runLength = start - runStart + 1
             if (runLength % 2 == 0) {
                 start -= 1
             }
@@ -34,15 +43,19 @@ object TextDeletion {
             start -= 1
         }
 
+        if (contextMayBeTruncated && (start == 0 || trailingRegionalRunTouchesBoundary)) {
+            return 0
+        }
+
         return codePoints.size - start
     }
 
-    private fun trailingRegionalIndicatorRunLength(codePoints: IntArray, finalIndicatorIndex: Int): Int {
+    private fun trailingRegionalIndicatorRunStart(codePoints: IntArray, finalIndicatorIndex: Int): Int {
         var start = finalIndicatorIndex
         while (start > 0 && isRegionalIndicator(codePoints[start - 1])) {
             start -= 1
         }
-        return finalIndicatorIndex - start + 1
+        return start
     }
 
     private fun baseStart(codePoints: IntArray, index: Int): Int {
