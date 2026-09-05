@@ -98,11 +98,28 @@ def main() -> None:
         begin_session,
         (
             "shifted = false",
+            "composingWord.clear()",
+            "if (info == null)",
+            "sensitiveInput = true",
+            "suggestionsSuppressed = true",
+            "val inputType = info.inputType",
             "InputPrivacyClassifier.isSensitive(inputType)",
             "EditorSuggestionPolicy.shouldSuppress(inputType)",
-            "composingWord.clear()",
         ),
     )
+    if "info?.inputType ?: 0" in begin_session:
+        fail("unknown EditorInfo must not fall through as ordinary input type 0")
+
+    null_policy = """if (info == null) {
+            // Unknown editor metadata must not silently receive ordinary-field privileges. Treat it
+            // as sensitive so backspace avoids surrounding-text inspection and suggestions remain
+            // suppressed until Android provides a concrete EditorInfo for the active session.
+            sensitiveInput = true
+            suggestionsSuppressed = true
+            return
+        }"""
+    if null_policy not in begin_session:
+        fail("null EditorInfo must fail closed as sensitive and suggestions-suppressed before return")
 
     reset_session = function_body(source, "private fun resetEditorSession()")
     require_all(
@@ -123,8 +140,9 @@ def main() -> None:
 
     print(
         "Keyboard editor privacy lifecycle boundary passed: current editor policy is applied at "
-        "onStartInput/onStartInputView; transient composing, sensitive/no-suggestions policy, shift, "
-        "layer, and visible candidates are cleared at both onFinishInput and onFinishInputView."
+        "onStartInput/onStartInputView; null editor metadata fails closed as sensitive and "
+        "suggestions-suppressed; transient composing, policy, shift, layer, and visible candidates "
+        "are cleared at both onFinishInput and onFinishInputView."
     )
 
 
