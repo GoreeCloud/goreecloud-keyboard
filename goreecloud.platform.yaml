@@ -40,7 +40,7 @@ platform_systems:
       - docs/development/portable-preference-user-transfer.md
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: Typed content is highly sensitive. Current source keeps password/sensitive editor handling fail-closed, suppresses local composing/suggestion handling when a host text editor requests no suggestions, applies current editor policy at Android's editor-session start, and clears transient composing/policy state plus visible candidates at editor-session/view teardown. Explicit user file-transfer scope remains one emoji-category choice, imports preview before any write, exports are reviewed and frozen before destination selection, and only that reviewed category is preserved across ordinary Activity recreation while the document picker owns the flow. Accepted Privacy Shield integration and production privacy validation are not established.
+    notes: Typed content is highly sensitive. Current source keeps password/sensitive editor handling fail-closed, suppresses local composing/suggestion handling when a host text editor requests no suggestions, treats missing EditorInfo as sensitive and suggestions-suppressed rather than granting ordinary-field behavior, applies current editor policy at Android's editor-session start, and clears transient composing/policy state plus visible candidates at editor-session/view teardown. Explicit user file-transfer scope remains one emoji-category choice, imports preview before any write, exports are reviewed and frozen before destination selection, and only that reviewed category is preserved across ordinary Activity recreation while the document picker owns the flow. Accepted Privacy Shield integration and production privacy validation are not established.
   wardveil_security:
     result: applicable-blocked
     version: null
@@ -54,7 +54,7 @@ platform_systems:
       - scripts/check_editor_privacy_lifecycle.py
       - docs/development/portable-preference-import-preview.md
       - docs/development/portable-preference-export-review.md
-    notes: Keyboard has local sensitive-editor safeguards, host no-suggestions suppression, authoritative editor-session start/finish policy reset with a fail-closed source guard, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior with fail-closed restoration of the reviewed category after Activity recreation, but accepted Wardveil Security integration and validation are not established.
+    notes: Keyboard has local sensitive-editor safeguards, host no-suggestions suppression, fail-closed handling when editor metadata is unavailable, authoritative editor-session start/finish policy reset with a fail-closed source guard, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior with fail-closed restoration of the reviewed category after Activity recreation, but accepted Wardveil Security integration and validation are not established.
   everkeep:
     result: applicable-blocked
     version: null
