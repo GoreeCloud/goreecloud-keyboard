@@ -69,6 +69,8 @@ def main() -> None:
             "AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK",
             '"Insert $value"',
             "KeyAlternates.forKey(target.label)",
+            "emojiSearchKeyboardIsActive()",
+            'target.label == "Clear emoji search" || target.label == "Close emoji search"',
             "override fun onPerformActionForVirtualView(",
             "AccessibilityNodeInfo.ACTION_LONG_CLICK",
             '"Alternate characters: ${alternates.joinToString(separator = ", ")}"',
@@ -88,6 +90,8 @@ def main() -> None:
             "longPressAlternatesAreDiscoverableAndActionableThroughNativeNodeActions",
             "AccessibilityNodeInfo.ACTION_LONG_CLICK",
             'it.label?.toString() == "Insert á"',
+            '"Emoji-search query keys must not gain long-press alternate semantics"',
+            '"Emoji-search query keys must not expose alternate custom actions"',
             "view.performAccessibilityTarget(hello.id)",
             'it.label == "Search emoji"',
             'it.label == "Clear emoji search"',
@@ -122,8 +126,9 @@ def main() -> None:
     print(
         "Keyboard virtual accessibility boundary passed: custom-drawn keys, suggestions, emoji categories, "
         "local emoji-search results, and bounded local key alternates expose actionable native accessibility "
-        "semantics without editor, clipboard, persistence, or network authority. Representative TalkBack/Switch "
-        "Access physical-device acceptance remains separate."
+        "semantics without editor, clipboard, persistence, or network authority. Emoji-search query mode cannot "
+        "gain alternate-commit authority. Representative TalkBack/Switch Access physical-device acceptance remains "
+        "separate."
     )
 
 
