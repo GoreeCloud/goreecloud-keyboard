@@ -27,7 +27,7 @@ internal data class KeyboardAccessibilityTarget(
  * catalog. Eligible keys expose both ACTION_LONG_CLICK as a discovery hint and bounded custom
  * actions for exact alternate activation. Alternate activation routes through the same
  * KeyboardView.Listener text path used by the rendered keyboard; this delegate does not gain
- * InputConnection or editor-observation authority.
+ * editor-observation authority.
  */
 internal class KeyboardAccessibilityDelegate(
     private val keyboardView: KeyboardView,
