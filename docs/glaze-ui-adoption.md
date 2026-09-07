@@ -21,11 +21,12 @@ The native surface remains first-party `KeyboardView`; no web runtime, remote UI
 - The suggestion strip and ordinary interaction floor remain 48 dp; the bounded map retains the 56 dp Touch Assistance / far-view floor without claiming platform preference resolution.
 - Optical geometry references 8/16/24/32 dp plus capsule remain separate from structural radius and hit-target authority.
 - V1.2 pressed, selected, focus, and increased-contrast focus calibration is represented explicitly in repository-local tokens.
-- Light keys now consume the V1.2 neutral base-glass material `rgba(255,255,255,0.58)` rather than the older V1.1 material mapping.
-- Dark keys now consume the V1.2 neutral base-glass material `rgba(25,25,27,0.62)`.
+- Ordinary rendered keys now consume the V1.2 pressed overlay (`0.095`) during an active pointer press. The overlay follows the currently touched key, clears when the pointer leaves all key bounds, clears when a long-press alternate popup takes over interaction, and clears on release or cancellation without introducing animation or Experimental Motion runtime authority.
+- Light keys consume the V1.2 neutral base-glass material `rgba(255,255,255,0.58)` rather than the older V1.1 material mapping.
+- Dark keys consume the V1.2 neutral base-glass material `rgba(25,25,27,0.62)`.
 - Deep Dark source material is explicitly defined as `rgba(14,14,16,0.72)` with the V1.2 structural border family.
 - `KeyboardView` continues to select only Light/Dark from Android night mode at draw time. Ordinary Android dark mode is not silently treated as Deep Dark. No new user appearance preference is added by this slice.
-- `GlazeKeyboardAtmosphere` now records the V1.2 neutral-substrate boundary: default chromatic material tint contribution is zero; teal, green, aqua, amber, brand, and semantic color cannot define the keyboard substrate.
+- `GlazeKeyboardAtmosphere` records the V1.2 neutral-substrate boundary: default chromatic material tint contribution is zero; teal, green, aqua, amber, brand, and semantic color cannot define the keyboard substrate.
 - Environmental aura remains optional and external to the substrate. Environmental Color Memory, editor/content sampling, remote color derivation, persistent sample history, semantic inference, telemetry, network lookup, and animated atmosphere remain disabled/not authorized.
 - Keyboard remains an **Application** surface. Long-press alternates and local emoji search remain local input interactions, not Control Center or Universal Search.
 - Existing Quill suggestions, sensitive-editor gating, typo correction, emoji, alternate-character, deletion, and key-release semantics remain first-party and on-device.
@@ -53,15 +54,18 @@ The V1.2 migration adds no new observation path. In particular it adds no:
 - Identity or Mesh session; or
 - background synchronization.
 
+Pressed-state rendering consumes only pointer geometry already required by the native key interaction path. It does not inspect editor content, clipboard state, suggestions, language state, application identity, or network data.
+
 The existing one-field `goreecloud-keyboard-preferences/1` portability boundary remains unchanged and still contains only the explicitly selected emoji category.
 
 ## Repository-local evidence
 
-- `android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt` — first-party rendering/pointer-input surface; consumes the neutral V1.2 key material while retaining Android Light/Dark runtime selection.
+- `android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt` — first-party rendering/pointer-input surface; consumes neutral V1.2 key material and native pressed-state feedback while retaining Android Light/Dark runtime selection.
 - `android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt` — bounded V1.2 structural/material/state source mapping including explicit Deep Dark source values.
 - `android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt` — V1.2 neutral-substrate and non-semantic atmosphere boundary.
 - `android/app/src/main/kotlin/com/goreecloud/keyboard/AlternatePopupLayout.kt` — viewport-bounded long-press geometry/hit-test authority.
 - `GlazeKeyboardTokensTest` — exact V1.2 provenance, inherited geometry, neutral Light/Dark/Deep Dark materials, state calibration, interaction floors, and atmosphere-observation/tinting assertions.
+- `GlazeKeyboardV12VisualStateRuntimeTest` — native emulator rendering evidence that an ordinary key changes visually on press, returns to idle presentation on release/cancel, and retains release-only semantic commit behavior.
 - `AlternatePopupLayoutTest` — normal, edge, compact multi-row, failure, gap/unused-cell, outside-point, and non-finite hit-test behavior.
 - Android manifest — no network permission.
 - Android CI — repository Glaze/Motion governance, JVM tests, debug assembly, and native emulator interaction validation.
@@ -72,6 +76,7 @@ This source migration still does not establish:
 
 - a reviewed runtime policy for selecting Deep Dark, if Keyboard should expose one;
 - complete V1.2 component/state/material-role mapping across every keyboard/settings surface;
+- selected/focus state runtime coverage for every applicable control surface;
 - Reduced Transparency / solid fallback acceptance;
 - Increased Contrast and forced-colors/native-equivalent acceptance;
 - Reduced Motion;
@@ -93,7 +98,7 @@ Source/build/emulator success remains Development evidence only until those appl
 
 ## Glaze Motion boundary
 
-Historical Glaze Motion 0.5 evaluation remains test-only. Glaze Motion is separately governed Experimental work and is not promoted by V1.2. It is not a production dependency and cannot establish V1.2 consumer acceptance.
+Historical Glaze Motion 0.5 evaluation remains test-only. Glaze Motion is separately governed Experimental work and is not promoted by V1.2. The pressed-state feedback in production `KeyboardView` is an immediate deterministic V1.2 state overlay and does not activate the Experimental Motion subsystem. Glaze Motion is not a production dependency and cannot establish V1.2 consumer acceptance.
 
 ## Rollback
 
