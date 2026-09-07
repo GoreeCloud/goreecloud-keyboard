@@ -53,6 +53,63 @@ class KeyboardAccessibilityRuntimeTest {
     }
 
     @Test
+    fun alternateCharactersAreDiscoverableActionsAndCommitThroughListener() {
+        val view = createRenderedKeyboard()
+        val a = view.accessibilityTargets().first { it.label == "a" }
+        val provider = view.accessibilityNodeProvider
+        assertNotNull("Platform accessibility provider must exist", provider)
+
+        val node = provider!!.createAccessibilityNodeInfo(a.id)
+        assertNotNull("Virtual a node must exist", node)
+        val alternateLabels = node!!.actionList.mapNotNull { it.label?.toString() }
+        assertTrue("a must expose its acute alternate action", "Insert á" in alternateLabels)
+        assertTrue("a must expose its ae-ligature alternate action", "Insert æ" in alternateLabels)
+        assertEquals("7 alternate characters available", node.hintText?.toString())
+
+        val acuteAction = node.actionList.first { it.label?.toString() == "Insert á" }
+        val committed = mutableListOf<String>()
+        view.listener = listener(onText = { committed += it })
+        assertTrue(
+            "Alternate accessibility action must be handled",
+            provider.performAction(a.id, acuteAction.id, null),
+        )
+        assertEquals(
+            "Alternate accessibility action must use the existing text listener boundary",
+            listOf("á"),
+            committed,
+        )
+    }
+
+    @Test
+    fun shiftedAlternatesFollowRenderedCaseAndEmojiSearchDoesNotExposeEditorAlternates() {
+        val view = createRenderedKeyboard()
+        view.setShifted(true)
+        render(view)
+
+        var target = view.accessibilityTargets().first { it.label == "A" }
+        var node = view.accessibilityNodeProvider!!.createAccessibilityNodeInfo(target.id)
+        assertNotNull("Shifted A virtual node must exist", node)
+        assertTrue(
+            "Shifted A must expose uppercase alternate actions",
+            node!!.actionList.any { it.label?.toString() == "Insert Á" },
+        )
+
+        view.setLayer(KeyboardLayer.EMOJI)
+        render(view)
+        val search = view.accessibilityTargets().first { it.label == "Search emoji" }
+        assertTrue("Search emoji virtual control must activate", view.performAccessibilityTarget(search.id))
+        render(view)
+
+        target = view.accessibilityTargets().first { it.label == "a" }
+        node = view.accessibilityNodeProvider!!.createAccessibilityNodeInfo(target.id)
+        assertNotNull("Emoji-search a virtual query key must exist", node)
+        assertTrue(
+            "Emoji-search query keys must not expose editor alternate actions",
+            node!!.actionList.none { it.label?.toString()?.startsWith("Insert ") == true },
+        )
+    }
+
+    @Test
     fun suggestionsAndEmojiControlsRemainDiscoverableAndActionable() {
         val view = createRenderedKeyboard(listOf("hello", "help", "hero"))
         val selectedSuggestions = mutableListOf<String>()
