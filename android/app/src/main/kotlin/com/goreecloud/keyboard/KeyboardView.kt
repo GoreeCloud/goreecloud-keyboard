@@ -11,6 +11,7 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import androidx.core.view.ViewCompat
 import kotlin.math.max
 
 class KeyboardView @JvmOverloads constructor(
@@ -87,6 +88,7 @@ class KeyboardView @JvmOverloads constructor(
     private val emojiCategoryStore = LocalEmojiCategoryStore(context)
     private val emojiRecents = EmojiRecents(initialValues = emojiRecentsStore.load())
     private val emojiSearchSession = EmojiSearchSession()
+    private val accessibilityDelegate = KeyboardAccessibilityDelegate(this)
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var layer = KeyboardLayer.LETTERS
@@ -95,6 +97,12 @@ class KeyboardView @JvmOverloads constructor(
     private var pressedKeyBounds: RectF? = null
     private var pendingAlternateHit: HitKey? = null
     private var alternatePopup: AlternatePopup? = null
+
+    init {
+        isClickable = true
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
+        ViewCompat.setAccessibilityDelegate(this, accessibilityDelegate)
+    }
 
     private val showAlternatesRunnable = Runnable {
         val hit = pendingAlternateHit ?: return@Runnable
@@ -110,7 +118,7 @@ class KeyboardView @JvmOverloads constructor(
     fun setShifted(value: Boolean) {
         cancelAlternateInteraction()
         shifted = value && layer == KeyboardLayer.LETTERS
-        invalidate()
+        invalidateStructure()
     }
 
     fun setLayer(value: KeyboardLayer) {
@@ -118,12 +126,12 @@ class KeyboardView @JvmOverloads constructor(
         layer = value
         if (layer != KeyboardLayer.LETTERS) shifted = false
         if (layer != KeyboardLayer.EMOJI) emojiSearchSession.close()
-        invalidate()
+        invalidateStructure()
     }
 
     fun setSuggestions(values: List<String>) {
         suggestions = values.take(3)
-        invalidate()
+        invalidateStructure()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -403,6 +411,11 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
+    override fun dispatchHoverEvent(event: MotionEvent): Boolean {
+        if (accessibilityDelegate.dispatchHoverEvent(event)) return true
+        return super.dispatchHoverEvent(event)
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -456,7 +469,7 @@ class KeyboardView @JvmOverloads constructor(
                         listener?.onText(value)
                         announceForAccessibility("Inserted alternate character")
                     }
-                    invalidate()
+                    invalidateStructure()
                     performClick()
                     return true
                 }
@@ -466,51 +479,145 @@ class KeyboardView @JvmOverloads constructor(
         }
 
         hitEmojiSearchResults.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
-            emojiRecents.record(hit.result.emoji)
-            emojiRecentsStore.save(emojiRecents.values())
-            listener?.onText(hit.result.emoji)
-            announceForAccessibility("Inserted emoji from local search")
-            invalidate()
-            performClick()
-            return true
+            return activateEmojiSearchResult(hit)
         }
 
         hitEmojiCategories.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
-            when {
-                hit.entry.search -> {
-                    emojiSearchSession.open()
-                    showingEmojiRecents = false
-                }
-                hit.entry.clearRecents -> {
-                    emojiSearchSession.close()
-                    emojiRecents.clear()
-                    emojiRecentsStore.save(emojiRecents.values())
-                    showingEmojiRecents = false
-                }
-                hit.entry.recent -> {
-                    emojiSearchSession.close()
-                    showingEmojiRecents = emojiRecents.values().isNotEmpty()
-                }
-                hit.entry.category != null -> {
-                    emojiSearchSession.close()
-                    emojiCategory = hit.entry.category
-                    emojiCategoryStore.save(emojiCategory)
-                    showingEmojiRecents = false
-                }
-            }
-            announceForAccessibility(hit.entry.accessibilityLabel)
-            invalidate()
-            performClick()
-            return true
+            return activateEmojiCategory(hit)
         }
 
         hitSuggestions.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
-            listener?.onSuggestion(hit.value)
-            performClick()
-            return true
+            return activateSuggestion(hit)
         }
 
         val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) } ?: return true
+        return activateKey(hit)
+    }
+
+    internal fun accessibilityTargets(): List<KeyboardAccessibilityTarget> = buildList {
+        hitKeys.forEachIndexed { index, hit ->
+            add(
+                KeyboardAccessibilityTarget(
+                    id = ACCESSIBILITY_KEY_BASE + index,
+                    bounds = RectF(hit.bounds),
+                    label = accessibilityLabel(hit.key),
+                    selected = hit.key.action == Action.SHIFT && shifted,
+                )
+            )
+        }
+        hitSuggestions.forEachIndexed { index, hit ->
+            add(
+                KeyboardAccessibilityTarget(
+                    id = ACCESSIBILITY_SUGGESTION_BASE + index,
+                    bounds = RectF(hit.bounds),
+                    label = "Suggestion ${hit.value}",
+                )
+            )
+        }
+        hitEmojiCategories.forEachIndexed { index, hit ->
+            val selected = when {
+                hit.entry.search -> false
+                hit.entry.recent -> showingEmojiRecents
+                else -> !showingEmojiRecents && hit.entry.category == emojiCategory
+            }
+            add(
+                KeyboardAccessibilityTarget(
+                    id = ACCESSIBILITY_EMOJI_CATEGORY_BASE + index,
+                    bounds = RectF(hit.bounds),
+                    label = hit.entry.accessibilityLabel,
+                    selected = selected,
+                )
+            )
+        }
+        hitEmojiSearchResults.forEachIndexed { index, hit ->
+            add(
+                KeyboardAccessibilityTarget(
+                    id = ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE + index,
+                    bounds = RectF(hit.bounds),
+                    label = "Emoji ${hit.result.emoji} from local search",
+                )
+            )
+        }
+    }
+
+    internal fun accessibilityTarget(id: Int): KeyboardAccessibilityTarget? =
+        accessibilityTargets().firstOrNull { it.id == id }
+
+    internal fun performAccessibilityTarget(id: Int): Boolean {
+        cancelAlternateInteraction()
+        return when {
+            id in ACCESSIBILITY_KEY_BASE until ACCESSIBILITY_SUGGESTION_BASE ->
+                hitKeys.getOrNull(id - ACCESSIBILITY_KEY_BASE)?.let(::activateKey) ?: false
+            id in ACCESSIBILITY_SUGGESTION_BASE until ACCESSIBILITY_EMOJI_CATEGORY_BASE ->
+                hitSuggestions.getOrNull(id - ACCESSIBILITY_SUGGESTION_BASE)?.let(::activateSuggestion) ?: false
+            id in ACCESSIBILITY_EMOJI_CATEGORY_BASE until ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE ->
+                hitEmojiCategories.getOrNull(id - ACCESSIBILITY_EMOJI_CATEGORY_BASE)?.let(::activateEmojiCategory) ?: false
+            id >= ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE ->
+                hitEmojiSearchResults.getOrNull(id - ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE)?.let(::activateEmojiSearchResult) ?: false
+            else -> false
+        }
+    }
+
+    private fun accessibilityLabel(key: Key): String = when (key.action) {
+        Action.TEXT -> renderedKeyLabel(key)
+        Action.SHIFT -> "Shift"
+        Action.BACKSPACE -> "Backspace"
+        Action.SPACE -> "Space"
+        Action.ENTER -> "Enter"
+        Action.LETTERS -> "Letters"
+        Action.SYMBOLS -> "Symbols"
+        Action.SYMBOLS_MORE -> "More symbols"
+        Action.EMOJI -> "Emoji"
+        Action.EMOJI_SEARCH_CLEAR -> "Clear emoji search"
+        Action.EMOJI_SEARCH_CLOSE -> "Close emoji search"
+    }
+
+    private fun activateEmojiSearchResult(hit: HitEmojiSearchResult): Boolean {
+        emojiRecents.record(hit.result.emoji)
+        emojiRecentsStore.save(emojiRecents.values())
+        listener?.onText(hit.result.emoji)
+        announceForAccessibility("Inserted emoji from local search")
+        invalidateStructure()
+        performClick()
+        return true
+    }
+
+    private fun activateEmojiCategory(hit: HitEmojiCategory): Boolean {
+        when {
+            hit.entry.search -> {
+                emojiSearchSession.open()
+                showingEmojiRecents = false
+            }
+            hit.entry.clearRecents -> {
+                emojiSearchSession.close()
+                emojiRecents.clear()
+                emojiRecentsStore.save(emojiRecents.values())
+                showingEmojiRecents = false
+            }
+            hit.entry.recent -> {
+                emojiSearchSession.close()
+                showingEmojiRecents = emojiRecents.values().isNotEmpty()
+            }
+            hit.entry.category != null -> {
+                emojiSearchSession.close()
+                emojiCategory = hit.entry.category
+                emojiCategoryStore.save(emojiCategory)
+                showingEmojiRecents = false
+            }
+        }
+        announceForAccessibility(hit.entry.accessibilityLabel)
+        invalidateStructure()
+        performClick()
+        return true
+    }
+
+    private fun activateSuggestion(hit: HitSuggestion): Boolean {
+        listener?.onSuggestion(hit.value)
+        performClick()
+        return true
+    }
+
+    private fun activateKey(hit: HitKey): Boolean {
         val searchActive = layer == KeyboardLayer.EMOJI && emojiSearchSession.snapshot().active
         when (hit.key.action) {
             Action.TEXT -> {
@@ -523,13 +630,13 @@ class KeyboardView @JvmOverloads constructor(
                     }
                     listener?.onText(hit.key.label)
                 }
-                if (layer == KeyboardLayer.EMOJI) invalidate()
+                if (layer == KeyboardLayer.EMOJI) invalidateStructure()
             }
             Action.SHIFT -> listener?.onShift()
             Action.BACKSPACE -> {
                 if (searchActive) {
                     emojiSearchSession.backspace()
-                    invalidate()
+                    invalidateStructure()
                 } else {
                     listener?.onBackspace()
                 }
@@ -537,7 +644,7 @@ class KeyboardView @JvmOverloads constructor(
             Action.SPACE -> {
                 if (searchActive) {
                     emojiSearchSession.append(" ")
-                    invalidate()
+                    invalidateStructure()
                 } else {
                     listener?.onSpace()
                 }
@@ -550,16 +657,21 @@ class KeyboardView @JvmOverloads constructor(
             Action.EMOJI_SEARCH_CLEAR -> {
                 emojiSearchSession.clear()
                 announceForAccessibility("Emoji search cleared")
-                invalidate()
+                invalidateStructure()
             }
             Action.EMOJI_SEARCH_CLOSE -> {
                 emojiSearchSession.close()
                 announceForAccessibility("Emoji search closed")
-                invalidate()
+                invalidateStructure()
             }
         }
         performClick()
         return true
+    }
+
+    private fun invalidateStructure() {
+        invalidate()
+        accessibilityDelegate.invalidateVirtualRoot()
     }
 
     private fun cancelAlternateInteraction() {
@@ -575,11 +687,18 @@ class KeyboardView @JvmOverloads constructor(
         shifted = false
         if (layer != KeyboardLayer.EMOJI) emojiSearchSession.close()
         listener?.onLayerChanged(layer)
-        invalidate()
+        invalidateStructure()
     }
 
     override fun performClick(): Boolean {
         super.performClick()
         return true
+    }
+
+    private companion object {
+        const val ACCESSIBILITY_KEY_BASE = 1_000
+        const val ACCESSIBILITY_SUGGESTION_BASE = 2_000
+        const val ACCESSIBILITY_EMOJI_CATEGORY_BASE = 3_000
+        const val ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE = 4_000
     }
 }
