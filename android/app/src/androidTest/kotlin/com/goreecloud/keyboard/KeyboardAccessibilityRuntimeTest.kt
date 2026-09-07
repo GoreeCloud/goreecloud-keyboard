@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.core.view.ViewCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
@@ -26,11 +25,13 @@ class KeyboardAccessibilityRuntimeTest {
         assertTrue("Rendered q virtual target must have positive width", q.bounds.width() > 0f)
         assertTrue("Rendered q virtual target must have positive height", q.bounds.height() > 0f)
 
-        val provider = ViewCompat.getAccessibilityNodeProvider(view)
-        assertNotNull("ExploreByTouchHelper must expose a node provider", provider)
+        // Exercise Android's actual platform provider bridge. ViewCompat's wrapper around an
+        // already-created platform provider intentionally does not proxy its compat methods.
+        val provider = view.accessibilityNodeProvider
+        assertNotNull("ExploreByTouchHelper must expose a platform node provider", provider)
         val node = provider!!.createAccessibilityNodeInfo(q.id)
         assertNotNull("Virtual q node must be creatable from its exposed target ID", node)
-        assertEquals("Virtual q node must expose its rendered label", "q", node!!.contentDescription)
+        assertEquals("Virtual q node must expose its rendered label", "q", node!!.contentDescription?.toString())
         assertEquals(
             "Virtual q node must expose button semantics",
             "android.widget.Button",
