@@ -3,43 +3,61 @@
 ## Implemented in Development source
 
 - Native Android input method using `InputMethodService`.
-- Original first-party keyboard rendering surface.
+- Original first-party keyboard rendering, hit-testing, and pointer-input surface.
+- Runtime input-method registration checks through Android `InputMethodManager`.
 - QWERTY letter entry.
 - Shift, backspace, space, and enter controls.
 - Letters/symbols mode switching with a primary digit/common-punctuation page and a second first-party symbol page for brackets, operators, currency marks, and common typographic symbols.
 - Direct `ABC`, `?123`, and `=\\<` navigation between implemented input layers.
-- A bounded first-party emoji layer with Smileys, People, Nature, Food, and Symbols categories plus selected composed variation-selector, skin-tone, ZWJ, family, rainbow-flag, and regional-indicator sequences.
+- A bounded first-party emoji layer with Smileys, People, Nature, Food, Symbols, and Travel categories plus selected composed variation-selector, skin-tone, ZWJ, family, rainbow-flag, and regional-indicator sequences.
 - Compact accessible emoji-category controls with separate spoken accessibility labels.
 - Bounded emoji recents that persist only in Android private app preferences, restore after an IME process restart, and can be explicitly cleared from the emoji strip.
-- Fully offline transient emoji search over the packaged first-party emoji catalog; query text stays inside the IME search session and only a deliberately selected result is committed to the editor.
-- Complete-String emoji commit behavior and bounded text-unit backspace tests that require every currently exposed emoji key to delete in one backspace action.
+- Fully offline transient emoji search over the packaged first-party emoji catalog; query text stays inside the IME search session, cannot be preloaded while the session is closed, and only a deliberately selected result is committed to the editor.
+- Complete-String emoji commit behavior and bounded text-unit backspace tests that require every currently exposed emoji key to delete coherently.
 - Bounded Unicode backspace handling for combining marks, variation selectors, emoji modifiers, keycaps, tag sequences, common ZWJ emoji, CRLF, and regional-indicator runs using pair-from-the-start flag parity.
+- Fail-closed handling when bounded ordinary-field look-behind may begin inside a larger text unit; sensitive fields retain the stricter no-look-behind path.
 - Local-only GoreeCloud Quill suggestion boundary.
-- Deterministic prefix suggestions and bounded one-edit typo-correction candidates.
+- Deterministic prefix suggestions and bounded one-edit typo-correction candidates using Unicode code points rather than raw UTF-16 units.
+- Bounded transient suggestion capture that suppresses misleading mid-word recapture when complete context is no longer known.
+- Suggestion commit authority bound to the exact candidates currently presented for the active editor session rather than accepting arbitrary callback values.
 - Sensitive-editor privacy gating for suggestion capture/display/acceptance and text look-behind deletion logic.
-- Composing-context reset across editor transitions and non-letter layer changes.
-- Light and Dark Glaze UI 2.0 source token mapping.
-- No Android network permission in the current foundation; emoji recents and emoji search do not synchronize or emit telemetry.
-- Unit, build, governance, and emulator validation paths, including rendered secondary-symbol hit testing.
+- Host `TYPE_TEXT_FLAG_NO_SUGGESTIONS` support without misclassifying ordinary fields as passwords.
+- Fail-closed editor lifecycle behavior across authoritative Android start/finish callbacks, including conservative no-active-editor and missing-editor-metadata state.
+- Deterministic local long-press alternates for common Latin diacritics and punctuation.
+- Viewport-bounded long-press popup placement and exact shared render/hit-test geometry with fail-closed gap/outside/non-finite/unused-cell handling, pointer movement selection, cancellation, haptic feedback, and accessibility announcements.
+- A privacy-minimized `goreecloud-keyboard-preferences/1` format containing exactly the last explicitly selected emoji category.
+- Strict portable-preference validation/checksum integrity, category-only reader/writer seams, explicit user-controlled Android Storage Access Framework transfer, import preview before mutation, and export review/freeze before destination selection.
+- GLAZE UI V1.2 (`1.2.0`) Development source/material mapping pinned to exact Stable release authority `f285b9145e27e6e7027b075c37299d101945c272`.
+- V1.2 neutral Frosted Neutral key surfaces consumed by the actual native `KeyboardView`, with Light/Dark runtime selection, explicit Deep Dark source values, 48/56 dp interaction floors, control geometry, and state calibration.
+- A V1.2 non-semantic material/atmosphere boundary that prohibits chromatic, brand, or semantic color from becoming the keyboard substrate and authorizes no editor/content sampling, remote derivation, persistence, semantic inference, telemetry, network lookup, or animated atmosphere.
+- No Android network permission in the current foundation; emoji recents, emoji search, suggestions, alternates, and portable preferences do not synchronize or emit telemetry.
+- Unit, build, governance, and Android emulator validation paths covering registration, privacy lifecycle, Unicode deletion, suggestion authority, emoji search, portable preference boundaries, Glaze UI mapping, and native interaction.
 
 ## Development / acceptance work still required
 
-- Complete migration and rendered acceptance against the current Stable Glaze UI contract, including applicable material roles and accessibility settings.
-- Representative physical-device IME acceptance.
-- Complete TalkBack, switch-access, large-text, contrast, reduced-transparency, and adaptive-layout acceptance.
-- Tablet/foldable/one-handed/split keyboard experiences.
+- Complete rendered/native consumer acceptance against GLAZE UI V1.2 across all keyboard and settings surfaces.
+- Reduced Transparency / solid fallback, Reduced Motion, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance, RTL/localization, and Deep Dark runtime policy where applicable.
+- Representative physical-device IME acceptance across supported Android/editor combinations.
+- Complete TalkBack, Switch Access, and other claimed assistive-input acceptance.
+- Representative phone/tablet/foldable ergonomics, including one-handed/split/adaptive layouts where implemented.
+- Representative physical-device latency, performance, power, and thermal acceptance.
+- Human Visual Excellence review of the actual Keyboard consumer.
 - Broader composed-sequence coverage, complete grapheme segmentation, and additional language/locale input modes.
-- Signed release packaging and distribution acceptance.
+- Privacy Shield, Wardveil Security, Everkeep, Manager, Mesh, and Identity acceptance where applicable without expanding input-data authority.
+- Complete approved backup/clean-target recovery scope beyond the current one-field portability primitive.
+- Protected signing/provenance, release packaging, distribution, update/rollback, and explicit Stable approval.
 
 ## Planned product capabilities — not current implementation claims
 
 - Gesture/swipe typing.
-- Richer local prediction/correction and dictionaries.
+- Stronger local prediction/correction and user/language dictionaries.
 - Multilingual input and language switching.
-- User-controlled personalization and learned-language features.
-- Clipboard tools with explicit privacy boundaries.
-- Optional voice/input adapters where platform and privacy policies permit.
+- User-controlled personalization and learned-language features where separately approved.
+- GoreeCloud Secure Paste and other clipboard tools with explicit Privacy Shield enforcement boundaries.
+- Optional voice input/adapters where platform, privacy, and security policies permit.
+- One-handed, split, tablet, foldable, and posture-aware keyboard experiences.
+- Richer emoji, symbol, kaomoji, and specialized input discovery.
 - GoreeCloud Quill writing assistance beyond the current local suggestion boundary.
 - Governed synchronization, backup/recovery, and portability where explicitly implemented.
 
-All planned capabilities remain subject to GoreeCloud privacy, security, identity, continuity, integration, design, and release acceptance requirements.
+All planned capabilities remain subject to GoreeCloud privacy, security, identity, continuity, integration, design, accessibility, and release acceptance requirements. Buttons, labels, placeholders, or decorative surfaces do not count as implementation evidence by themselves.
