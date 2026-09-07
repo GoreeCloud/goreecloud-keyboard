@@ -14,6 +14,7 @@ internal data class KeyboardAccessibilityTarget(
     val bounds: android.graphics.RectF,
     val label: String,
     val selected: Boolean = false,
+    val longClickable: Boolean = false,
 )
 
 /**
@@ -56,7 +57,11 @@ internal class KeyboardAccessibilityDelegate(
         node.isFocusable = true
         node.isClickable = true
         node.isSelected = target.selected
+        node.isLongClickable = target.longClickable
         node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK)
+        if (target.longClickable) {
+            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK)
+        }
         node.setBoundsInParent(target.bounds.toAccessibilityRect())
     }
 
@@ -65,10 +70,19 @@ internal class KeyboardAccessibilityDelegate(
         action: Int,
         arguments: Bundle?,
     ): Boolean {
-        if (action != AccessibilityNodeInfo.ACTION_CLICK) return false
-        if (!keyboardView.performAccessibilityTarget(virtualViewId)) return false
-        sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
-        return true
+        return when (action) {
+            AccessibilityNodeInfo.ACTION_CLICK -> {
+                if (!keyboardView.performAccessibilityTarget(virtualViewId)) return false
+                sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
+                true
+            }
+            AccessibilityNodeInfo.ACTION_LONG_CLICK -> {
+                if (!keyboardView.performAccessibilityLongPressTarget(virtualViewId)) return false
+                sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_LONG_CLICKED)
+                true
+            }
+            else -> false
+        }
     }
 
     fun invalidateVirtualRoot() {
