@@ -27,7 +27,8 @@ internal data class KeyboardAccessibilityTarget(
  * catalog. Eligible keys expose both ACTION_LONG_CLICK as a discovery hint and bounded custom
  * actions for exact alternate activation. Alternate activation routes through the same
  * KeyboardView.Listener text path used by the rendered keyboard; this delegate does not gain
- * editor-observation authority.
+ * editor-observation authority. When the rendered emoji-search keyboard is active, alternates
+ * stay disabled just as they are for touch input so accessibility cannot bypass that mode boundary.
  */
 internal class KeyboardAccessibilityDelegate(
     private val keyboardView: KeyboardView,
@@ -119,8 +120,15 @@ internal class KeyboardAccessibilityDelegate(
         invalidateRoot()
     }
 
-    private fun alternatesFor(target: KeyboardAccessibilityTarget): List<String> =
-        KeyAlternates.forKey(target.label).take(alternateActionIds.size)
+    private fun alternatesFor(target: KeyboardAccessibilityTarget): List<String> {
+        if (emojiSearchKeyboardIsActive()) return emptyList()
+        return KeyAlternates.forKey(target.label).take(alternateActionIds.size)
+    }
+
+    private fun emojiSearchKeyboardIsActive(): Boolean =
+        keyboardView.accessibilityTargets().any { target ->
+            target.label == "Clear emoji search" || target.label == "Close emoji search"
+        }
 
     private fun android.graphics.RectF.toAccessibilityRect(): Rect {
         val left = left.roundToInt()
