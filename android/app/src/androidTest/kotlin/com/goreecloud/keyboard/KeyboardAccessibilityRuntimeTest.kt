@@ -23,21 +23,32 @@ class KeyboardAccessibilityRuntimeTest {
         assertEquals("Virtual target IDs must be unique", targets.size, targets.map { it.id }.toSet().size)
 
         val q = targets.first { it.label == "q" }
-        assertTrue(q.bounds.width() > 0f)
-        assertTrue(q.bounds.height() > 0f)
+        assertTrue("Rendered q virtual target must have positive width", q.bounds.width() > 0f)
+        assertTrue("Rendered q virtual target must have positive height", q.bounds.height() > 0f)
 
         val provider = ViewCompat.getAccessibilityNodeProvider(view)
         assertNotNull("ExploreByTouchHelper must expose a node provider", provider)
         val node = provider!!.createAccessibilityNodeInfo(q.id)
-        assertNotNull(node)
-        assertEquals("q", node!!.contentDescription)
-        assertEquals("android.widget.Button", node.className)
-        assertTrue(node.isClickable)
+        assertNotNull("Virtual q node must be creatable from its exposed target ID", node)
+        assertEquals("Virtual q node must expose its rendered label", "q", node!!.contentDescription)
+        assertEquals(
+            "Virtual q node must expose button semantics",
+            "android.widget.Button",
+            node.className?.toString(),
+        )
+        assertTrue("Virtual q node must expose clickable semantics", node.isClickable)
 
         val committed = mutableListOf<String>()
         view.listener = listener(onText = { committed += it })
-        assertTrue(provider.performAction(q.id, AccessibilityNodeInfo.ACTION_CLICK, null))
-        assertEquals("Accessibility activation must use the normal listener path", listOf("q"), committed)
+        assertTrue(
+            "Accessibility ACTION_CLICK must be handled by the virtual q node",
+            provider.performAction(q.id, AccessibilityNodeInfo.ACTION_CLICK, null),
+        )
+        assertEquals(
+            "Accessibility activation must use the normal listener path",
+            listOf("q"),
+            committed,
+        )
     }
 
     @Test
@@ -48,20 +59,20 @@ class KeyboardAccessibilityRuntimeTest {
 
         var targets = view.accessibilityTargets()
         val hello = targets.first { it.label == "Suggestion hello" }
-        assertTrue(view.performAccessibilityTarget(hello.id))
-        assertEquals(listOf("hello"), selectedSuggestions)
+        assertTrue("Suggestion virtual target must activate", view.performAccessibilityTarget(hello.id))
+        assertEquals("Suggestion activation must use the normal suggestion listener", listOf("hello"), selectedSuggestions)
 
         view.setLayer(KeyboardLayer.EMOJI)
         render(view)
         targets = view.accessibilityTargets()
         val search = targets.first { it.label == "Search emoji" }
-        assertTrue(view.performAccessibilityTarget(search.id))
+        assertTrue("Search emoji virtual control must activate", view.performAccessibilityTarget(search.id))
 
         render(view)
         targets = view.accessibilityTargets()
-        assertTrue(targets.any { it.label == "Clear emoji search" })
-        assertTrue(targets.any { it.label == "Close emoji search" })
-        assertTrue(targets.any { it.label == "q" })
+        assertTrue("Emoji search must expose Clear", targets.any { it.label == "Clear emoji search" })
+        assertTrue("Emoji search must expose Close", targets.any { it.label == "Close emoji search" })
+        assertTrue("Emoji search keyboard must expose letter keys", targets.any { it.label == "q" })
     }
 
     @Test
@@ -73,7 +84,7 @@ class KeyboardAccessibilityRuntimeTest {
         var targets = view.accessibilityTargets()
         val shift = targets.first { it.label == "Shift" }
         assertTrue("Shift virtual node must expose selected state", shift.selected)
-        assertTrue(targets.any { it.label == "Q" })
+        assertTrue("Shifted text keys must expose rendered uppercase labels", targets.any { it.label == "Q" })
 
         view.setLayer(KeyboardLayer.EMOJI)
         render(view)
