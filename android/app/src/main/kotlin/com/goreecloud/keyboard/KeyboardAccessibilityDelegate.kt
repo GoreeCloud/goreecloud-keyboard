@@ -20,8 +20,8 @@ internal data class KeyboardAccessibilityTarget(
  * Exposes the custom-drawn KeyboardView controls as real virtual accessibility nodes.
  *
  * This delegate deliberately consumes only the already-rendered interaction geometry and
- * visible labels supplied by KeyboardView. It does not inspect InputConnection/editor
- * contents, clipboard state, suggestion history, network data, or any hidden input state.
+ * visible labels supplied by KeyboardView. It does not inspect editor contents, clipboard
+ * state, suggestion history, network data, or any hidden input state.
  */
 internal class KeyboardAccessibilityDelegate(
     private val keyboardView: KeyboardView,
