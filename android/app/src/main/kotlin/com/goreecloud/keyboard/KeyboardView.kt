@@ -628,7 +628,7 @@ class KeyboardView @JvmOverloads constructor(
                         emojiRecents.record(hit.key.label)
                         emojiRecentsStore.save(emojiRecents.values())
                     }
-                    listener?.onText(renderedKeyLabel(hit.key))
+                    listener?.onText(hit.key.label)
                 }
                 if (layer == KeyboardLayer.EMOJI) invalidateStructure()
             }
