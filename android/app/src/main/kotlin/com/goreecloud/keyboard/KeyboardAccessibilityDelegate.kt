@@ -14,7 +14,6 @@ internal data class KeyboardAccessibilityTarget(
     val bounds: android.graphics.RectF,
     val label: String,
     val selected: Boolean = false,
-    val longClickable: Boolean = false,
 )
 
 /**
@@ -57,10 +56,11 @@ internal class KeyboardAccessibilityDelegate(
         node.isFocusable = true
         node.isClickable = true
         node.isSelected = target.selected
-        node.isLongClickable = target.longClickable
         node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK)
-        if (target.longClickable) {
-            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK)
+        val alternateActions = alternateActionsFor(target)
+        if (alternateActions.isNotEmpty()) {
+            node.hintText = "${alternateActions.size} alternate characters available"
+            alternateActions.forEach { node.addAction(it.action) }
         }
         node.setBoundsInParent(target.bounds.toAccessibilityRect())
     }
@@ -70,23 +70,38 @@ internal class KeyboardAccessibilityDelegate(
         action: Int,
         arguments: Bundle?,
     ): Boolean {
-        return when (action) {
-            AccessibilityNodeInfo.ACTION_CLICK -> {
-                if (!keyboardView.performAccessibilityTarget(virtualViewId)) return false
-                sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
-                true
-            }
-            AccessibilityNodeInfo.ACTION_LONG_CLICK -> {
-                if (!keyboardView.performAccessibilityLongPressTarget(virtualViewId)) return false
-                sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_LONG_CLICKED)
-                true
-            }
-            else -> false
+        if (action == AccessibilityNodeInfo.ACTION_CLICK) {
+            if (!keyboardView.performAccessibilityTarget(virtualViewId)) return false
+            sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
+            return true
         }
+
+        val target = keyboardView.accessibilityTarget(virtualViewId) ?: return false
+        val alternate = alternateActionsFor(target).firstOrNull { it.action.id == action }?.value ?: return false
+        keyboardView.listener?.onText(alternate)
+        keyboardView.announceForAccessibility("Inserted alternate character $alternate")
+        keyboardView.performClick()
+        sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
+        return true
     }
 
     fun invalidateVirtualRoot() {
         invalidateRoot()
+    }
+
+    private fun alternateActionsFor(target: KeyboardAccessibilityTarget): List<AlternateAction> {
+        // The rendered local emoji-search keyboard reuses Latin key labels as query controls.
+        // Its characters must remain query input rather than becoming editor alternate actions.
+        if (keyboardView.accessibilityTargets().any { it.label == "Close emoji search" }) return emptyList()
+        return KeyAlternates.forKey(target.label).mapIndexed { index, value ->
+            AlternateAction(
+                action = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                    ALTERNATE_ACTION_BASE + index,
+                    "Insert $value",
+                ),
+                value = value,
+            )
+        }
     }
 
     private fun android.graphics.RectF.toAccessibilityRect(): Rect {
@@ -95,5 +110,14 @@ internal class KeyboardAccessibilityDelegate(
         val right = right.roundToInt().coerceAtLeast(left + 1)
         val bottom = bottom.roundToInt().coerceAtLeast(top + 1)
         return Rect(left, top, right, bottom)
+    }
+
+    private data class AlternateAction(
+        val action: AccessibilityNodeInfoCompat.AccessibilityActionCompat,
+        val value: String,
+    )
+
+    private companion object {
+        const val ALTERNATE_ACTION_BASE = 0x0101_0000
     }
 }
