@@ -57,6 +57,7 @@ class KeyboardView @JvmOverloads constructor(
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val pressedKeyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val keyStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = resources.displayMetrics.density
@@ -91,6 +92,7 @@ class KeyboardView @JvmOverloads constructor(
     private var layer = KeyboardLayer.LETTERS
     private var emojiCategory = emojiCategoryStore.load()
     private var showingEmojiRecents = false
+    private var pressedKeyBounds: RectF? = null
     private var pendingAlternateHit: HitKey? = null
     private var alternatePopup: AlternatePopup? = null
 
@@ -98,6 +100,7 @@ class KeyboardView @JvmOverloads constructor(
         val hit = pendingAlternateHit ?: return@Runnable
         val values = alternatesFor(hit)
         if (values.isEmpty()) return@Runnable
+        pressedKeyBounds = null
         alternatePopup = AlternatePopup(RectF(hit.bounds), values)
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         announceForAccessibility("Alternate characters available")
@@ -160,6 +163,9 @@ class KeyboardView @JvmOverloads constructor(
                 val keyWidth = availableWidth * (key.weight / totalWeight)
                 val bounds = RectF(left, top, left + keyWidth, top + rowHeight)
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyPaint)
+                if (isPressedKey(bounds)) {
+                    canvas.drawRoundRect(bounds, keyRadius, keyRadius, pressedKeyPaint)
+                }
                 canvas.drawRoundRect(bounds, keyRadius, keyRadius, keyStrokePaint)
 
                 val label = renderedKeyLabel(key)
@@ -233,12 +239,24 @@ class KeyboardView @JvmOverloads constructor(
         return KeyAlternates.forKey(renderedKeyLabel(hit.key))
     }
 
+    private fun isPressedKey(bounds: RectF): Boolean {
+        val pressed = pressedKeyBounds ?: return false
+        return pressed.left == bounds.left &&
+            pressed.top == bounds.top &&
+            pressed.right == bounds.right &&
+            pressed.bottom == bounds.bottom
+    }
+
     private fun applyCurrentAppearance() {
         val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val appearance = if (nightMode == Configuration.UI_MODE_NIGHT_YES) GlazeKeyboardTokens.Appearance.DARK else GlazeKeyboardTokens.Appearance.LIGHT
         val palette = GlazeKeyboardTokens.palette(appearance)
         backgroundPaint.color = palette.canvasArgb
         keyPaint.color = palette.surfaceArgb
+        pressedKeyPaint.color = GlazeKeyboardTokens.stateOverlayArgb(
+            appearance,
+            GlazeKeyboardTokens.PressedOverlayOpacity,
+        )
         keyStrokePaint.color = palette.lineArgb
         textPaint.color = palette.onSurfaceArgb
         suggestionPaint.color = palette.onSurfaceArgb
@@ -390,15 +408,18 @@ class KeyboardView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 cancelAlternateInteraction()
                 val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
+                pressedKeyBounds = hit?.let { RectF(it.bounds) }
                 if (hit != null && alternatesFor(hit).isNotEmpty()) {
                     pendingAlternateHit = hit
                     postDelayed(showAlternatesRunnable, ViewConfiguration.getLongPressTimeout().toLong())
                 }
+                invalidate()
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 val popup = alternatePopup
                 if (popup != null) {
+                    pressedKeyBounds = null
                     popup.selectedIndex = popup.layout?.hitTest(event.x, event.y)
                     invalidate()
                     return true
@@ -411,6 +432,12 @@ class KeyboardView @JvmOverloads constructor(
                         pendingAlternateHit = null
                     }
                 }
+                val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
+                val nextBounds = hit?.let { RectF(it.bounds) }
+                if (nextBounds != pressedKeyBounds) {
+                    pressedKeyBounds = nextBounds
+                    invalidate()
+                }
                 return true
             }
             MotionEvent.ACTION_CANCEL -> {
@@ -421,6 +448,7 @@ class KeyboardView @JvmOverloads constructor(
             MotionEvent.ACTION_UP -> {
                 removeCallbacks(showAlternatesRunnable)
                 pendingAlternateHit = null
+                pressedKeyBounds = null
                 alternatePopup?.let { popup ->
                     val value = popup.selectedIndex?.let(popup.values::getOrNull)
                     alternatePopup = null
@@ -432,6 +460,7 @@ class KeyboardView @JvmOverloads constructor(
                     performClick()
                     return true
                 }
+                invalidate()
             }
             else -> return true
         }
@@ -535,6 +564,7 @@ class KeyboardView @JvmOverloads constructor(
 
     private fun cancelAlternateInteraction() {
         removeCallbacks(showAlternatesRunnable)
+        pressedKeyBounds = null
         pendingAlternateHit = null
         alternatePopup = null
     }
