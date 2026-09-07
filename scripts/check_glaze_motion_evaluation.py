@@ -157,6 +157,12 @@ def main() -> None:
             "GlazeKeyboardTokens.palette(appearance)",
             "GlazeKeyboardTokens.SuggestionStripHeightDp",
             "GlazeKeyboardTokens.RadiusMediumDp",
+            "private val pressedKeyPaint = Paint(Paint.ANTI_ALIAS_FLAG)",
+            "private var pressedKeyBounds: RectF? = null",
+            "canvas.drawRoundRect(bounds, keyRadius, keyRadius, pressedKeyPaint)",
+            "GlazeKeyboardTokens.stateOverlayArgb(",
+            "GlazeKeyboardTokens.PressedOverlayOpacity",
+            "pressedKeyBounds = hit?.let { RectF(it.bounds) }",
             "override fun onTouchEvent(event: MotionEvent)",
             "listener?.onSuggestion(hit.value)",
             "emojiRecents.record(hit.key.label)",
@@ -208,9 +214,9 @@ def main() -> None:
             fail(f"active evidence retains stale design-system boundary `{stale}`")
 
     print(
-        "Keyboard GLAZE UI V1.2 source/material mapping + Glaze Motion 0.5 test-only boundary passed: "
+        "Keyboard GLAZE UI V1.2 source/material/pressed-state mapping + Glaze Motion 0.5 test-only boundary passed: "
         f"source target {GLAZE_VERSION}, source {GLAZE_SOURCE_REVISION}; Platform Contract v0.2 remains "
-        "migration-required/nonconformant; Keyboard runtime remains Android Light/Dark only; V1.2 neutral material is active; "
+        "migration-required/nonconformant; Keyboard runtime remains Android Light/Dark only; V1.2 neutral material and pressed feedback are active; "
         "optional atmosphere remains non-semantic; Experimental Motion remains quarantined; "
         "rendered/accessibility/device/release acceptance remains separate."
     )
