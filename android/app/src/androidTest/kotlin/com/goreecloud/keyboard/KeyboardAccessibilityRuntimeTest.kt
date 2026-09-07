@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -108,7 +109,19 @@ class KeyboardAccessibilityRuntimeTest {
         targets = view.accessibilityTargets()
         assertTrue("Emoji search must expose Clear", targets.any { it.label == "Clear emoji search" })
         assertTrue("Emoji search must expose Close", targets.any { it.label == "Close emoji search" })
-        assertTrue("Emoji search keyboard must expose letter keys", targets.any { it.label == "q" })
+        val q = targets.first { it.label == "q" }
+        val provider = view.accessibilityNodeProvider
+        assertNotNull("Emoji search must retain the platform accessibility provider", provider)
+        val qNode = provider!!.createAccessibilityNodeInfo(q.id)
+        assertNotNull("Emoji-search q node must be creatable", qNode)
+        assertFalse(
+            "Emoji-search query keys must not gain long-press alternate semantics",
+            qNode!!.isLongClickable,
+        )
+        assertFalse(
+            "Emoji-search query keys must not expose alternate custom actions",
+            qNode.actionList.any { it.label?.toString()?.startsWith("Insert ") == true },
+        )
     }
 
     @Test
