@@ -72,7 +72,7 @@ def main() -> None:
         "Android virtual-node runtime evidence",
         test_text,
         (
-            "ViewCompat.getAccessibilityNodeProvider(view)",
+            "view.accessibilityNodeProvider",
             "createAccessibilityNodeInfo(q.id)",
             "AccessibilityNodeInfo.ACTION_CLICK",
             "view.performAccessibilityTarget(hello.id)",
