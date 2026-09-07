@@ -11,13 +11,13 @@ KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 ATMOSPHERE = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt"
 MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-GLAZE_VERSION = "1.1.0"
-GLAZE_SOURCE_REVISION = "15cc76d2bcd4065552dc31c77145b63f34d9e7b2"
+GLAZE_VERSION = "1.2.0"
+GLAZE_SOURCE_REVISION = "f285b9145e27e6e7027b075c37299d101945c272"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"Keyboard GLAZE UI V1.1 / Platform Contract v0.2 boundary failed: {message}")
+    raise SystemExit(f"Keyboard GLAZE UI V1.2 / Platform Contract v0.2 boundary failed: {message}")
 
 
 def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
@@ -48,26 +48,27 @@ def main() -> None:
             "Runtime compatibility baseline: **0.4.0**",
             "Evaluation mode: **native Android interaction mapping, test-only**",
             "Production dependency: **no**",
-            "GLAZE UI V1.1 (`1.1.0`) is the current Stable",
+            "GLAZE UI V1.2 (`1.2.0`) is the current Stable",
             "Motion remains separately Experimental",
             "insufficient for promotion by itself",
         ),
     )
 
     require_all(
-        "V1.1 adoption record",
+        "V1.2 adoption record",
         adoption_text,
         (
-            "# GLAZE UI V1.1 Migration — GoreeCloud Keyboard",
+            "# GLAZE UI V1.2 Migration — GoreeCloud Keyboard",
             "Status: **Migration in progress / Development**",
-            "Official target: **GLAZE UI V1.1 (`1.1.0`)**",
+            "Official target: **GLAZE UI V1.2 (`1.2.0`)**",
             f"Exact Stable source authority: `{GLAZE_SOURCE_REVISION}`",
             "Production eligible on the Glaze UI gate: **no**",
-            "does **not** establish complete V1.1 consumer conformance",
-            "V1.1 optical geometry references 8/16/24/32 dp plus capsule",
-            "Deep Dark is now explicitly defined",
+            "does **not** establish complete V1.2 consumer conformance",
+            "Neutral glass is the material. Color is an accent.",
+            "V1.2 pressed, selected, focus, and increased-contrast focus calibration",
+            "Deep Dark source material is explicitly defined",
             "KeyboardView` continues to select only Light/Dark from Android night mode",
-            "Atmosphere is **not rendered by KeyboardView**",
+            "default chromatic material tint contribution is zero",
             "editor/content sampling",
             "one-field `goreecloud-keyboard-preferences/1` portability boundary remains unchanged",
             "Glaze Motion 0.5 evaluation remains test-only",
@@ -75,7 +76,7 @@ def main() -> None:
     )
 
     require_all(
-        "V1.1 token mapping",
+        "V1.2 token mapping",
         token_text,
         (
             f'const val TargetVersion = "{GLAZE_VERSION}"',
@@ -91,27 +92,40 @@ def main() -> None:
             "const val OpticalContainerDp = 24f",
             "const val OpticalHeroDp = 32f",
             "const val OpticalCapsuleDp = 999f",
-            "0xFFF5F7FA",
-            "0xFF0B0D11",
-            "0xFF05070A",
-            "0xCC12161D",
-            "0xFFABB4C2",
+            "const val PressedOverlayOpacity = 0.095f",
+            "const val SelectedOverlayOpacity = 0.12f",
+            "const val FocusWidthDp = 3f",
+            "const val IncreasedContrastFocusWidthDp = 4f",
+            "0x94FFFFFF",
+            "0x9E19191B",
+            "0xB80E0E10",
+            "0x1A505050",
+            "0x1AFFFFFF",
+            "0x17FFFFFF",
             "Appearance.DEEP_DARK -> DeepDarkPalette",
+            "fun stateOverlayArgb(",
         ),
     )
 
     require_all(
-        "V1.1 atmosphere contract",
+        "V1.2 atmosphere/material boundary",
         atmosphere_text,
         (
-            "Non-semantic GLAZE UI V1.1 atmospheric source contract",
-            "const val DeepTealArgb = 0xFF0F6B6F.toInt()",
-            "const val SoftAmberArgb = 0xFFD9A35F.toInt()",
+            "Non-semantic GLAZE UI V1.2 Frosted Optical atmosphere/material boundary",
+            "Neutral glass is the material. Color is an accent.",
+            "const val DefaultMaterialTintContribution = 0f",
+            "const val TealAsBaseMaterialAllowed = false",
+            "const val GreenAsBaseMaterialAllowed = false",
+            "const val AquaAsBaseMaterialAllowed = false",
+            "const val AmberAsBaseMaterialAllowed = false",
+            "const val BrandColorMayDefineSubstrate = false",
+            "const val SemanticColorMayDefineSubstrate = false",
             "const val EnvironmentalColorMemoryEnabled = false",
             "const val RemoteColorDerivationAllowed = false",
             "const val PersistentSampleHistoryAllowed = false",
             "const val SemanticInferenceAllowed = false",
-            "no editor/content sampling",
+            "const val AnimatedAtmosphereEnabled = false",
+            "No editor/content",
         ),
     )
 
@@ -121,12 +135,12 @@ def main() -> None:
         (
             'schema_version: "0.2"',
             "  id: goreecloud-keyboard",
-            '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.1.0"',
+            '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.2.0"',
             "android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt",
             '  platform_contract: "0.2"',
-            '  glaze_ui_required: "1.1.0"',
+            '  glaze_ui_required: "1.2.0"',
             "goreecloud-platform-contract==0.2",
-            "glaze-ui==1.1.0",
+            "glaze-ui==1.2.0",
             "conformance:\n  status: nonconformant",
             "runtime Deep Dark policy",
         ),
@@ -154,7 +168,7 @@ def main() -> None:
     if "Appearance.DEEP_DARK" in view_text:
         fail("KeyboardView must not infer or auto-select Deep Dark in this source-mapping slice")
     if "GlazeKeyboardAtmosphere" in view_text:
-        fail("KeyboardView must not render V1.1 atmosphere in this source-mapping slice")
+        fail("KeyboardView must not render optional V1.2 atmosphere in this source-mapping slice")
 
     require_all(
         "native test-only Motion evidence",
@@ -183,8 +197,9 @@ def main() -> None:
     active_records = adoption_text + "\n" + doc_text + "\n" + token_text + "\n" + platform_text
     for stale in (
         "Official target: **GLAZE UI V1.0 (`1.0.0`)**",
-        "GLAZE UI V1.0 (`1.0.0`) is the official and only current",
+        "Official target: **GLAZE UI V1.1 (`1.1.0`)**",
         '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.0.0"',
+        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.1.0"',
         "Glaze UI 2.2.0 Stable is the production design-system authority.",
         "Required Stable baseline: **Glaze UI 2.2.0**",
         "stable_eligible: true",
@@ -193,10 +208,11 @@ def main() -> None:
             fail(f"active evidence retains stale design-system boundary `{stale}`")
 
     print(
-        "Keyboard GLAZE UI V1.1 source mapping + Glaze Motion 0.5 test-only boundary passed: "
+        "Keyboard GLAZE UI V1.2 source/material mapping + Glaze Motion 0.5 test-only boundary passed: "
         f"source target {GLAZE_VERSION}, source {GLAZE_SOURCE_REVISION}; Platform Contract v0.2 remains "
-        "migration-required/nonconformant; Keyboard runtime remains Android Light/Dark only; atmosphere is source-only; "
-        "Experimental Motion remains quarantined; rendered/accessibility/device/release acceptance remains separate."
+        "migration-required/nonconformant; Keyboard runtime remains Android Light/Dark only; V1.2 neutral material is active; "
+        "optional atmosphere remains non-semantic; Experimental Motion remains quarantined; "
+        "rendered/accessibility/device/release acceptance remains separate."
     )
 
 
