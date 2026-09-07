@@ -65,6 +65,19 @@ class SuggestionEngineTest {
     }
 
     @Test
+    fun supplementaryCharacterInsertionCountsAsOneUnicodeEdit() {
+        val engine = SuggestionEngine()
+        val deseretSmallLongI = String(Character.toChars(0x10428))
+        val result = engine.suggest(
+            prefix = "abx",
+            dictionary = listOf("ab${deseretSmallLongI}x"),
+            limit = 3,
+        )
+
+        assertEquals(listOf("ab${deseretSmallLongI}x"), result)
+    }
+
+    @Test
     fun returnsNothingForNonPositiveLimit() {
         val engine = SuggestionEngine()
         assertEquals(emptyList<String>(), engine.suggest("go", listOf("good"), limit = 0))

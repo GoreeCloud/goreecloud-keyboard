@@ -1,0 +1,176 @@
+schema_version: "0.2"
+
+component:
+  type: application
+  id: goreecloud-keyboard
+  product_name: GoreeCloud Keyboard
+  repository: GoreeCloud/goreecloud-keyboard
+
+lifecycle: development
+version: "0.1.0-dev"
+
+supported_platforms:
+  - android
+
+api:
+  versions: []
+  endpoints: []
+
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - README.md
+    notes: Keyboard is a first-party GoreeCloud application, but canonical Mesh registration and accepted Manager platform visibility are not established.
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/InputPrivacyClassifier.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/InputPrivacyClassifierTest.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicyTest.kt
+      - scripts/check_editor_privacy_lifecycle.py
+      - docs/development/portable-preference-snapshot.md
+      - docs/development/portable-preference-import.md
+      - docs/development/portable-preference-export.md
+      - docs/development/portable-preference-user-transfer.md
+      - docs/development/portable-preference-import-preview.md
+      - docs/development/portable-preference-export-review.md
+    notes: Typed content is highly sensitive. Current source keeps password/sensitive editor handling fail-closed, suppresses local composing/suggestion handling when a host text editor requests no suggestions, keeps inactive/no-editor state sensitive and suggestions-suppressed, treats missing EditorInfo the same way rather than granting ordinary-field behavior, applies current editor policy only from Android's editor-session start/view-start callbacks, and returns to the fail-closed transient policy while clearing composing state and visible candidates at editor-session/view teardown. Explicit user file-transfer scope remains one emoji-category choice, imports preview before any write, exports are reviewed and frozen before destination selection, and only that reviewed category is preserved across ordinary Activity recreation while the document picker owns the flow. Accepted Privacy Shield integration and production privacy validation are not established.
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/InputPrivacyClassifier.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/InputPrivacyClassifierTest.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicyTest.kt
+      - scripts/check_editor_privacy_lifecycle.py
+      - docs/development/portable-preference-import-preview.md
+      - docs/development/portable-preference-export-review.md
+    notes: Keyboard has local sensitive-editor safeguards, host no-suggestions suppression, fail-closed inactive and missing-editor-metadata handling, authoritative editor-session start/finish policy reset with a fail-closed source guard, no Android network permission, bounded explicit file transfer, preview-before-write import behavior, and review-before-destination export behavior with fail-closed restoration of the reviewed category after Activity recreation, but accepted Wardveil Security integration and validation are not established.
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - docs/development/portable-preference-snapshot.md
+      - docs/development/portable-preference-import.md
+      - docs/development/portable-preference-export.md
+      - docs/development/portable-preference-user-transfer.md
+      - docs/development/portable-preference-import-preview.md
+      - docs/development/portable-preference-export-review.md
+    notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, including import preview/Apply, export review/freeze, and minimized reviewed-export lifecycle restoration, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
+  glaze_ui:
+    result: applicable-migration-required
+    version: "1.2.0"
+    evidence:
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
+      - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
+      - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
+      - scripts/check_glaze_motion_evaluation.py
+      - docs/glaze-ui-adoption.md
+    notes: Repository-local Development source now targets current Stable GLAZE UI V1.2 / 1.2.0 at exact release authority f285b9145e27e6e7027b075c37299d101945c272. The native key material consumes V1.2 neutral Frosted Neutral surfaces and preserves V1.2 state/target geometry boundaries; Deep Dark remains source-defined but not runtime-selected. Application-specific rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain required before current conformance can be claimed.
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: Current local typing does not depend on Mesh, but canonical GoreeCloud Mesh registration, capability publication, producer evidence, and runtime acceptance are not established for Keyboard.
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+    notes: Core typing and the local category-only transfer flow require no GoreeCloud account, but accepted Identity integration for any future account-backed personalization or synchronization is not established.
+
+health:
+  health_endpoint: null
+  readiness_endpoint: null
+
+continuity:
+  backup:
+    required: true
+    requirements:
+      - Define the approved minimal Keyboard-owned durable-state backup scope without silently including typed or usage-derived history.
+      - Keep emoji recents, learned input, editor context, suggestions, clipboard data, credentials, telemetry identifiers, and sensitive-editor contents out of recovery scope unless separately reviewed and authorized.
+  restore:
+    required: true
+    requirements:
+      - Preserve validation-before-write for the supported category-only portable preference import.
+      - Require the native user transfer flow to preview the decoded category and obtain explicit Apply confirmation before invoking the category writer.
+      - Treat the explicit Storage Access Framework import as one-field portability, not product-wide clean-target recovery or Everkeep restore acceptance.
+  export:
+    required: true
+    requirements:
+      - Preserve goreecloud-keyboard-preferences/1 as a privacy-minimized format whose current version contains only the explicitly selected emoji category.
+      - Keep typed text, composing context, learned input, suggestion state, emoji recents, search queries, clipboard data, key history, credentials, secrets, and sensitive-editor contents out of portable output.
+      - Keep file export user-initiated through Android's document picker without background URI retention or automatic synchronization.
+      - Review and freeze the one category into a typed export preview before destination selection so mutable local preference changes cannot silently alter the reviewed file contents.
+      - Preserve only the already-reviewed category across Activity recreation while the Android picker owns the flow, and fail closed on missing or altered saved preview state.
+  portability:
+    required: true
+    requirements:
+      - Keep schema expansion explicit and separately reviewed for privacy, retention, user control, and recovery authority.
+      - Preserve the category-only reader, codec, writer, explicit file-transfer, import-preview/confirmation, export-review/freeze, and minimized lifecycle-restoration boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
+
+external_dependencies:
+  - name: Android platform
+    purpose: InputMethodService lifecycle, editor metadata, InputConnection, Storage Access Framework document selection, native confirmation UI, accessibility, configuration, and application execution environment.
+    required: true
+    version_constraint: ">=26"
+
+compatibility:
+  platform_contract: "0.2"
+  glaze_ui_required: "1.2.0"
+  requires:
+    - goreecloud-platform-contract==0.2
+    - glaze-ui==1.2.0
+    - android-api>=26
+  provides:
+    - goreecloud-keyboard-preferences/1
+
+evidence:
+  acceptance_tests: []
+  release: []
+
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence:
+    - README.md
+    - SPECIFICATIONS.md
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/InputPrivacyClassifier.kt
+    - android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt
+    - android/app/src/test/kotlin/com/goreecloud/keyboard/InputPrivacyClassifierTest.kt
+    - android/app/src/test/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicyTest.kt
+    - docs/glaze-ui-adoption.md
+    - scripts/check_glaze_motion_evaluation.py
+    - scripts/check_editor_privacy_lifecycle.py
+    - docs/development/portable-preference-snapshot.md
+    - docs/development/portable-preference-import.md
+    - docs/development/portable-preference-export.md
+    - docs/development/portable-preference-user-transfer.md
+    - docs/development/portable-preference-import-preview.md
+    - docs/development/portable-preference-export-review.md
+  blockers:
+    - GLAZE UI V1.2 / 1.2.0 current-Stable source/material mapping exists, but application-specific rendered, runtime Deep Dark policy, accessibility/resilience, adaptive/form-factor, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
+    - Wardveil Security integration and acceptance are not established.
+    - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
+    - Everkeep integration plus approved product backup and clean-target restore acceptance remain incomplete; the explicit user file flow is only one-field portability.
+    - GoreeCloud Mesh registration, capability publication, and runtime acceptance are not established.
+    - Manager platform visibility and administrative integration acceptance are not established.
+    - Current portability covers only one explicit emoji-category preference and does not include product-wide Keyboard state.
+    - Production signing, distribution, representative-device acceptance, release approval, and Stable qualification remain outstanding.

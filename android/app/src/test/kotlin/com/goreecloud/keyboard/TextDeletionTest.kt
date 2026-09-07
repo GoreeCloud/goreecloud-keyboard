@@ -42,7 +42,58 @@ class TextDeletionTest {
     }
 
     @Test
+    fun regionalIndicatorRunsPairFromTheStart() {
+        assertEquals(1, TextDeletion.previousTextUnitCodePointCount("flags🇦🇧🇨"))
+        assertEquals(2, TextDeletion.previousTextUnitCodePointCount("flags🇦🇧🇨🇩"))
+        assertEquals(1, TextDeletion.previousTextUnitCodePointCount("flags🇦🇧🇨🇩🇪"))
+    }
+
+    @Test
+    fun nonRegionalTextResetsRegionalIndicatorPairing() {
+        assertEquals(2, TextDeletion.previousTextUnitCodePointCount("🇦🇧x🇨🇩"))
+        assertEquals(1, TextDeletion.previousTextUnitCodePointCount("🇦🇧x🇨"))
+    }
+
+    @Test
     fun crlfDeletesAsOneLineBreakUnit() {
         assertEquals(2, TextDeletion.previousTextUnitCodePointCount("line\r\n"))
+    }
+
+    @Test
+    fun truncatedContextRefusesTextUnitThatTouchesLookbehindBoundary() {
+        val context = "a" + "\u0301".repeat(63)
+        assertEquals(
+            0,
+            TextDeletion.previousTextUnitCodePointCount(
+                textBeforeCursor = context,
+                contextMayBeTruncated = true,
+            ),
+        )
+    }
+
+    @Test
+    fun truncatedRegionalIndicatorRunRefusesUnknownPairingParity() {
+        val context = buildString {
+            repeat(16) { append("🇺🇸") }
+        }
+        assertEquals(
+            0,
+            TextDeletion.previousTextUnitCodePointCount(
+                textBeforeCursor = context,
+                contextMayBeTruncated = true,
+            ),
+        )
+    }
+
+    @Test
+    fun truncatedWindowStillDeletesWhenUnitStartIsVisible() {
+        val context = "x".repeat(63) + "y"
+        assertEquals(
+            1,
+            TextDeletion.previousTextUnitCodePointCount(
+                textBeforeCursor = context,
+                contextMayBeTruncated = true,
+            ),
+        )
     }
 }

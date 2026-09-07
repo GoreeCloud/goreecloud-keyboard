@@ -4,121 +4,185 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "docs/glaze-motion-evaluation.md"
 ADOPTION = ROOT / "docs/glaze-ui-adoption.md"
+PLATFORM = ROOT / "goreecloud.platform.yaml"
 TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeMotionExperimentalKeyboardRuntimeTest.kt"
 MAIN = ROOT / "android/app/src/main"
 KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
-REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-STABLE_REVISION = "d19c576336881e44c4795d687d768b3cbb7bdf45"
+ATMOSPHERE = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt"
+MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
+GLAZE_VERSION = "1.2.0"
+GLAZE_SOURCE_REVISION = "f285b9145e27e6e7027b075c37299d101945c272"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"Glaze Motion keyboard evaluation failed: {message}")
+    raise SystemExit(f"Keyboard GLAZE UI V1.2 / Platform Contract v0.2 boundary failed: {message}")
+
+
+def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
+    for marker in markers:
+        if marker not in text:
+            fail(f"{label} missing `{marker}`")
 
 
 def main() -> None:
-    for path in (DOC, ADOPTION, TEST, KEYBOARD_VIEW, TOKENS):
+    for path in (DOC, ADOPTION, PLATFORM, TEST, KEYBOARD_VIEW, TOKENS, ATMOSPHERE):
         if not path.is_file():
             fail(f"missing required evidence: {path.relative_to(ROOT)}")
 
     doc_text = DOC.read_text(encoding="utf-8")
     adoption_text = ADOPTION.read_text(encoding="utf-8")
+    platform_text = PLATFORM.read_text(encoding="utf-8")
     test_text = TEST.read_text(encoding="utf-8")
     view_text = KEYBOARD_VIEW.read_text(encoding="utf-8")
     token_text = TOKENS.read_text(encoding="utf-8")
+    atmosphere_text = ATMOSPHERE.read_text(encoding="utf-8")
 
-    required_doc = [
-        "Lifecycle: **Experimental 0.5**",
-        f"Reviewed canonical revision: `{REFERENCE_REVISION}`",
-        "Runtime compatibility baseline: **0.4.0**",
-        "Evaluation mode: **native Android interaction mapping, test-only**",
-        "Production dependency: **no**",
-        "Glaze UI 2.0 Stable is the production design-system authority.",
-        "insufficient for Candidate promotion by itself",
-    ]
-    for evidence in required_doc:
-        if evidence not in doc_text:
-            fail(f"missing lifecycle or evidence boundary `{evidence}`")
+    require_all(
+        "Motion boundary",
+        doc_text,
+        (
+            "Lifecycle: **Experimental 0.5**",
+            f"Reviewed canonical revision: `{MOTION_REFERENCE_REVISION}`",
+            "Runtime compatibility baseline: **0.4.0**",
+            "Evaluation mode: **native Android interaction mapping, test-only**",
+            "Production dependency: **no**",
+            "GLAZE UI V1.2 (`1.2.0`) is the current Stable",
+            "Motion remains separately Experimental",
+            "insufficient for promotion by itself",
+        ),
+    )
 
-    required_adoption = [
-        "# Glaze UI 2.0 Adoption Candidate — GoreeCloud Keyboard",
-        "Status: **Adoption Candidate**",
-        "Required Stable baseline: **Glaze UI 2.0.0**",
-        f"Reviewed canonical Stable revision: `{STABLE_REVISION}`",
-        "Production eligible on the Glaze UI gate: **no**",
-        "48 dp general interaction floor",
-        "14 dp `radius.md` token",
-        "Dark maps the canonical canvas",
-        "Deep Dark remains unimplemented",
-        "Glaze UI 2.0 Stable is the production design-system authority.",
-        "Experimental Glaze Motion remains test-only and is not a production dependency.",
-    ]
-    for evidence in required_adoption:
-        if evidence not in adoption_text:
-            fail(f"missing Glaze UI adoption boundary `{evidence}`")
+    require_all(
+        "V1.2 adoption record",
+        adoption_text,
+        (
+            "# GLAZE UI V1.2 Migration — GoreeCloud Keyboard",
+            "Status: **Migration in progress / Development**",
+            "Official target: **GLAZE UI V1.2 (`1.2.0`)**",
+            f"Exact Stable source authority: `{GLAZE_SOURCE_REVISION}`",
+            "Production eligible on the Glaze UI gate: **no**",
+            "does **not** establish complete V1.2 consumer conformance",
+            "Neutral glass is the material. Color is an accent.",
+            "V1.2 pressed, selected, focus, and increased-contrast focus calibration",
+            "Deep Dark source material is explicitly defined",
+            "KeyboardView` continues to select only Light/Dark from Android night mode",
+            "default chromatic material tint contribution is zero",
+            "editor/content sampling",
+            "one-field `goreecloud-keyboard-preferences/1` portability boundary remains unchanged",
+            "Glaze Motion 0.5 evaluation remains test-only",
+        ),
+    )
 
-    for stale in (
-        "Required Stable baseline: **Glaze UI 1.6.0**",
-        "Glaze UI 1.6 Stable remains the production design-system authority.",
-        "Required Stable baseline: **Glaze UI 1.5.0**",
-        "Glaze UI 1.5 Stable remains the production design-system authority.",
-        "12 dp medium utility radius",
-    ):
-        if stale in adoption_text or stale in doc_text:
-            fail(f"stale Stable adoption boundary remains active: `{stale}`")
+    require_all(
+        "V1.2 token mapping",
+        token_text,
+        (
+            f'const val TargetVersion = "{GLAZE_VERSION}"',
+            f'const val SourceRevision = "{GLAZE_SOURCE_REVISION}"',
+            "enum class Appearance { LIGHT, DARK, DEEP_DARK }",
+            "const val Space1Dp = 4f",
+            "const val Space2Dp = 8f",
+            "const val RadiusMediumDp = 12f",
+            "const val GeneralInteractionFloorDp = 48f",
+            "const val TouchAssistanceInteractionFloorDp = 56f",
+            "const val OpticalMicroDp = 8f",
+            "const val OpticalControlDp = 16f",
+            "const val OpticalContainerDp = 24f",
+            "const val OpticalHeroDp = 32f",
+            "const val OpticalCapsuleDp = 999f",
+            "const val PressedOverlayOpacity = 0.095f",
+            "const val SelectedOverlayOpacity = 0.12f",
+            "const val FocusWidthDp = 3f",
+            "const val IncreasedContrastFocusWidthDp = 4f",
+            "0x94FFFFFF",
+            "0x9E19191B",
+            "0xB80E0E10",
+            "0x1A505050",
+            "0x1AFFFFFF",
+            "0x17FFFFFF",
+            "Appearance.DEEP_DARK -> DeepDarkPalette",
+            "fun stateOverlayArgb(",
+        ),
+    )
 
-    required_tokens = [
-        "enum class Appearance { LIGHT, DARK }",
-        "const val Space1Dp = 4f",
-        "const val Space2Dp = 8f",
-        "const val RadiusMediumDp = 14f",
-        "const val GeneralInteractionFloorDp = 48f",
-        "const val SuggestionStripHeightDp = GeneralInteractionFloorDp",
-        "0xFFEEF3F9",
-        "0xC2FFFFFF",
-        "0xFF172033",
-        "0xFF67748A",
-        "0xFF0D1119",
-        "0xC719202D",
-        "0xFFF3F6FB",
-        "0xFFA1AEC0",
-    ]
-    for evidence in required_tokens:
-        if evidence not in token_text:
-            fail(f"missing Glaze UI 2.0 source mapping `{evidence}`")
+    require_all(
+        "V1.2 atmosphere/material boundary",
+        atmosphere_text,
+        (
+            "Non-semantic GLAZE UI V1.2 Frosted Optical atmosphere/material boundary",
+            "Neutral glass is the material. Color is an accent.",
+            "const val DefaultMaterialTintContribution = 0f",
+            "const val TealAsBaseMaterialAllowed = false",
+            "const val GreenAsBaseMaterialAllowed = false",
+            "const val AquaAsBaseMaterialAllowed = false",
+            "const val AmberAsBaseMaterialAllowed = false",
+            "const val BrandColorMayDefineSubstrate = false",
+            "const val SemanticColorMayDefineSubstrate = false",
+            "const val EnvironmentalColorMemoryEnabled = false",
+            "const val RemoteColorDerivationAllowed = false",
+            "const val PersistentSampleHistoryAllowed = false",
+            "const val SemanticInferenceAllowed = false",
+            "const val AnimatedAtmosphereEnabled = false",
+            "No editor/content",
+        ),
+    )
 
-    required_test = [
-        f'const val REFERENCE_REVISION = "{REFERENCE_REVISION}"',
-        'const val VERSION = "0.5.0"',
-        'const val RUNTIME_BASELINE = "0.4.0"',
-        "Settings.Global.ANIMATOR_DURATION_SCALE",
-        "allowsOptionalSettling(",
-        "KeyboardView(context)",
-        "dispatchTouchEvent(event)",
-    ]
-    for evidence in required_test:
-        if evidence not in test_text:
-            fail(f"missing native test-only evidence `{evidence}`")
+    require_all(
+        "Platform Contract v0.2",
+        platform_text,
+        (
+            'schema_version: "0.2"',
+            "  id: goreecloud-keyboard",
+            '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.2.0"',
+            "android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt",
+            '  platform_contract: "0.2"',
+            '  glaze_ui_required: "1.2.0"',
+            "goreecloud-platform-contract==0.2",
+            "glaze-ui==1.2.0",
+            "conformance:\n  status: nonconformant",
+            "runtime Deep Dark policy",
+        ),
+    )
 
-    required_consumer = [
-        "class KeyboardView",
-        "Configuration.UI_MODE_NIGHT_MASK",
-        "GlazeKeyboardTokens.Appearance.DARK",
-        "GlazeKeyboardTokens.Appearance.LIGHT",
-        "GlazeKeyboardTokens.palette(appearance)",
-        "GlazeKeyboardTokens.SuggestionStripHeightDp",
-        "GlazeKeyboardTokens.RadiusMediumDp",
-        "override fun onTouchEvent(event: MotionEvent)",
-        "listener?.onSuggestion(hit.value)",
-        "Action.TEXT -> {",
-        "emojiRecents.record(hit.key.label)",
-        "listener?.onText(hit.key.label)",
-        "performClick()",
-    ]
-    for evidence in required_consumer:
-        if evidence not in view_text:
-            fail(f"representative Keyboard interaction surface no longer exposes `{evidence}`")
+    require_all(
+        "representative Keyboard runtime",
+        view_text,
+        (
+            "class KeyboardView",
+            "Configuration.UI_MODE_NIGHT_MASK",
+            "GlazeKeyboardTokens.Appearance.DARK",
+            "GlazeKeyboardTokens.Appearance.LIGHT",
+            "GlazeKeyboardTokens.palette(appearance)",
+            "GlazeKeyboardTokens.SuggestionStripHeightDp",
+            "GlazeKeyboardTokens.RadiusMediumDp",
+            "override fun onTouchEvent(event: MotionEvent)",
+            "listener?.onSuggestion(hit.value)",
+            "emojiRecents.record(hit.key.label)",
+            "listener?.onText(hit.key.label)",
+            "performClick()",
+        ),
+    )
+
+    if "Appearance.DEEP_DARK" in view_text:
+        fail("KeyboardView must not infer or auto-select Deep Dark in this source-mapping slice")
+    if "GlazeKeyboardAtmosphere" in view_text:
+        fail("KeyboardView must not render optional V1.2 atmosphere in this source-mapping slice")
+
+    require_all(
+        "native test-only Motion evidence",
+        test_text,
+        (
+            f'const val REFERENCE_REVISION = "{MOTION_REFERENCE_REVISION}"',
+            'const val VERSION = "0.5.0"',
+            'const val RUNTIME_BASELINE = "0.4.0"',
+            "Settings.Global.ANIMATOR_DURATION_SCALE",
+            "allowsOptionalSettling(",
+            "KeyboardView(context)",
+            "dispatchTouchEvent(event)",
+        ),
+    )
 
     production_hits = []
     for path in MAIN.rglob("*.kt"):
@@ -126,13 +190,29 @@ def main() -> None:
             production_hits.append(str(path.relative_to(ROOT)))
     if production_hits:
         fail(
-            "Experimental mapping escaped test quarantine into production source: "
+            "Experimental Motion escaped test quarantine into production source: "
             + ", ".join(production_hits)
         )
 
+    active_records = adoption_text + "\n" + doc_text + "\n" + token_text + "\n" + platform_text
+    for stale in (
+        "Official target: **GLAZE UI V1.0 (`1.0.0`)**",
+        "Official target: **GLAZE UI V1.1 (`1.1.0`)**",
+        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.0.0"',
+        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.1.0"',
+        "Glaze UI 2.2.0 Stable is the production design-system authority.",
+        "Required Stable baseline: **Glaze UI 2.2.0**",
+        "stable_eligible: true",
+    ):
+        if stale in active_records:
+            fail(f"active evidence retains stale design-system boundary `{stale}`")
+
     print(
-        "Glaze UI 2.0 Keyboard Adoption Candidate + Glaze Motion 0.5 test-only boundary passed: "
-        "current Stable Light/Dark source mapping validated and Experimental Motion remains quarantined."
+        "Keyboard GLAZE UI V1.2 source/material mapping + Glaze Motion 0.5 test-only boundary passed: "
+        f"source target {GLAZE_VERSION}, source {GLAZE_SOURCE_REVISION}; Platform Contract v0.2 remains "
+        "migration-required/nonconformant; Keyboard runtime remains Android Light/Dark only; V1.2 neutral material is active; "
+        "optional atmosphere remains non-semantic; Experimental Motion remains quarantined; "
+        "rendered/accessibility/device/release acceptance remains separate."
     )
 
 

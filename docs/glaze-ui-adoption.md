@@ -1,41 +1,100 @@
-# Glaze UI 2.0 Adoption Candidate — GoreeCloud Keyboard
+# GLAZE UI V1.2 Migration — GoreeCloud Keyboard
 
-Status: **Adoption Candidate**  
-Required Stable baseline: **Glaze UI 2.0.0**  
-Reviewed canonical Stable revision: `d19c576336881e44c4795d687d768b3cbb7bdf45`  
+Status: **Migration in progress / Development**  
+Official target: **GLAZE UI V1.2 (`1.2.0`)**  
+Canonical repository: `GoreeCloud/goreecloud-glaze-ui`  
+Exact Stable source authority: `f285b9145e27e6e7027b075c37299d101945c272`  
 Production eligible on the Glaze UI gate: **no**
 
 ## Scope
 
-GoreeCloud Keyboard targets Glaze UI 2.0.0 as the current Stable design-system authority for keyboard geometry, spacing, interaction feedback, accessibility, visual state, and adaptive presentation. This record establishes current-Stable migration work; it does not claim complete Glaze UI 2.0 conformance or production acceptance.
+GLAZE UI V1.2 / `1.2.0` is the current Stable GoreeCloud design-system target. This repository-local migration maps the applicable V1.2 foundation, Frosted Neutral material, appearance, geometry, target-size, and interaction-state contract into GoreeCloud Keyboard's first-party Android surface. It does **not** establish complete V1.2 consumer conformance, production acceptance, representative-device acceptance, signed release, or Stable qualification. GLAZE UI V1.1 / `1.1.0` remains the prior known-good Stable rollback anchor; V1.0 and pre-reset Glaze evidence remain historical migration evidence only.
 
-The current native Android surface remains a first-party `KeyboardView`. The migration maps only semantics published by the canonical Stable token map and actually consumed by this surface rather than importing a web runtime or third-party keyboard implementation.
+The native surface remains first-party `KeyboardView`; no web runtime, remote UI layer, network permission, analytics, advertising, or Experimental Motion production dependency is introduced.
 
-## Implemented 2.0 mapping
+## Implemented V1.2 source mapping
 
-- `GlazeKeyboardTokens` maps the current 4 dp and 8 dp spacing steps used by the keyboard surface.
-- Key geometry follows the current 14 dp `radius.md` token.
-- The suggestion strip uses the 48 dp general interaction floor.
-- Light maps the canonical canvas, surface, text, muted-text, and line values.
-- Dark maps the canonical canvas, surface, text, muted-text, and line values and `KeyboardView` selects it from Android night mode at draw time.
-- Deep Dark remains unimplemented because the current Stable semantic map names the appearance but does not publish a separate concrete Deep Dark color block in `tokens/glaze.tokens.json`; Keyboard will not invent downstream values.
-- Existing local Quill suggestions, private-editor gating, bounded typo correction, and key-release semantics remain first-party and on-device.
-- No Android network permission, remote UI dependency, analytics, advertising, or Experimental Motion production dependency is introduced.
+- `GlazeKeyboardTokens.TargetVersion` is `1.2.0` and `SourceRevision` pins Stable release commit `f285b9145e27e6e7027b075c37299d101945c272`.
+- Governing material rule: **Neutral glass is the material. Color is an accent.**
+- Inherited spacing consumed by the keyboard remains 4 dp and 8 dp.
+- Existing `RadiusMediumDp` remains a source-compatible alias for the V1.2 12 dp control radius role.
+- The suggestion strip and ordinary interaction floor remain 48 dp; the bounded map retains the 56 dp Touch Assistance / far-view floor without claiming platform preference resolution.
+- Optical geometry references 8/16/24/32 dp plus capsule remain separate from structural radius and hit-target authority.
+- V1.2 pressed, selected, focus, and increased-contrast focus calibration is represented explicitly in repository-local tokens.
+- Light keys now consume the V1.2 neutral base-glass material `rgba(255,255,255,0.58)` rather than the older V1.1 material mapping.
+- Dark keys now consume the V1.2 neutral base-glass material `rgba(25,25,27,0.62)`.
+- Deep Dark source material is explicitly defined as `rgba(14,14,16,0.72)` with the V1.2 structural border family.
+- `KeyboardView` continues to select only Light/Dark from Android night mode at draw time. Ordinary Android dark mode is not silently treated as Deep Dark. No new user appearance preference is added by this slice.
+- `GlazeKeyboardAtmosphere` now records the V1.2 neutral-substrate boundary: default chromatic material tint contribution is zero; teal, green, aqua, amber, brand, and semantic color cannot define the keyboard substrate.
+- Environmental aura remains optional and external to the substrate. Environmental Color Memory, editor/content sampling, remote color derivation, persistent sample history, semantic inference, telemetry, network lookup, and animated atmosphere remain disabled/not authorized.
+- Keyboard remains an **Application** surface. Long-press alternates and local emoji search remain local input interactions, not Control Center or Universal Search.
+- Existing Quill suggestions, sensitive-editor gating, typo correction, emoji, alternate-character, deletion, and key-release semantics remain first-party and on-device.
+
+## V1.2 authority and presentation boundary
+
+Keyboard follows V1.2's material and interaction hierarchy while retaining the inherited principle: **Solid where users read or make explicit critical decisions. Glazed where users interact with transient navigation, command, search, control, or feedback chrome.** For an IME, key labels, suggestion content, selection/focus indication, and sensitive-input behavior are higher priority than optical effects.
+
+The V1.2 authority order remains controlling: producer-authoritative protected meaning and accessibility resolution precede optical presentation. Removing blur, translucency, aura, or other advanced effects must never remove content, actions, focus, semantic state, hierarchy, or target size.
+
+Accent color cannot mean privacy, security, protection, identity, recovery, synchronization, availability, sensitive-editor state, focus, or selection unless the applicable authoritative semantic contract explicitly grants that meaning. Glaze presentation grants no clipboard, editor-observation, learning, network, Identity, Mesh, Everkeep, Privacy Shield, or Wardveil Security authority.
+
+## Privacy boundary
+
+The V1.2 migration adds no new observation path. In particular it adds no:
+
+- typed/composing/surrounding text read;
+- suggestion or learned-input persistence;
+- emoji-recents or emoji-search export;
+- clipboard access;
+- editor/content sampling for color;
+- telemetry or analytics;
+- remote design or color derivation;
+- network permission;
+- Identity or Mesh session; or
+- background synchronization.
+
+The existing one-field `goreecloud-keyboard-preferences/1` portability boundary remains unchanged and still contains only the explicitly selected emoji category.
 
 ## Repository-local evidence
 
-- `android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt` is the first-party rendering and pointer-input surface and resolves Light/Dark from Android configuration.
-- `android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt` is the bounded Stable token mapping used by that surface.
-- `GlazeKeyboardTokensTest` locks current geometry plus Light/Dark token values.
-- The Android manifest requests no network permission.
-- Unit tests cover local suggestion, correction, sensitive-editor, and Glaze token boundaries.
-- Android CI runs repository-local Glaze UI / Glaze Motion governance checks, unit tests, debug assembly, and a dedicated emulator runtime job.
-- Experimental Glaze Motion evaluation remains quarantined to documentation, validation tooling, and Android test source.
+- `android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt` — first-party rendering/pointer-input surface; consumes the neutral V1.2 key material while retaining Android Light/Dark runtime selection.
+- `android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt` — bounded V1.2 structural/material/state source mapping including explicit Deep Dark source values.
+- `android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt` — V1.2 neutral-substrate and non-semantic atmosphere boundary.
+- `android/app/src/main/kotlin/com/goreecloud/keyboard/AlternatePopupLayout.kt` — viewport-bounded long-press geometry/hit-test authority.
+- `GlazeKeyboardTokensTest` — exact V1.2 provenance, inherited geometry, neutral Light/Dark/Deep Dark materials, state calibration, interaction floors, and atmosphere-observation/tinting assertions.
+- `AlternatePopupLayoutTest` — normal, edge, compact multi-row, failure, gap/unused-cell, outside-point, and non-finite hit-test behavior.
+- Android manifest — no network permission.
+- Android CI — repository Glaze/Motion governance, JVM tests, debug assembly, and native emulator interaction validation.
 
-## Remaining application gates
+## Acceptance still required
 
-This Adoption Candidate does not establish rendered Dark acceptance, Deep Dark implementation/acceptance, complete Soft Glaze/Glaze/Deep Glaze/Live Glaze role mapping, complete 2.0 motion/reduced-motion behavior, expression modes, adaptive phone/tablet acceptance, large-text/reflow acceptance, increased-contrast/reduced-transparency acceptance, TalkBack/switch-access acceptance, representative physical-device acceptance, or production release acceptance.
+This source migration still does not establish:
 
-The current custom Android surface can still be constrained by host IME geometry; the 48 dp mapping and Light/Dark appearance must therefore be validated on representative devices and accessibility configurations before production acceptance.
+- a reviewed runtime policy for selecting Deep Dark, if Keyboard should expose one;
+- complete V1.2 component/state/material-role mapping across every keyboard/settings surface;
+- Reduced Transparency / solid fallback acceptance;
+- Increased Contrast and forced-colors/native-equivalent acceptance;
+- Reduced Motion;
+- 200% large-text/reflow within host IME constraints;
+- platform Touch Assistance detection and 56 dp assisted geometry;
+- RTL/localization expansion;
+- TalkBack/Switch Access acceptance;
+- representative phone/tablet/foldable and host-IME adaptation;
+- representative physical-device long-press/slide/release ergonomics;
+- representative physical-device performance, power, thermal, and latency acceptance;
+- Human Visual Excellence review of the actual Keyboard consumer;
+- Privacy Shield and Wardveil Security acceptance appropriate to sensitive input processing;
+- Everkeep acceptance for any approved durable-state recovery scope;
+- Mesh/Identity integration only where applicable and authorized;
+- Manager visibility/administrative integration where required; or
+- production signing, distribution, release approval, and Stable qualification.
 
-Glaze UI 2.0 Stable is the production design-system authority. Experimental Glaze Motion remains test-only and is not a production dependency.
+Source/build/emulator success remains Development evidence only until those applicable runtime and release gates are satisfied.
+
+## Glaze Motion boundary
+
+Historical Glaze Motion 0.5 evaluation remains test-only. Glaze Motion is separately governed Experimental work and is not promoted by V1.2. It is not a production dependency and cannot establish V1.2 consumer acceptance.
+
+## Rollback
+
+If this V1.2 source/material migration causes a regression, revert the exact Keyboard V1.2 migration commit/merge to the prior validated Keyboard V1.1 source-mapping revision. GLAZE UI V1.1 / `1.1.0` remains the prior known-good Stable design-system rollback anchor. Do not weaken the canonical V1.2 contract or reactivate an older release as the current product target merely to bypass a consumer defect.

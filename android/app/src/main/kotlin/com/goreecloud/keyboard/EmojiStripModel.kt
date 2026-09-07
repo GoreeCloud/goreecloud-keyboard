@@ -6,10 +6,18 @@ data class EmojiStripEntry(
     val category: EmojiCategory? = null,
     val recent: Boolean = false,
     val clearRecents: Boolean = false,
+    val search: Boolean = false,
 )
 
 object EmojiStripModel {
     fun entries(hasRecents: Boolean): List<EmojiStripEntry> = buildList {
+        add(
+            EmojiStripEntry(
+                visibleLabel = "⌕",
+                accessibilityLabel = "Search emoji",
+                search = true,
+            ),
+        )
         if (hasRecents) {
             add(
                 EmojiStripEntry(
