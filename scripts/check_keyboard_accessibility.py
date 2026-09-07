@@ -6,6 +6,7 @@ VIEW = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.
 DELEGATE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt"
 TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt"
 GRADLE = ROOT / "android/app/build.gradle.kts"
+DOC = ROOT / "docs/development/accessibility-alternate-actions.md"
 
 
 def fail(message: str) -> None:
@@ -19,7 +20,7 @@ def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
 
 
 def main() -> None:
-    for path in (VIEW, DELEGATE, TEST, GRADLE):
+    for path in (VIEW, DELEGATE, TEST, GRADLE, DOC):
         if not path.is_file():
             fail(f"missing required evidence: {path.relative_to(ROOT)}")
 
@@ -27,6 +28,7 @@ def main() -> None:
     delegate_text = DELEGATE.read_text(encoding="utf-8")
     test_text = TEST.read_text(encoding="utf-8")
     gradle_text = GRADLE.read_text(encoding="utf-8")
+    doc_text = DOC.read_text(encoding="utf-8")
 
     require_all(
         "KeyboardView virtual-control integration",
@@ -69,6 +71,20 @@ def main() -> None:
     )
 
     require_all(
+        "deterministic accessible alternate actions",
+        delegate_text,
+        (
+            "private fun alternateActionsFor(target: KeyboardAccessibilityTarget)",
+            'it.label == "Close emoji search"',
+            "KeyAlternates.forKey(target.label)",
+            '"Insert $value"',
+            "ALTERNATE_ACTION_BASE + index",
+            "keyboardView.listener?.onText(alternate)",
+            'keyboardView.announceForAccessibility("Inserted alternate character $alternate")',
+        ),
+    )
+
+    require_all(
         "Android virtual-node runtime evidence",
         test_text,
         (
@@ -80,6 +96,23 @@ def main() -> None:
             'it.label == "Clear emoji search"',
             'it.label == "Close emoji search"',
             'it.label == "Shift"',
+            '"Insert á"',
+            '"Insert æ"',
+            '"Insert Á"',
+            'startsWith("Insert ")',
+        ),
+    )
+
+    require_all(
+        "accessible alternate Development record",
+        doc_text,
+        (
+            "# Accessible Alternate Character Actions — Development",
+            "deterministic device-local key alternates",
+            "custom Android accessibility action",
+            "KeyboardView.Listener.onText",
+            "emoji-search keyboard never exposes editor alternate actions",
+            "Representative TalkBack and Switch Access validation on physical devices remains required",
         ),
     )
 
@@ -102,9 +135,10 @@ def main() -> None:
             fail(f"accessibility delegate gained forbidden data authority `{forbidden}`")
 
     print(
-        "Keyboard virtual accessibility boundary passed: custom-drawn keys, suggestions, emoji categories, "
-        "and local emoji-search results expose actionable virtual nodes without editor, clipboard, persistence, "
-        "or network authority. Representative TalkBack/Switch Access physical-device acceptance remains separate."
+        "Keyboard virtual accessibility boundary passed: custom-drawn keys, suggestions, emoji controls, "
+        "and local emoji-search results expose actionable virtual nodes; deterministic key alternates are available "
+        "as direct node actions outside emoji-search query mode; no editor, clipboard, persistence, or network "
+        "authority was added. Representative TalkBack/Switch Access physical-device acceptance remains separate."
     )
 
 
