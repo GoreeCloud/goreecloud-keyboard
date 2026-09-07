@@ -17,6 +17,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "SOURCE_SHA=$ACTUAL_SHA" >> "$GITHUB_ENV"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -43,6 +55,39 @@ jobs:
 
       - name: Build debug APK
         run: gradle :android:app:assembleDebug --stacktrace
+
+      - name: Stage self-verifying Keyboard Development APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          ARTIFACT_ROOT="artifact-keyboard-android"
+          rm -rf "$ARTIFACT_ROOT"
+          mkdir -p "$ARTIFACT_ROOT"
+          cp "$APK" "$ARTIFACT_ROOT/GoreeCloudKeyboard-debug.apk"
+          cat > "$ARTIFACT_ROOT/BUILD-PROVENANCE.txt" <<EOF
+          repository=GoreeCloud/goreecloud-keyboard
+          source_sha=$SOURCE_SHA
+          version_name=0.1.0-dev
+          application_id=com.goreecloud.keyboard
+          artifact_role=android-keyboard-development-acceptance
+          signing_role=ci-debug-installability-only
+          stable_release_authority=none
+          EOF
+          (
+            cd "$ARTIFACT_ROOT"
+            sha256sum GoreeCloudKeyboard-debug.apk > SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+
+      - name: Upload Keyboard Development APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-keyboard-android-dev-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
+          retention-days: 30
+          path: artifact-keyboard-android/*
 
   motion-runtime-emulator:
     needs: build
