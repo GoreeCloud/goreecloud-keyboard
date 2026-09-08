@@ -63,6 +63,7 @@ internal class KeyboardAccessibilityDelegate(
         node.isFocusable = true
         node.isClickable = true
         node.isSelected = target.selected
+        node.stateDescription = stateDescriptionFor(target)
         node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK)
 
         val alternates = alternatesFor(target)
@@ -118,6 +119,14 @@ internal class KeyboardAccessibilityDelegate(
 
     fun invalidateVirtualRoot() {
         invalidateRoot()
+    }
+
+    private fun stateDescriptionFor(target: KeyboardAccessibilityTarget): CharSequence? = when {
+        target.label == "Shift" -> keyboardView.context.getString(
+            if (target.selected) R.string.accessibility_state_on else R.string.accessibility_state_off,
+        )
+        target.selected -> keyboardView.context.getString(R.string.accessibility_state_selected)
+        else -> null
     }
 
     private fun alternatesFor(target: KeyboardAccessibilityTarget): List<String> {
