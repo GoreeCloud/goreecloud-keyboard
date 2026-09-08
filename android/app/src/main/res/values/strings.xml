@@ -13,6 +13,12 @@
     <string name="accessibility_alternates_announcement">Alternate characters: %1$s</string>
     <string name="accessibility_inserted_alternate">Inserted alternate character %1$s</string>
 
+    <string name="keyboard_settings_title">GoreeCloud Keyboard settings</string>
+    <string name="keyboard_settings_typing_heading">Typing layout</string>
+    <string name="keyboard_settings_number_row">Show number row</string>
+    <string name="keyboard_settings_number_row_summary">Keep 1–0 visible above QWERTY. Changes apply the next time the keyboard opens.</string>
+    <string name="keyboard_settings_portability_heading">Portable preference</string>
+
     <string name="portable_preferences_title">Portable preference</string>
     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>
     <string name="portable_preferences_current_category">Current category: %1$s</string>
