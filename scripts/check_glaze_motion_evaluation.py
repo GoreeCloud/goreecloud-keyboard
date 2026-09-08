@@ -12,7 +12,7 @@ TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 ATMOSPHERE = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt"
 MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
 SOURCE_GLAZE_VERSION = "1.2.0"
-GOVERNED_GLAZE_BASELINE = "1.1.0"
+GOVERNED_GLAZE_BASELINE = "1.2.0"
 GLAZE_SOURCE_REVISION = "f285b9145e27e6e7027b075c37299d101945c272"
 MARKER = "GlazeMotionExperimental"
 
@@ -51,8 +51,8 @@ def main() -> None:
             "Runtime compatibility baseline: **0.4.0**",
             "Evaluation mode: **native Android interaction mapping, test-only**",
             "Production dependency: **no**",
-            "V1.2 is **not** the governed Stable application-consumer baseline",
-            f"GLAZE UI V1.1 / `{GOVERNED_GLAZE_BASELINE}`",
+            "V1.2 is the governed Stable application-consumer baseline",
+            f"GLAZE UI V1.2 / `{GOVERNED_GLAZE_BASELINE}`",
             "Motion remains separately Experimental",
             "insufficient for promotion by itself",
         ),
@@ -65,7 +65,7 @@ def main() -> None:
             "# GLAZE UI V1.2 Development Source Mapping — GoreeCloud Keyboard",
             "Status: **Migration in progress / Development**",
             f"Repository-local source target: **GLAZE UI V1.2 (`{SOURCE_GLAZE_VERSION}`)**",
-            f"Governed Stable consumer baseline: **GLAZE UI V1.1 (`{GOVERNED_GLAZE_BASELINE}`)**",
+            f"Governed Stable consumer baseline: **GLAZE UI V1.2 (`{GOVERNED_GLAZE_BASELINE}`)**",
             f"Reviewed V1.2 source reference: `{GLAZE_SOURCE_REVISION}`",
             "Production eligible on the Glaze UI gate: **no**",
             "applicable-migration-required",
@@ -126,7 +126,7 @@ def main() -> None:
             "goreecloud-platform-contract==0.2",
             f"glaze-ui=={GOVERNED_GLAZE_BASELINE}",
             "conformance:\n  status: nonconformant",
-            "known immutable import-closure defect",
+            "rendered/accessibility/adaptive/representative-device/Human Visual Excellence acceptance",
         ),
     )
 
@@ -179,11 +179,6 @@ def main() -> None:
 
     active_records = adoption_text + "\n" + doc_text + "\n" + platform_text
     false_authority_claims = (
-        "GLAZE UI V1.2 (`1.2.0`) is the current Stable",
-        "GLAZE UI V1.2 / `1.2.0` is the current Stable",
-        "Exact Stable source authority",
-        '  glaze_ui_required: "1.2.0"',
-        "glaze-ui==1.2.0",
         "Glaze UI 2.2.0 Stable is the production design-system authority.",
         "Required Stable baseline: **Glaze UI 2.2.0**",
         "stable_eligible: true",
