@@ -22,6 +22,8 @@ The bounded evaluation checks actual key and suggestion activation behavior unde
 
 ## Boundary
 
-Keyboard currently contains a repository-local GLAZE UI V1.2 (`1.2.0`) Development source/material mapping. V1.2 is **not** the governed Stable application-consumer baseline. Current governed Stable consumer authority remains GLAZE UI V1.1 / `1.1.0`, and its known immutable import-closure defect requires a corrected governed Stable release before downstream conformance can be claimed. The Keyboard V1.2 source mapping is therefore migration-required and separately gated; this Glaze Motion evaluation provides no V1.2 production, Stable, or conformance evidence. Motion remains separately Experimental.
+Keyboard targets the current **GLAZE UI V1.2 / `1.2.0` Stable** consumer line at exact promotion revision `f285b9145e27e6e7027b075c37299d101945c272`. Its native source maps Frosted Neutral material, interaction targets, optical geometry, pressed-state feedback, and bounded accessibility behavior to that Stable design authority.
+
+This Glaze Motion document remains separate: Motion 0.5 is still Experimental/test-only and supplies no production Motion authority, no additional V1.2 conformance evidence, and no Release Candidate evidence. A Stable Glaze UI design-system target does not promote an independently Experimental Motion subsystem.
 
 This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or Switch Access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for promotion by itself and does not establish adoption of a later Glaze Motion revision.
