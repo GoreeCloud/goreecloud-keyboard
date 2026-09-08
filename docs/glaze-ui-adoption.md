@@ -2,14 +2,14 @@
 
 Status: **Migration in progress / Development**  
 Repository-local source target: **GLAZE UI V1.2 (`1.2.0`)**  
-Governed Stable consumer baseline: **GLAZE UI V1.1 (`1.1.0`)**  
+Governed Stable consumer baseline: **GLAZE UI V1.2 (`1.2.0`)**  
 Canonical repository: `GoreeCloud/goreecloud-glaze-ui`  
 Reviewed V1.2 source reference: `f285b9145e27e6e7027b075c37299d101945c272`  
 Production eligible on the Glaze UI gate: **no**
 
 ## Scope
 
-This repository currently carries a Development source/material mapping derived from GLAZE UI V1.2 / `1.2.0`. That mapping is **not** a governed Stable application-consumer authority. Current governed Stable consumer authority remains GLAZE UI V1.1 / `1.1.0`; the immutable `1.1.0` source has a known import-closure defect and requires a corrected governed Stable release before downstream conformance can be established. Keyboard therefore remains `applicable-migration-required` even though its local source tokens currently model V1.2 Frosted Neutral material and interaction states.
+This repository currently carries a Development source/material mapping derived from GLAZE UI V1.2 / `1.2.0`. That mapping is **not** a governed Stable application-consumer authority. Current governed Stable consumer authority remains GLAZE UI V1.2 / `1.2.0`; the immutable `1.1.0` source has a known import-closure defect and requires a corrected governed Stable release before downstream conformance can be established. Keyboard therefore remains `applicable-migration-required` even though its local source tokens currently model V1.2 Frosted Neutral material and interaction states.
 
 The repository-local mapping covers applicable V1.2 foundation, Frosted Neutral material, appearance, geometry, target-size, interaction-state, and bounded native accessibility behavior in GoreeCloud Keyboard's first-party Android surface. It does **not** establish complete V1.2 consumer conformance, governed release adoption, production acceptance, representative-device acceptance, signed release, Release Candidate entry, or Stable qualification.
 
