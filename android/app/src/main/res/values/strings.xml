@@ -4,6 +4,10 @@
     <string name="ime_name">GoreeCloud Keyboard</string>
     <string name="subtype_en_us">English (United States)</string>
 
+    <string name="accessibility_state_on">On</string>
+    <string name="accessibility_state_off">Off</string>
+    <string name="accessibility_state_selected">Selected</string>
+
     <string name="portable_preferences_title">Portable preference</string>
     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>
     <string name="portable_preferences_current_category">Current category: %1$s</string>

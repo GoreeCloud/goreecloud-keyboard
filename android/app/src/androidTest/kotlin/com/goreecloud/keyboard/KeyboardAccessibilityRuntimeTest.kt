@@ -127,20 +127,48 @@ class KeyboardAccessibilityRuntimeTest {
     @Test
     fun selectedVirtualStateTracksShiftAndEmojiCategoryPresentation() {
         val view = createRenderedKeyboard()
+        var targets = view.accessibilityTargets()
+        var shift = targets.first { it.label == "Shift" }
+        var provider = view.accessibilityNodeProvider
+        assertNotNull("ExploreByTouchHelper must expose a platform node provider", provider)
+        var shiftNode = provider!!.createAccessibilityNodeInfo(shift.id)
+        assertNotNull("Shift virtual node must be creatable", shiftNode)
+        assertEquals(
+            "Unshifted state must be available without relying on selection visuals",
+            "Off",
+            shiftNode!!.stateDescription?.toString(),
+        )
+
         view.setShifted(true)
         render(view)
 
-        var targets = view.accessibilityTargets()
-        val shift = targets.first { it.label == "Shift" }
+        targets = view.accessibilityTargets()
+        shift = targets.first { it.label == "Shift" }
         assertTrue("Shift virtual node must expose selected state", shift.selected)
         assertTrue("Shifted text keys must expose rendered uppercase labels", targets.any { it.label == "Q" })
+        provider = view.accessibilityNodeProvider
+        shiftNode = provider!!.createAccessibilityNodeInfo(shift.id)
+        assertEquals(
+            "Shifted state must be explicitly described",
+            "On",
+            shiftNode!!.stateDescription?.toString(),
+        )
 
         view.setLayer(KeyboardLayer.EMOJI)
         render(view)
         targets = view.accessibilityTargets()
-        assertTrue(
+        val selectedCategories = targets.filter { it.selected && it.label.endsWith(" emoji") }
+        assertEquals(
             "Exactly one ordinary emoji category should expose selected state initially",
-            targets.count { it.selected && it.label.endsWith(" emoji") } == 1,
+            1,
+            selectedCategories.size,
+        )
+        val selectedCategoryNode = view.accessibilityNodeProvider!!
+            .createAccessibilityNodeInfo(selectedCategories.single().id)
+        assertEquals(
+            "Selected emoji category must expose a textual state description",
+            "Selected",
+            selectedCategoryNode!!.stateDescription?.toString(),
         )
     }
 
