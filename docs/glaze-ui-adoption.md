@@ -52,7 +52,7 @@ GLAZE UI grants no clipboard, editor-observation, learning, network, Identity, M
 
 The V1.2 mapping adds no new observation path. In particular it adds no typed/composing/surrounding-text read, learned-input persistence, clipboard access, editor/content color sampling, telemetry, remote design/color derivation, network permission, Identity/Mesh session, or background synchronization.
 
-The existing `goreecloud-keyboard-preferences/1` portability boundary remains privacy-minimized and currently contains only the explicitly selected emoji category.
+The one-field `goreecloud-keyboard-preferences/1` portability boundary remains privacy-minimized and currently contains only the explicitly selected emoji category.
 
 ## Repository-local evidence
 
