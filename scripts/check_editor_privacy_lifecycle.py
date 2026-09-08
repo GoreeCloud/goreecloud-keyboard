@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt"
+POLICY = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/EditorSuggestionPolicy.kt"
 
 
 def fail(message: str) -> None:
@@ -39,8 +40,11 @@ def require_all(label: str, body: str, markers: tuple[str, ...]) -> None:
 def main() -> None:
     if not SERVICE.is_file():
         fail(f"missing {SERVICE.relative_to(ROOT)}")
+    if not POLICY.is_file():
+        fail(f"missing {POLICY.relative_to(ROOT)}")
 
     source = SERVICE.read_text(encoding="utf-8")
+    policy_source = POLICY.read_text(encoding="utf-8")
     require_all(
         "inactive process default",
         source,
@@ -112,11 +116,21 @@ def main() -> None:
             "suggestionsSuppressed = true",
             "val inputType = info.inputType",
             "InputPrivacyClassifier.isSensitive(inputType)",
-            "EditorSuggestionPolicy.shouldSuppress(inputType)",
+            "EditorSuggestionPolicy.shouldSuppress(inputType, info.imeOptions)",
         ),
     )
     if "info?.inputType ?: 0" in begin_session:
         fail("unknown EditorInfo must not fall through as ordinary input type 0")
+
+    require_all(
+        "suggestion policy privacy flags",
+        policy_source,
+        (
+            "fun shouldSuppress(inputType: Int, imeOptions: Int = 0)",
+            "EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING",
+            "imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0",
+        ),
+    )
 
     null_policy = """if (info == null) {
             // Unknown editor metadata must not silently receive ordinary-field privileges. Treat it
@@ -151,8 +165,9 @@ def main() -> None:
     print(
         "Keyboard editor privacy lifecycle boundary passed: inactive/no-editor state is fail-closed; "
         "current editor policy is applied at onStartInput/onStartInputView; null editor metadata "
-        "remains sensitive and suggestions-suppressed; transient composing, shift, layer, and visible "
-        "candidates are cleared at both onFinishInput and onFinishInputView."
+        "remains sensitive and suggestions-suppressed; IME no-personalized-learning requests suppress "
+        "transient suggestion capture; composing, shift, layer, and visible candidates are cleared at "
+        "both onFinishInput and onFinishInputView."
     )
 
 
