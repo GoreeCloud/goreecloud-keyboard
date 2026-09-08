@@ -67,8 +67,19 @@ class KeyboardAccessibilityRuntimeTest {
             "Keys with local alternates must expose ACTION_LONG_CLICK",
             node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_LONG_CLICK },
         )
+        assertEquals(
+            "Alternate discovery hint must come from the localized resource boundary",
+            view.context.getString(R.string.accessibility_alternates_available),
+            node.hintText?.toString(),
+        )
 
-        val insertAcute = node.actionList.firstOrNull { it.label?.toString() == "Insert á" }
+        val expectedInsertAcute = view.context.getString(
+            R.string.accessibility_insert_alternate,
+            "á",
+        )
+        val insertAcute = node.actionList.firstOrNull {
+            it.label?.toString() == expectedInsertAcute
+        }
         assertNotNull("Local acute-a alternate must be discoverable as a custom action", insertAcute)
 
         val committed = mutableListOf<String>()
@@ -118,9 +129,13 @@ class KeyboardAccessibilityRuntimeTest {
             "Emoji-search query keys must not gain long-press alternate semantics",
             qNode!!.isLongClickable,
         )
+        val insertPrefix = view.context.getString(
+            R.string.accessibility_insert_alternate,
+            "",
+        ).trim()
         assertFalse(
             "Emoji-search query keys must not expose alternate custom actions",
-            qNode.actionList.any { it.label?.toString()?.startsWith("Insert ") == true },
+            qNode.actionList.any { it.label?.toString()?.startsWith(insertPrefix) == true },
         )
     }
 
@@ -135,7 +150,7 @@ class KeyboardAccessibilityRuntimeTest {
         assertNotNull("Shift virtual node must be creatable", shiftNode)
         assertEquals(
             "Unshifted state must be available without relying on selection visuals",
-            "Off",
+            view.context.getString(R.string.accessibility_state_off),
             shiftNode!!.stateDescription?.toString(),
         )
 
@@ -150,7 +165,7 @@ class KeyboardAccessibilityRuntimeTest {
         shiftNode = provider!!.createAccessibilityNodeInfo(shift.id)
         assertEquals(
             "Shifted state must be explicitly described",
-            "On",
+            view.context.getString(R.string.accessibility_state_on),
             shiftNode!!.stateDescription?.toString(),
         )
 
@@ -167,7 +182,7 @@ class KeyboardAccessibilityRuntimeTest {
             .createAccessibilityNodeInfo(selectedCategories.single().id)
         assertEquals(
             "Selected emoji category must expose a textual state description",
-            "Selected",
+            view.context.getString(R.string.accessibility_state_selected),
             selectedCategoryNode!!.stateDescription?.toString(),
         )
     }
