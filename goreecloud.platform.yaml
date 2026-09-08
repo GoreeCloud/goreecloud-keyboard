@@ -68,7 +68,7 @@ platform_systems:
     notes: A one-field portable preference format, category-only local export/apply seams, and explicit user-controlled Storage Access Framework transfer exist, including import preview/Apply, export review/freeze, and minimized reviewed-export lifecycle restoration, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
   glaze_ui:
     result: applicable-migration-required
-    version: "1.2.0"
+    version: "1.3.0"
     evidence:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt
@@ -81,7 +81,7 @@ platform_systems:
       - scripts/check_keyboard_accessibility.py
       - docs/glaze-ui-adoption.md
       - docs/glaze-motion-evaluation.md
-    notes: Repository-local Development source targets current Stable GLAZE UI V1.2 / 1.2.0 at exact promotion revision f285b9145e27e6e7027b075c37299d101945c272. Native key material follows Frosted Neutral, color remains accent-only, 48/56 dp interaction floors are mapped, deterministic pressed feedback is implemented, and custom-drawn controls including eligible long-press alternates have bounded accessibility-node/action support. Complete rendered, adaptive, representative-device, accessibility, Human Visual Excellence, release, and production acceptance remain required before application conformance can be claimed.
+    notes: Repository-local Development source targets current Stable GLAZE UI V1.3 / 1.3.0 Adaptive Resonance at exact Stable integration revision fc7cc91d2eace8da2371371c2855c24cbcb326a1. Native key material retains the inherited Frosted Neutral foundation, color remains accent-only, 48/56 dp interaction floors are mapped, deterministic pressed feedback is implemented, and typed/editor content remains excluded from adaptive color authority. V1.2.0 is the rollback baseline. Complete rendered, adaptive, representative-device, accessibility, Human Visual Excellence, rollback, release, and production acceptance remain required before application conformance can be claimed.
   mesh:
     result: applicable-blocked
     version: null
@@ -136,10 +136,10 @@ external_dependencies:
 
 compatibility:
   platform_contract: "0.2"
-  glaze_ui_required: "1.2.0"
+  glaze_ui_required: "1.3.0"
   requires:
     - goreecloud-platform-contract==0.2
-    - glaze-ui==1.2.0
+    - glaze-ui==1.3.0
     - android-api>=26
   provides:
     - goreecloud-keyboard-preferences/1
@@ -173,7 +173,7 @@ conformance:
     - docs/development/portable-preference-import-preview.md
     - docs/development/portable-preference-export-review.md
   blockers:
-    - GLAZE UI V1.2 / 1.2.0 source mapping exists at the current Stable promotion revision, but complete application-specific rendered/accessibility/adaptive/representative-device/Human Visual Excellence acceptance remains outstanding.
+    - GLAZE UI V1.3 / 1.3.0 source mapping exists at the current Stable integration revision, but complete application-specific rendered/accessibility/adaptive/representative-device/Human Visual Excellence/rollback acceptance remains outstanding.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
