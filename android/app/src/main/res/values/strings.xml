@@ -7,6 +7,11 @@
     <string name="accessibility_state_on">On</string>
     <string name="accessibility_state_off">Off</string>
     <string name="accessibility_state_selected">Selected</string>
+    <string name="accessibility_unavailable_control">Unavailable keyboard control</string>
+    <string name="accessibility_alternates_available">Alternate characters available</string>
+    <string name="accessibility_insert_alternate">Insert %1$s</string>
+    <string name="accessibility_alternates_announcement">Alternate characters: %1$s</string>
+    <string name="accessibility_inserted_alternate">Inserted alternate character %1$s</string>
 
     <string name="portable_preferences_title">Portable preference</string>
     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>
