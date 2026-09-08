@@ -7,6 +7,7 @@ DELEGATE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardA
 TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt"
 GRADLE = ROOT / "android/app/build.gradle.kts"
 ACTION_IDS = ROOT / "android/app/src/main/res/values/accessibility_ids.xml"
+STRINGS = ROOT / "android/app/src/main/res/values/strings.xml"
 
 
 def fail(message: str) -> None:
@@ -20,7 +21,7 @@ def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
 
 
 def main() -> None:
-    for path in (VIEW, DELEGATE, TEST, GRADLE, ACTION_IDS):
+    for path in (VIEW, DELEGATE, TEST, GRADLE, ACTION_IDS, STRINGS):
         if not path.is_file():
             fail(f"missing required evidence: {path.relative_to(ROOT)}")
 
@@ -29,6 +30,7 @@ def main() -> None:
     test_text = TEST.read_text(encoding="utf-8")
     gradle_text = GRADLE.read_text(encoding="utf-8")
     action_ids_text = ACTION_IDS.read_text(encoding="utf-8")
+    strings_text = STRINGS.read_text(encoding="utf-8")
 
     require_all(
         "KeyboardView virtual-control integration",
@@ -63,20 +65,37 @@ def main() -> None:
             'node.className = "android.widget.Button"',
             "node.isClickable = true",
             "node.isSelected = target.selected",
+            "node.stateDescription = stateDescriptionFor(target)",
             "AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK",
             "node.isLongClickable = true",
-            'node.hintText = "Alternate characters available"',
+            "R.string.accessibility_alternates_available",
             "AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK",
-            '"Insert $value"',
+            "R.string.accessibility_insert_alternate",
             "KeyAlternates.forKey(target.label)",
             "emojiSearchKeyboardIsActive()",
             'target.label == "Clear emoji search" || target.label == "Close emoji search"',
             "override fun onPerformActionForVirtualView(",
             "AccessibilityNodeInfo.ACTION_LONG_CLICK",
-            '"Alternate characters: ${alternates.joinToString(separator = ", ")}"',
+            "R.string.accessibility_alternates_announcement",
+            "R.string.accessibility_inserted_alternate",
             "keyboardView.listener?.onText(value)",
             "keyboardView.performAccessibilityTarget(virtualViewId)",
             "AccessibilityEvent.TYPE_VIEW_CLICKED",
+        ),
+    )
+
+    require_all(
+        "resource-backed accessibility copy",
+        strings_text,
+        (
+            '<string name="accessibility_state_on">',
+            '<string name="accessibility_state_off">',
+            '<string name="accessibility_state_selected">',
+            '<string name="accessibility_unavailable_control">',
+            '<string name="accessibility_alternates_available">',
+            '<string name="accessibility_insert_alternate">',
+            '<string name="accessibility_alternates_announcement">',
+            '<string name="accessibility_inserted_alternate">',
         ),
     )
 
@@ -89,7 +108,8 @@ def main() -> None:
             "AccessibilityNodeInfo.ACTION_CLICK",
             "longPressAlternatesAreDiscoverableAndActionableThroughNativeNodeActions",
             "AccessibilityNodeInfo.ACTION_LONG_CLICK",
-            'it.label?.toString() == "Insert á"',
+            "R.string.accessibility_alternates_available",
+            "R.string.accessibility_insert_alternate",
             '"Emoji-search query keys must not gain long-press alternate semantics"',
             '"Emoji-search query keys must not expose alternate custom actions"',
             "view.performAccessibilityTarget(hello.id)",
@@ -97,6 +117,9 @@ def main() -> None:
             'it.label == "Clear emoji search"',
             'it.label == "Close emoji search"',
             'it.label == "Shift"',
+            "R.string.accessibility_state_off",
+            "R.string.accessibility_state_on",
+            "R.string.accessibility_state_selected",
         ),
     )
 
@@ -126,9 +149,10 @@ def main() -> None:
     print(
         "Keyboard virtual accessibility boundary passed: custom-drawn keys, suggestions, emoji categories, "
         "local emoji-search results, and bounded local key alternates expose actionable native accessibility "
-        "semantics without editor, clipboard, persistence, or network authority. Emoji-search query mode cannot "
-        "gain alternate-commit authority. Representative TalkBack/Switch Access physical-device acceptance remains "
-        "separate."
+        "semantics with resource-backed user-facing alternate actions and state descriptions, without editor, "
+        "clipboard, persistence, or network authority. Emoji-search query mode cannot gain alternate-commit "
+        "authority. Representative translated-resource, RTL, TalkBack, and Switch Access physical-device "
+        "acceptance remain separate."
     )
 
 
