@@ -22,6 +22,6 @@ The bounded evaluation checks actual key and suggestion activation behavior unde
 
 ## Boundary
 
-GLAZE UI V1.2 (`1.2.0`) is the current Stable GoreeCloud design-system target. The Keyboard V1.2 consumer mapping is separately gated and this Glaze Motion evaluation provides no V1.2 production or conformance evidence. V1.2 does not promote Glaze Motion; Motion remains separately Experimental. Earlier V1.1, V1.0, and pre-reset Glaze UI records remain historical audit context only.
+Keyboard currently contains a repository-local GLAZE UI V1.2 (`1.2.0`) Development source/material mapping. V1.2 is **not** the governed Stable application-consumer baseline. Current governed Stable consumer authority remains GLAZE UI V1.1 / `1.1.0`, and its known immutable import-closure defect requires a corrected governed Stable release before downstream conformance can be claimed. The Keyboard V1.2 source mapping is therefore migration-required and separately gated; this Glaze Motion evaluation provides no V1.2 production, Stable, or conformance evidence. Motion remains separately Experimental.
 
 This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or Switch Access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for promotion by itself and does not establish adoption of a later Glaze Motion revision.
