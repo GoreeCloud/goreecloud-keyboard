@@ -11,13 +11,15 @@ KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 ATMOSPHERE = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt"
 MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-STABLE_GLAZE_VERSION = "1.2.0"
-GLAZE_SOURCE_REVISION = "f285b9145e27e6e7027b075c37299d101945c272"
+STABLE_GLAZE_VERSION = "1.3.0"
+GLAZE_SOURCE_REVISION = "fc7cc91d2eace8da2371371c2855c24cbcb326a1"
+GLAZE_ADAPTIVE_CONTRACT = "contracts/v1.3/adaptive-resonance.plan.json"
+GLAZE_ROLLBACK_BASELINE = "1.2.0"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit("Keyboard Glaze V1.2 / Experimental Motion boundary failed: " + message)
+    raise SystemExit("Keyboard Glaze V1.3 / Experimental Motion boundary failed: " + message)
 
 
 def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
@@ -48,7 +50,7 @@ def main() -> None:
             "Runtime compatibility baseline: **0.4.0**",
             "Evaluation mode: **native Android interaction mapping, test-only**",
             "Production dependency: **no**",
-            f"GLAZE UI V1.2 / `{STABLE_GLAZE_VERSION}` Stable",
+            f"GLAZE UI V1.3 / `{STABLE_GLAZE_VERSION}` Stable",
             f"`{GLAZE_SOURCE_REVISION}`",
             "Motion 0.5 is still Experimental/test-only",
             "insufficient for promotion by itself",
@@ -59,24 +61,27 @@ def main() -> None:
         "Glaze adoption record",
         adoption_text,
         (
-            "# GLAZE UI V1.2 Stable Adoption — GoreeCloud Keyboard",
-            f"Current design-system target: **GLAZE UI V1.2 (`{STABLE_GLAZE_VERSION}`) Stable**",
-            f"Exact Stable promotion revision: `{GLAZE_SOURCE_REVISION}`",
+            "# GLAZE UI V1.3 Stable Adoption — GoreeCloud Keyboard",
+            f"Current design-system target: **GLAZE UI V1.3 (`{STABLE_GLAZE_VERSION}`) Stable**",
+            f"Exact Stable integration revision: `{GLAZE_SOURCE_REVISION}`",
             "Production eligible on the Glaze UI gate: **no**",
             "Neutral glass is the material. Color is an accent.",
             "Deep Dark source material is explicitly defined",
             "no-personalized-learning",
             "one-field `goreecloud-keyboard-preferences/1` portability boundary",
             "Glaze Motion 0.5 evaluation remains test-only",
+            "typed/editor content outside adaptive-color authority",
         ),
     )
 
     require_all(
-        "V1.2 Stable token mapping",
+        "V1.3 Stable token mapping",
         token_text,
         (
             f'const val TargetVersion = "{STABLE_GLAZE_VERSION}"',
             f'const val SourceRevision = "{GLAZE_SOURCE_REVISION}"',
+            f'const val AdaptiveContract = "{GLAZE_ADAPTIVE_CONTRACT}"',
+            f'const val RollbackBaselineVersion = "{GLAZE_ROLLBACK_BASELINE}"',
             "enum class Appearance { LIGHT, DARK, DEEP_DARK }",
             "const val GeneralInteractionFloorDp = 48f",
             "const val TouchAssistanceInteractionFloorDp = 56f",
@@ -89,7 +94,7 @@ def main() -> None:
     )
 
     require_all(
-        "V1.2 neutral material boundary",
+        "V1.3 neutral material boundary",
         atmosphere_text,
         (
             "Neutral glass is the material. Color is an accent.",
@@ -172,6 +177,8 @@ def main() -> None:
         'Governed Stable consumer baseline: **GLAZE UI V1.1 (`1.1.0`)**',
         '  glaze_ui_required: "1.1.0"',
         "glaze-ui==1.1.0",
+        '  glaze_ui_required: "1.2.0"',
+        "glaze-ui==1.2.0",
         "known immutable import-closure defect",
         "Required Stable baseline: **Glaze UI 2.2.0**",
         "stable_eligible: true",
@@ -184,7 +191,8 @@ def main() -> None:
         "Keyboard Glaze boundary passed: current Stable target "
         f"{STABLE_GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; Platform Contract remains "
         "migration-required/nonconformant pending application acceptance; Android runtime remains "
-        "Light/Dark only; Experimental Motion remains quarantined."
+        "Light/Dark only; typed/editor content remains outside adaptive color; Experimental Motion "
+        "remains quarantined."
     )
 
 
