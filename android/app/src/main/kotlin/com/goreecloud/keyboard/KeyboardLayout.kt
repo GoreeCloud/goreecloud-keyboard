@@ -17,13 +17,14 @@ enum class EmojiCategory(val label: String) {
 }
 
 object KeyboardLayout {
+    private val numberRow = keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
     private val letterRows = listOf(
         keys("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
         keys("a", "s", "d", "f", "g", "h", "j", "k", "l"),
         keys("z", "x", "c", "v", "b", "n", "m"),
     )
     private val symbolRows = listOf(
-        keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
+        numberRow,
         keys("@", "#", "$", "%", "&", "-", "+", "(", ")"),
         keys("*", "\"", "'", ":", ";", "!", "?"),
     )
@@ -64,6 +65,8 @@ object KeyboardLayout {
             keys("☀️", "🌙", "☁️", "⚡", "❄️", "☕", "🎵", "🎁"),
         ),
     )
+
+    fun numberRow(): List<String> = numberRow
 
     fun characterRows(layer: KeyboardLayer): List<List<String>> = when (layer) {
         KeyboardLayer.LETTERS -> letterRows
