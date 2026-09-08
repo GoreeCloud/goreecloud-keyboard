@@ -77,7 +77,7 @@ platform_systems:
       - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: Repository-local Development source now targets current Stable GLAZE UI V1.2 / 1.2.0 at exact release authority f285b9145e27e6e7027b075c37299d101945c272. The native key material consumes V1.2 neutral Frosted Neutral surfaces and preserves V1.2 state/target geometry boundaries; Deep Dark remains source-defined but not runtime-selected. Application-specific rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance remain required before current conformance can be claimed.
+    notes: Repository-local Development source currently contains a V1.2-targeted Frosted Neutral material mapping, but V1.2 is not the governed Stable consumer baseline for applications. Current governed Stable consumer authority remains GLAZE UI V1.1 / 1.1.0, whose known immutable import-closure defect still requires a corrected governed Stable release. Keyboard therefore remains migration-required until source authority is reconciled to the governed consumer line and fresh rendered, accessibility, adaptive, representative-device, Human Visual Excellence, release, and production acceptance is completed.
   mesh:
     result: applicable-blocked
     version: null
@@ -132,10 +132,10 @@ external_dependencies:
 
 compatibility:
   platform_contract: "0.2"
-  glaze_ui_required: "1.2.0"
+  glaze_ui_required: "1.1.0"
   requires:
     - goreecloud-platform-contract==0.2
-    - glaze-ui==1.2.0
+    - glaze-ui==1.1.0
     - android-api>=26
   provides:
     - goreecloud-keyboard-preferences/1
@@ -165,7 +165,7 @@ conformance:
     - docs/development/portable-preference-import-preview.md
     - docs/development/portable-preference-export-review.md
   blockers:
-    - GLAZE UI V1.2 / 1.2.0 current-Stable source/material mapping exists, but application-specific rendered, runtime Deep Dark policy, accessibility/resilience, adaptive/form-factor, representative-device, Human Visual Excellence, release, and production acceptance remain outstanding.
+    - Repository-local Development source currently carries a V1.2-targeted Glaze material mapping, while the governed Stable application baseline remains V1.1 / 1.1.0; the known immutable 1.1.0 defect requires a corrected governed Stable release, explicit Keyboard source-authority reconciliation/re-pin, and complete application-specific rendered/accessibility/adaptive/representative-device/Human Visual Excellence acceptance.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
