@@ -210,7 +210,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
         val inputType = info.inputType
         sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
-        suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType)
+        suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType, info.imeOptions)
     }
 
     private fun resetEditorSession() {
