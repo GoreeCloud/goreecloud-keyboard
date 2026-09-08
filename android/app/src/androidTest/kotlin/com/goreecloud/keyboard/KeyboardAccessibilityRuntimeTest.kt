@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -53,6 +54,41 @@ class KeyboardAccessibilityRuntimeTest {
     }
 
     @Test
+    fun longPressAlternatesAreDiscoverableAndActionableThroughNativeNodeActions() {
+        val view = createRenderedKeyboard()
+        val a = view.accessibilityTargets().first { it.label == "a" }
+        val provider = view.accessibilityNodeProvider
+        assertNotNull("ExploreByTouchHelper must expose a platform node provider", provider)
+
+        val node = provider!!.createAccessibilityNodeInfo(a.id)
+        assertNotNull("Virtual a node must be creatable", node)
+        assertTrue("Keys with local alternates must expose long-click semantics", node!!.isLongClickable)
+        assertTrue(
+            "Keys with local alternates must expose ACTION_LONG_CLICK",
+            node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_LONG_CLICK },
+        )
+
+        val insertAcute = node.actionList.firstOrNull { it.label?.toString() == "Insert á" }
+        assertNotNull("Local acute-a alternate must be discoverable as a custom action", insertAcute)
+
+        val committed = mutableListOf<String>()
+        view.listener = listener(onText = { committed += it })
+        assertTrue(
+            "Long click must provide an accessibility discovery path for alternates",
+            provider.performAction(a.id, AccessibilityNodeInfo.ACTION_LONG_CLICK, null),
+        )
+        assertTrue(
+            "Alternate custom action must be handled by the virtual key",
+            provider.performAction(a.id, insertAcute!!.id, null),
+        )
+        assertEquals(
+            "Alternate accessibility activation must use the normal text listener path",
+            listOf("á"),
+            committed,
+        )
+    }
+
+    @Test
     fun suggestionsAndEmojiControlsRemainDiscoverableAndActionable() {
         val view = createRenderedKeyboard(listOf("hello", "help", "hero"))
         val selectedSuggestions = mutableListOf<String>()
@@ -73,7 +109,19 @@ class KeyboardAccessibilityRuntimeTest {
         targets = view.accessibilityTargets()
         assertTrue("Emoji search must expose Clear", targets.any { it.label == "Clear emoji search" })
         assertTrue("Emoji search must expose Close", targets.any { it.label == "Close emoji search" })
-        assertTrue("Emoji search keyboard must expose letter keys", targets.any { it.label == "q" })
+        val q = targets.first { it.label == "q" }
+        val provider = view.accessibilityNodeProvider
+        assertNotNull("Emoji search must retain the platform accessibility provider", provider)
+        val qNode = provider!!.createAccessibilityNodeInfo(q.id)
+        assertNotNull("Emoji-search q node must be creatable", qNode)
+        assertFalse(
+            "Emoji-search query keys must not gain long-press alternate semantics",
+            qNode!!.isLongClickable,
+        )
+        assertFalse(
+            "Emoji-search query keys must not expose alternate custom actions",
+            qNode.actionList.any { it.label?.toString()?.startsWith("Insert ") == true },
+        )
     }
 
     @Test
