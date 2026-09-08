@@ -50,7 +50,9 @@ internal class KeyboardAccessibilityDelegate(
     ) {
         val target = keyboardView.accessibilityTarget(virtualViewId)
         if (target == null) {
-            node.contentDescription = "Unavailable keyboard control"
+            node.contentDescription = keyboardView.context.getString(
+                R.string.accessibility_unavailable_control,
+            )
             node.className = "android.widget.Button"
             node.isEnabled = false
             node.setBoundsInParent(Rect(0, 0, 1, 1))
@@ -69,13 +71,18 @@ internal class KeyboardAccessibilityDelegate(
         val alternates = alternatesFor(target)
         if (alternates.isNotEmpty()) {
             node.isLongClickable = true
-            node.hintText = "Alternate characters available"
+            node.hintText = keyboardView.context.getString(
+                R.string.accessibility_alternates_available,
+            )
             node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK)
             alternates.forEachIndexed { index, value ->
                 node.addAction(
                     AccessibilityNodeInfoCompat.AccessibilityActionCompat(
                         alternateActionIds[index],
-                        "Insert $value",
+                        keyboardView.context.getString(
+                            R.string.accessibility_insert_alternate,
+                            value,
+                        ),
                     )
                 )
             }
@@ -95,7 +102,10 @@ internal class KeyboardAccessibilityDelegate(
         if (action == AccessibilityNodeInfo.ACTION_LONG_CLICK) {
             if (alternates.isEmpty()) return false
             keyboardView.announceForAccessibility(
-                "Alternate characters: ${alternates.joinToString(separator = ", ")}",
+                keyboardView.context.getString(
+                    R.string.accessibility_alternates_announcement,
+                    alternates.joinToString(separator = ", "),
+                ),
             )
             sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_ANNOUNCEMENT)
             return true
@@ -106,7 +116,12 @@ internal class KeyboardAccessibilityDelegate(
             val value = alternates.getOrNull(alternateIndex) ?: return false
             keyboardView.listener?.onText(value)
             keyboardView.performClick()
-            keyboardView.announceForAccessibility("Inserted alternate character $value")
+            keyboardView.announceForAccessibility(
+                keyboardView.context.getString(
+                    R.string.accessibility_inserted_alternate,
+                    value,
+                ),
+            )
             sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
             return true
         }
