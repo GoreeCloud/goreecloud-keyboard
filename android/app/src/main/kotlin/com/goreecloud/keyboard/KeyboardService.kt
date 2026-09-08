@@ -16,6 +16,8 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
     private var presentedSuggestions: List<String> = emptyList()
+    private var editorAction: EditorActionPresentation = EditorActionPolicy.Enter
+    private val settingsStore by lazy { LocalKeyboardSettingsStore(this) }
 
     private val bootstrapDictionary = listOf(
         "about", "after", "again", "because", "before", "cloud", "could", "family",
@@ -30,6 +32,8 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             view.listener = this
             view.setLayer(KeyboardLayer.LETTERS)
             view.setShifted(shifted)
+            view.setNumberRowEnabled(settingsStore.showNumberRow())
+            view.setEditorAction(editorAction)
             updateSuggestions()
         }
     }
@@ -49,6 +53,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         beginEditorSession(info)
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
+        keyboardView?.setNumberRowEnabled(settingsStore.showNumberRow())
         updateSuggestions()
     }
 
@@ -142,8 +147,12 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     override fun onEnter() {
         val connection = currentInputConnection ?: return
-        connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
-        connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+        val actionId = editorAction.actionId
+        val handled = actionId != null && connection.performEditorAction(actionId)
+        if (!handled) {
+            connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+            connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+        }
         clearComposingBoundary()
         updateSuggestions()
     }
@@ -195,6 +204,8 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         shifted = false
         composingWord.clear()
         composingCaptureExhausted = false
+        editorAction = if (info == null) EditorActionPolicy.Enter else EditorActionPolicy.resolve(info.imeOptions)
+        keyboardView?.setEditorAction(editorAction)
         // Presentation belongs to the previous editor until this exact session is evaluated. Clear
         // both the service-side acceptance set and any visible strip before granting new candidates.
         presentedSuggestions = emptyList()
@@ -215,6 +226,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     private fun resetEditorSession() {
         shifted = false
+        editorAction = EditorActionPolicy.Enter
         // With no active editor, retain the most restrictive transient policy. A subsequent concrete
         // EditorInfo is the only authority that may enable ordinary-field composing/surrounding text.
         sensitiveInput = true
@@ -224,6 +236,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         presentedSuggestions = emptyList()
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
+        keyboardView?.setEditorAction(editorAction)
         // No active editor owns suggestion presentation after teardown. Clear the visible strip
         // rather than repopulating bootstrap candidates until a subsequent editor session starts.
         keyboardView?.setSuggestions(emptyList())
