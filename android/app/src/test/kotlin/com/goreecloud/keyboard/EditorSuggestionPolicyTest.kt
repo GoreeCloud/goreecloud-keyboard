@@ -1,6 +1,7 @@
 package com.goreecloud.keyboard
 
 import android.text.InputType
+import android.view.inputmethod.EditorInfo
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -28,6 +29,26 @@ class EditorSuggestionPolicyTest {
 
         assertTrue(EditorSuggestionPolicy.shouldSuppress(inputType))
         assertFalse(InputPrivacyClassifier.isSensitive(inputType))
+    }
+
+    @Test
+    fun honorsEditorNoPersonalizedLearningFlagAsTransientSuggestionPrivacyBoundary() {
+        val inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
+
+        assertTrue(
+            EditorSuggestionPolicy.shouldSuppress(
+                inputType,
+                EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING,
+            ),
+        )
+        assertFalse(InputPrivacyClassifier.isSensitive(inputType))
+    }
+
+    @Test
+    fun unrelatedImeOptionsDoNotSuppressOrdinaryEditorSuggestions() {
+        val inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
+
+        assertFalse(EditorSuggestionPolicy.shouldSuppress(inputType, EditorInfo.IME_ACTION_DONE))
     }
 
     @Test
