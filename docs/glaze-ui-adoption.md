@@ -29,6 +29,7 @@ The native surface remains first-party `KeyboardView`; no web runtime, remote UI
 - Deep Dark source material is explicitly defined, but Android night mode continues to select Light/Dark only; Deep Dark is not silently inferred.
 - `GlazeKeyboardAtmosphere` keeps adaptive expression bounded: chromatic tint cannot define the key substrate.
 - Editor/content sampling, Environmental Color Memory, remote color derivation, persistent sample history, semantic inference, telemetry, network lookup, and animated atmosphere remain disabled/not authorized.
+- The Keyboard mapping deliberately keeps typed/editor content outside adaptive-color authority.
 - Adaptive color must never be derived from typed, composing, surrounding, clipboard, suggestion, password, or other editor content.
 - Keyboard remains an **Application** surface. Long-press alternates and local emoji search remain local input interactions, not Control Center or Universal Search.
 - Existing Quill suggestions, sensitive-editor gating, no-personalized-learning handling, typo correction, emoji, alternate-character, deletion, and key-release semantics remain first-party and on-device.
