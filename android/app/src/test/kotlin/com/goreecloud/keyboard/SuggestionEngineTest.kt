@@ -78,6 +78,28 @@ class SuggestionEngineTest {
     }
 
     @Test
+    fun matchesCanonicallyEquivalentAccentedText() {
+        val engine = SuggestionEngine()
+        val decomposedCafe = "cafe\u0301"
+
+        assertEquals(
+            listOf("café"),
+            engine.suggest(prefix = decomposedCafe, dictionary = listOf("café", "cafeteria")),
+        )
+    }
+
+    @Test
+    fun canonicalDuplicatesCollapseWithoutRewritingDictionarySpelling() {
+        val engine = SuggestionEngine()
+        val decomposedCafe = "cafe\u0301"
+
+        assertEquals(
+            listOf(decomposedCafe),
+            engine.suggest(prefix = "café", dictionary = listOf(decomposedCafe, "café")),
+        )
+    }
+
+    @Test
     fun returnsNothingForNonPositiveLimit() {
         val engine = SuggestionEngine()
         assertEquals(emptyList<String>(), engine.suggest("go", listOf("good"), limit = 0))
