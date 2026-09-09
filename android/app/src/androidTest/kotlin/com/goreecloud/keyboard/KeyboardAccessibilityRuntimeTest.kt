@@ -140,7 +140,42 @@ class KeyboardAccessibilityRuntimeTest {
     }
 
     @Test
-    fun selectedVirtualStateTracksShiftAndEmojiCategoryPresentation() {
+    fun utilityToolbarSettingsActionIsAResourceBackedNativeVirtualControl() {
+        val view = createRenderedKeyboard()
+        view.setToolbarConfiguration(
+            KeyboardToolbarConfiguration(
+                enabled = true,
+                showEmoji = false,
+                showSymbols = false,
+                showSettings = true,
+            )
+        )
+        render(view)
+
+        val target = view.accessibilityTargets().first { it.id >= 5_000 }
+        assertEquals(
+            view.context.getString(R.string.accessibility_toolbar_settings),
+            target.label,
+        )
+        val provider = view.accessibilityNodeProvider
+        assertNotNull("Toolbar must remain available through the platform accessibility provider", provider)
+        val node = provider!!.createAccessibilityNodeInfo(target.id)
+        assertNotNull("Toolbar Settings node must be creatable", node)
+        assertEquals(target.label, node!!.contentDescription?.toString())
+        assertTrue(node.isClickable)
+
+        var settingsRequests = 0
+        view.listener = listener(onOpenSettings = { settingsRequests += 1 })
+        assertTrue(provider.performAction(target.id, AccessibilityNodeInfo.ACTION_CLICK, null))
+        assertEquals(
+            "Toolbar accessibility activation must reuse the normal Settings listener path",
+            1,
+            settingsRequests,
+        )
+    }
+
+    @Test
+    fun selectedVirtualStateTracksShiftEmojiCategoryAndToolbarPresentation() {
         val view = createRenderedKeyboard()
         var targets = view.accessibilityTargets()
         var shift = targets.first { it.label == "Shift" }
@@ -185,6 +220,16 @@ class KeyboardAccessibilityRuntimeTest {
             view.context.getString(R.string.accessibility_state_selected),
             selectedCategoryNode!!.stateDescription?.toString(),
         )
+
+        val selectedToolbarEmoji = targets.first { it.id >= 5_000 && it.label == "Emoji" }
+        assertTrue("Toolbar Emoji must expose selected state on the emoji layer", selectedToolbarEmoji.selected)
+        val selectedToolbarNode = view.accessibilityNodeProvider!!
+            .createAccessibilityNodeInfo(selectedToolbarEmoji.id)
+        assertEquals(
+            "Selected toolbar state must be available without relying on visual treatment",
+            view.context.getString(R.string.accessibility_state_selected),
+            selectedToolbarNode!!.stateDescription?.toString(),
+        )
     }
 
     private fun createRenderedKeyboard(suggestions: List<String> = emptyList()): KeyboardView {
@@ -207,6 +252,7 @@ class KeyboardAccessibilityRuntimeTest {
     private fun listener(
         onText: (String) -> Unit = {},
         onSuggestion: (String) -> Unit = {},
+        onOpenSettings: () -> Unit = {},
     ) = object : KeyboardView.Listener {
         override fun onText(value: String) = onText(value)
         override fun onSpace() = Unit
@@ -215,5 +261,6 @@ class KeyboardAccessibilityRuntimeTest {
         override fun onShift() = Unit
         override fun onSuggestion(value: String) = onSuggestion(value)
         override fun onLayerChanged(layer: KeyboardLayer) = Unit
+        override fun onOpenSettings() = onOpenSettings()
     }
 }
