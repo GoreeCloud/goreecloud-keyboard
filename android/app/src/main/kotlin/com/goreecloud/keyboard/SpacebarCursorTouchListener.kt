@@ -10,7 +10,9 @@ import android.view.ViewConfiguration
  *
  * Ordinary taps continue through KeyboardView unchanged. Once a horizontal cursor gesture is
  * established, the listener cancels the normal key press and owns the remainder of that gesture so
- * releasing the finger cannot also commit a space or another key. No editor text is inspected.
+ * releasing the finger cannot also commit a space or another key. Multi-pointer gestures fail
+ * closed because cursor movement is intentionally a one-finger interaction. No editor text is
+ * inspected.
  */
 internal class SpacebarCursorTouchListener(
     private val keyboardView: KeyboardView,
@@ -28,6 +30,14 @@ internal class SpacebarCursorTouchListener(
     private var consumeUntilUp = false
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
+        if (spaceBounds != null && !SpacebarCursorGesturePolicy.supportsPointerCount(event.pointerCount)) {
+            cancelNormalKeyboardTouch(event)
+            spaceBounds = null
+            cursorMode = false
+            consumeUntilUp = true
+            return true
+        }
+
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 reset()
