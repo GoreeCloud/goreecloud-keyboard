@@ -34,6 +34,18 @@ class SpacebarCursorGesturePolicyTest {
     }
 
     @Test
+    fun extremeFiniteHorizontalSamplesRemainBoundedAndDirectional() {
+        assertEquals(
+            SpacebarCursorGestureDecision(SpacebarCursorGestureMode.CURSOR, cumulativeSteps = 4096),
+            SpacebarCursorGesturePolicy.evaluate(Float.MAX_VALUE, 0f, 8f, 1f),
+        )
+        assertEquals(
+            SpacebarCursorGestureDecision(SpacebarCursorGestureMode.CURSOR, cumulativeSteps = -4096),
+            SpacebarCursorGesturePolicy.evaluate(-Float.MAX_VALUE, 0f, 8f, 1f),
+        )
+    }
+
+    @Test
     fun verticalDominantGestureFailsClosed() {
         assertEquals(
             SpacebarCursorGestureDecision(SpacebarCursorGestureMode.CANCEL),
