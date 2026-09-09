@@ -27,21 +27,13 @@ class GlazeKeyboardV12VisualStateRuntimeTest {
         val committed = mutableListOf<String>()
         view.listener = listener(onText = { committed += it })
 
-        val density = view.resources.displayMetrics.density
-        val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
-        val gap = GlazeKeyboardTokens.Space1Dp * density
-        val keyboardTop = (
-            GlazeKeyboardTokens.SuggestionStripHeightDp + GlazeKeyboardTokens.Space2Dp
-        ) * density
-        val rowHeight = (view.height - keyboardTop - gap * 5f) / 4f
-        val availableWidth = view.width - horizontalPadding * 2f - gap * 9f
-        val keyWidth = availableWidth / 10f
-        val pressX = horizontalPadding + keyWidth / 2f
-        val pressY = keyboardTop + rowHeight / 2f
-        val sampleX = pressX.toInt()
-        val sampleY = (keyboardTop + 5f * density).toInt()
-
         val idle = render(view)
+        val qBounds = view.accessibilityTargets().first { it.label == "q" }.bounds
+        val density = view.resources.displayMetrics.density
+        val pressX = qBounds.centerX()
+        val pressY = qBounds.centerY()
+        val sampleX = pressX.toInt()
+        val sampleY = (qBounds.top + 5f * density).toInt()
         val idleColor = idle.getPixel(sampleX, sampleY)
         idle.recycle()
 
@@ -83,20 +75,13 @@ class GlazeKeyboardV12VisualStateRuntimeTest {
         val committed = mutableListOf<String>()
         view.listener = listener(onText = { committed += it })
 
-        val density = view.resources.displayMetrics.density
-        val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
-        val gap = GlazeKeyboardTokens.Space1Dp * density
-        val keyboardTop = (
-            GlazeKeyboardTokens.SuggestionStripHeightDp + GlazeKeyboardTokens.Space2Dp
-        ) * density
-        val availableWidth = view.width - horizontalPadding * 2f - gap * 9f
-        val keyWidth = availableWidth / 10f
-        val x = horizontalPadding + keyWidth / 2f
-        val y = keyboardTop + 20f * density
-        val sampleX = x.toInt()
-        val sampleY = (keyboardTop + 5f * density).toInt()
-
         val idle = render(view)
+        val qBounds = view.accessibilityTargets().first { it.label == "q" }.bounds
+        val density = view.resources.displayMetrics.density
+        val x = qBounds.centerX()
+        val y = qBounds.centerY()
+        val sampleX = x.toInt()
+        val sampleY = (qBounds.top + 5f * density).toInt()
         val idleColor = idle.getPixel(sampleX, sampleY)
         idle.recycle()
 
