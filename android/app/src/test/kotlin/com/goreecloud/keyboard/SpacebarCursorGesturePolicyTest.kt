@@ -1,9 +1,19 @@
 package com.goreecloud.keyboard
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SpacebarCursorGesturePolicyTest {
+    @Test
+    fun onlySinglePointerGesturesAreSupported() {
+        assertTrue(SpacebarCursorGesturePolicy.supportsPointerCount(1))
+        assertFalse(SpacebarCursorGesturePolicy.supportsPointerCount(0))
+        assertFalse(SpacebarCursorGesturePolicy.supportsPointerCount(2))
+        assertFalse(SpacebarCursorGesturePolicy.supportsPointerCount(Int.MAX_VALUE))
+    }
+
     @Test
     fun movementInsideActivationWindowStaysPending() {
         assertEquals(
