@@ -24,6 +24,8 @@ internal data class SpacebarCursorGestureDecision(
  * into another key action.
  */
 internal object SpacebarCursorGesturePolicy {
+    fun supportsPointerCount(pointerCount: Int): Boolean = pointerCount == 1
+
     fun evaluate(
         deltaX: Float,
         deltaY: Float,
