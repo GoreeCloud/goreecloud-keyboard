@@ -48,7 +48,7 @@ internal object SpacebarCursorGesturePolicy {
 
         val additionalSteps = floor((horizontal - activationDistancePx) / stepDistancePx)
             .toInt()
-            .coerceAtLeast(0)
+            .coerceIn(0, MAX_CUMULATIVE_STEPS - 1)
         val magnitude = 1 + additionalSteps
         val direction = if (deltaX < 0f) -1 else 1
         return SpacebarCursorGestureDecision(
@@ -56,4 +56,9 @@ internal object SpacebarCursorGesturePolicy {
             cumulativeSteps = direction * magnitude,
         )
     }
+
+    // Defensive arithmetic ceiling far beyond any plausible physical-screen gesture. Keeping the
+    // cumulative value bounded prevents overflow when anomalous/synthetic finite coordinates are
+    // supplied or when a gesture reverses direction after an extreme sample.
+    private const val MAX_CUMULATIVE_STEPS = 4096
 }
