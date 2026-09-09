@@ -281,7 +281,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         composingWord.clear()
         composingCaptureExhausted = false
         presentedSuggestions = emptyList()
-        keyboardView?.setLayer(currentLayer)
+        keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         keyboardView?.setEditorAction(editorAction)
         // No active editor owns suggestion presentation after teardown. Clear the visible strip
