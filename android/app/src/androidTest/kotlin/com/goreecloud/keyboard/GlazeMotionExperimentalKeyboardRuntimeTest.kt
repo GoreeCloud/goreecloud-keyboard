@@ -73,10 +73,10 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         val selected = mutableListOf<String>()
         view.listener = listener(onSuggestion = { selected += it })
 
-        val density = view.resources.displayMetrics.density
-        val horizontalPadding = 6f * density
-        val cellWidth = (view.width - horizontalPadding * 2f) / 3f
-        dispatch(view, MotionEvent.ACTION_UP, horizontalPadding + cellWidth / 2f, 21f * density)
+        val helloBounds = view.accessibilityTargets()
+            .first { it.label == "Suggestion hello" }
+            .bounds
+        dispatch(view, MotionEvent.ACTION_UP, helloBounds.centerX(), helloBounds.centerY())
 
         assertEquals("Suggestion hit-testing must remain authoritative", listOf("hello"), selected)
         assertEquals("0.5.0", GlazeMotionExperimental.VERSION)
@@ -97,25 +97,16 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
             onLayerChanged = { layers += it }
         )
 
-        val density = view.resources.displayMetrics.density
-        val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
-        val gap = GlazeKeyboardTokens.Space1Dp * density
-        val keyboardTop = (GlazeKeyboardTokens.SuggestionStripHeightDp + GlazeKeyboardTokens.Space2Dp) * density
-        val rowHeight = (view.height - keyboardTop - gap * 5f) / 4f
-        val bottomY = keyboardTop + 3f * (rowHeight + gap) + rowHeight / 2f
-
-        val bottomAvailable = view.width - horizontalPadding * 2f - gap * 3f
-        val modeWidth = bottomAvailable * (1.2f / 7.9f)
-        val moreModeX = horizontalPadding + modeWidth + gap + modeWidth / 2f
-        dispatch(view, MotionEvent.ACTION_UP, moreModeX, bottomY)
+        val moreSymbolsBounds = view.accessibilityTargets()
+            .first { it.label == "More symbols" }
+            .bounds
+        dispatch(view, MotionEvent.ACTION_UP, moreSymbolsBounds.centerX(), moreSymbolsBounds.centerY())
 
         assertEquals(listOf(KeyboardLayer.SYMBOLS_MORE), layers)
 
         render(view)
-        val topRowAvailable = view.width - horizontalPadding * 2f - gap * 9f
-        val firstTextX = horizontalPadding + topRowAvailable / 10f / 2f
-        val firstTextY = keyboardTop + rowHeight / 2f
-        dispatch(view, MotionEvent.ACTION_UP, firstTextX, firstTextY)
+        val leftBracketBounds = view.accessibilityTargets().first { it.label == "[" }.bounds
+        dispatch(view, MotionEvent.ACTION_UP, leftBracketBounds.centerX(), leftBracketBounds.centerY())
 
         assertEquals("Secondary symbol page must commit the rendered [ key", listOf("["), text)
     }

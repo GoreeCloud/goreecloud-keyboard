@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -16,12 +17,12 @@ import java.io.IOException
 /**
  * Explicit user-controlled Keyboard settings and bounded portable-preference surface.
  *
- * The layout preference is device-local and low sensitivity. Portable transfer uses Android's
- * Storage Access Framework so the user chooses every source or destination document. Export is
- * reviewed and frozen to one typed category before a destination document is requested. Import
- * selection validates and previews the one category before any local preference write. It requests
- * no broad storage or network permission and does not expose typed text, emoji recents, clipboard
- * state, search history, learned input, telemetry, Identity data, or credentials.
+ * Layout and toolbar preferences are device-local and low sensitivity. Portable transfer uses
+ * Android's Storage Access Framework so the user chooses every source or destination document.
+ * Export is reviewed and frozen to one typed category before a destination document is requested.
+ * Import selection validates and previews the one category before any local preference write. It
+ * requests no broad storage or network permission and does not expose typed text, emoji recents,
+ * clipboard state, search history, learned input, telemetry, Identity data, or credentials.
  */
 class KeyboardPortablePreferencesActivity : Activity() {
     private lateinit var categoryStore: LocalEmojiCategoryStore
@@ -45,7 +46,7 @@ class KeyboardPortablePreferencesActivity : Activity() {
             setPadding(padding, padding, padding, padding)
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
             )
         }
 
@@ -65,6 +66,68 @@ class KeyboardPortablePreferencesActivity : Activity() {
 
         content.addView(TextView(this).apply {
             text = getString(R.string.keyboard_settings_number_row_summary)
+            setPadding(0, 0, 0, dp(20))
+        }, matchWidth())
+
+        content.addView(TextView(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_heading)
+            textSize = 18f
+        }, matchWidth())
+
+        val toolbarConfiguration = settingsStore.toolbarConfiguration()
+        val toolbarEnabled = CheckBox(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_enabled)
+            isChecked = toolbarConfiguration.enabled
+            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
+        }
+        val toolbarEmoji = CheckBox(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_emoji)
+            isChecked = toolbarConfiguration.showEmoji
+            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
+        }
+        val toolbarSymbols = CheckBox(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_symbols)
+            isChecked = toolbarConfiguration.showSymbols
+            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
+        }
+        val toolbarSettings = CheckBox(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_settings)
+            isChecked = toolbarConfiguration.showSettings
+            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
+        }
+
+        fun refreshToolbarActionState() {
+            val enabled = toolbarEnabled.isChecked
+            toolbarEmoji.isEnabled = enabled
+            toolbarSymbols.isEnabled = enabled
+            toolbarSettings.isEnabled = enabled
+        }
+
+        toolbarEnabled.setOnCheckedChangeListener { _, checked ->
+            settingsStore.setShowUtilityToolbar(checked)
+            refreshToolbarActionState()
+        }
+        toolbarEmoji.setOnCheckedChangeListener { _, checked ->
+            settingsStore.setToolbarEmoji(checked)
+        }
+        toolbarSymbols.setOnCheckedChangeListener { _, checked ->
+            settingsStore.setToolbarSymbols(checked)
+        }
+        toolbarSettings.setOnCheckedChangeListener { _, checked ->
+            settingsStore.setToolbarSettings(checked)
+        }
+        refreshToolbarActionState()
+
+        content.addView(toolbarEnabled, matchWidth())
+        content.addView(TextView(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_summary)
+            setPadding(0, 0, 0, dp(8))
+        }, matchWidth())
+        content.addView(toolbarEmoji, matchWidth())
+        content.addView(toolbarSymbols, matchWidth())
+        content.addView(toolbarSettings, matchWidth())
+        content.addView(TextView(this).apply {
+            text = getString(R.string.keyboard_settings_toolbar_actions_summary)
             setPadding(0, 0, 0, dp(20))
         }, matchWidth())
 
@@ -106,7 +169,10 @@ class KeyboardPortablePreferencesActivity : Activity() {
         }
         content.addView(statusView, matchWidth())
 
-        setContentView(content)
+        setContentView(ScrollView(this).apply {
+            isFillViewport = true
+            addView(content)
+        })
         refreshCategory()
     }
 

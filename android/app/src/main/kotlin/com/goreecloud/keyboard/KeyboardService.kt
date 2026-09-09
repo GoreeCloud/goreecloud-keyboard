@@ -1,5 +1,6 @@
 package com.goreecloud.keyboard
 
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.view.KeyEvent
 import android.view.View
@@ -33,6 +34,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             view.setLayer(KeyboardLayer.LETTERS)
             view.setShifted(shifted)
             view.setNumberRowEnabled(settingsStore.showNumberRow())
+            view.setToolbarConfiguration(settingsStore.toolbarConfiguration())
             view.setEditorAction(editorAction)
             updateSuggestions()
         }
@@ -54,6 +56,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         keyboardView?.setLayer(KeyboardLayer.LETTERS)
         keyboardView?.setShifted(false)
         keyboardView?.setNumberRowEnabled(settingsStore.showNumberRow())
+        keyboardView?.setToolbarConfiguration(settingsStore.toolbarConfiguration())
         updateSuggestions()
     }
 
@@ -198,6 +201,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         clearComposingBoundary()
         keyboardView?.setShifted(false)
         updateSuggestions()
+    }
+
+    override fun onOpenSettings() {
+        startActivity(
+            Intent(this, KeyboardPortablePreferencesActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
     }
 
     private fun beginEditorSession(info: EditorInfo?) {

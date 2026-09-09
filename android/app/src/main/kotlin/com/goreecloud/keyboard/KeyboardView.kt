@@ -27,6 +27,7 @@ class KeyboardView @JvmOverloads constructor(
         fun onShift()
         fun onSuggestion(value: String)
         fun onLayerChanged(layer: KeyboardLayer)
+        fun onOpenSettings() = Unit
     }
 
     var listener: Listener? = null
@@ -49,6 +50,7 @@ class KeyboardView @JvmOverloads constructor(
     private data class HitSuggestion(val bounds: RectF, val value: String)
     private data class HitEmojiCategory(val bounds: RectF, val entry: EmojiStripEntry)
     private data class HitEmojiSearchResult(val bounds: RectF, val result: EmojiSearchResult)
+    private data class HitToolbarAction(val bounds: RectF, val action: KeyboardToolbarAction)
     private data class AlternatePopup(
         val sourceBounds: RectF,
         val values: List<String>,
@@ -84,6 +86,7 @@ class KeyboardView @JvmOverloads constructor(
     private val hitSuggestions = mutableListOf<HitSuggestion>()
     private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
     private val hitEmojiSearchResults = mutableListOf<HitEmojiSearchResult>()
+    private val hitToolbarActions = mutableListOf<HitToolbarAction>()
     private val emojiRecentsStore = LocalEmojiRecentsStore(context)
     private val emojiCategoryStore = LocalEmojiCategoryStore(context)
     private val emojiRecents = EmojiRecents(initialValues = emojiRecentsStore.load())
@@ -92,6 +95,7 @@ class KeyboardView @JvmOverloads constructor(
     private var shifted = false
     private var suggestions: List<String> = emptyList()
     private var numberRowEnabled = true
+    private var toolbarConfiguration = KeyboardToolbarConfiguration()
     private var editorAction: EditorActionPresentation = EditorActionPolicy.Enter
     private var layer = KeyboardLayer.LETTERS
     private var emojiCategory = emojiCategoryStore.load()
@@ -144,6 +148,14 @@ class KeyboardView @JvmOverloads constructor(
         invalidateStructure()
     }
 
+    fun setToolbarConfiguration(value: KeyboardToolbarConfiguration) {
+        if (toolbarConfiguration == value) return
+        cancelAlternateInteraction()
+        toolbarConfiguration = value
+        requestLayout()
+        invalidateStructure()
+    }
+
     fun setEditorAction(value: EditorActionPresentation) {
         editorAction = value
         invalidateStructure()
@@ -151,7 +163,12 @@ class KeyboardView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
-        val preferredHeightDp = if (numberRowEnabled) 360f else 300f
+        val toolbarExtraDp = if (toolbarConfiguration.isVisible()) {
+            GlazeKeyboardTokens.GeneralInteractionFloorDp + GlazeKeyboardTokens.Space1Dp
+        } else {
+            0f
+        }
+        val preferredHeightDp = (if (numberRowEnabled) 360f else 300f) + toolbarExtraDp
         val preferredHeight = (preferredHeightDp * resources.displayMetrics.density).toInt()
         val height = resolveSize(preferredHeight, heightMeasureSpec)
         setMeasuredDimension(width, height)
@@ -165,17 +182,29 @@ class KeyboardView @JvmOverloads constructor(
         hitSuggestions.clear()
         hitEmojiCategories.clear()
         hitEmojiSearchResults.clear()
+        hitToolbarActions.clear()
 
         val rows = currentRows()
         val density = resources.displayMetrics.density
         val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
         val gap = GlazeKeyboardTokens.Space1Dp * density
-        val topArea = GlazeKeyboardTokens.SuggestionStripHeightDp * density
-        val keyboardTop = topArea + GlazeKeyboardTokens.Space2Dp * density
+        val toolbarActions = toolbarConfiguration.visibleActions()
+        val toolbarHeight = if (toolbarActions.isEmpty()) {
+            0f
+        } else {
+            GlazeKeyboardTokens.GeneralInteractionFloorDp * density
+        }
+        val toolbarGap = if (toolbarActions.isEmpty()) 0f else gap
+        val suggestionTop = toolbarHeight + toolbarGap
+        val suggestionHeight = GlazeKeyboardTokens.SuggestionStripHeightDp * density
+        val keyboardTop = suggestionTop + suggestionHeight + GlazeKeyboardTokens.Space2Dp * density
         val rowHeight = max(1f, (height - keyboardTop - gap * (rows.size + 1)) / rows.size)
         val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density
 
-        drawSuggestionStrip(canvas, horizontalPadding, topArea)
+        if (toolbarActions.isNotEmpty()) {
+            drawUtilityToolbar(canvas, horizontalPadding, toolbarActions, toolbarHeight)
+        }
+        drawSuggestionStrip(canvas, horizontalPadding, suggestionTop, suggestionHeight)
 
         rows.forEachIndexed { rowIndex, row ->
             val totalWeight = row.sumOf { it.weight.toDouble() }.toFloat()
@@ -290,41 +319,100 @@ class KeyboardView @JvmOverloads constructor(
         alternateSelectedPaint.color = palette.surfaceArgb
     }
 
-    private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+    private fun drawUtilityToolbar(
+        canvas: Canvas,
+        horizontalPadding: Float,
+        actions: List<KeyboardToolbarAction>,
+        toolbarHeight: Float,
+    ) {
+        val density = resources.displayMetrics.density
+        val gap = GlazeKeyboardTokens.Space1Dp * density
+        val availableWidth = width - horizontalPadding * 2 - gap * (actions.size - 1)
+        val cellWidth = availableWidth / actions.size
+        val radius = GlazeKeyboardTokens.RadiusMediumDp * density
+
+        actions.forEachIndexed { index, action ->
+            val left = horizontalPadding + index * (cellWidth + gap)
+            val bounds = RectF(left, 0f, left + cellWidth, toolbarHeight)
+            canvas.drawRoundRect(bounds, radius, radius, keyPaint)
+            if (isToolbarActionSelected(action) || isPressedKey(bounds)) {
+                canvas.drawRoundRect(bounds, radius, radius, pressedKeyPaint)
+            }
+            canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
+            val baseline = bounds.centerY() - (suggestionPaint.descent() + suggestionPaint.ascent()) / 2
+            canvas.drawText(toolbarVisibleLabel(action), bounds.centerX(), baseline, suggestionPaint)
+            hitToolbarActions += HitToolbarAction(bounds, action)
+        }
+    }
+
+    private fun toolbarVisibleLabel(action: KeyboardToolbarAction): String = when (action) {
+        KeyboardToolbarAction.EMOJI -> "☺"
+        KeyboardToolbarAction.SYMBOLS -> "?123"
+        KeyboardToolbarAction.SETTINGS -> "⚙"
+    }
+
+    private fun toolbarAccessibilityLabel(action: KeyboardToolbarAction): String = when (action) {
+        KeyboardToolbarAction.EMOJI -> context.getString(R.string.accessibility_toolbar_emoji)
+        KeyboardToolbarAction.SYMBOLS -> context.getString(R.string.accessibility_toolbar_symbols)
+        KeyboardToolbarAction.SETTINGS -> context.getString(R.string.accessibility_toolbar_settings)
+    }
+
+    private fun isToolbarActionSelected(action: KeyboardToolbarAction): Boolean = when (action) {
+        KeyboardToolbarAction.EMOJI -> layer == KeyboardLayer.EMOJI
+        KeyboardToolbarAction.SYMBOLS -> layer == KeyboardLayer.SYMBOLS || layer == KeyboardLayer.SYMBOLS_MORE
+        KeyboardToolbarAction.SETTINGS -> false
+    }
+
+    private fun drawSuggestionStrip(
+        canvas: Canvas,
+        horizontalPadding: Float,
+        top: Float,
+        height: Float,
+    ) {
         if (layer == KeyboardLayer.EMOJI) {
             if (emojiSearchSession.snapshot().active) {
-                drawEmojiSearchStrip(canvas, horizontalPadding, topArea)
+                drawEmojiSearchStrip(canvas, horizontalPadding, top, height)
             } else {
-                drawEmojiCategoryStrip(canvas, horizontalPadding, topArea)
+                drawEmojiCategoryStrip(canvas, horizontalPadding, top, height)
             }
             return
         }
         if (layer != KeyboardLayer.LETTERS) {
-            val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+            val baseline = top + height / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText("Symbols stay local", width / 2f, baseline, suggestionHintPaint)
             return
         }
 
         if (suggestions.isEmpty()) {
-            val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+            val baseline = top + height / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText("Quill suggestions stay on-device", width / 2f, baseline, suggestionHintPaint)
             return
         }
 
         val cellWidth = (width - horizontalPadding * 2) / suggestions.size
         suggestions.forEachIndexed { index, suggestion ->
-            val bounds = RectF(horizontalPadding + cellWidth * index, 0f, horizontalPadding + cellWidth * (index + 1), topArea)
+            val bounds = RectF(
+                horizontalPadding + cellWidth * index,
+                top,
+                horizontalPadding + cellWidth * (index + 1),
+                top + height,
+            )
             val baseline = bounds.centerY() - (suggestionPaint.descent() + suggestionPaint.ascent()) / 2
             canvas.drawText(suggestion, bounds.centerX(), baseline, suggestionPaint)
             hitSuggestions += HitSuggestion(bounds, suggestion)
         }
     }
 
-    private fun drawEmojiSearchStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+    private fun drawEmojiSearchStrip(
+        canvas: Canvas,
+        horizontalPadding: Float,
+        top: Float,
+        height: Float,
+    ) {
         val snapshot = emojiSearchSession.snapshot()
         val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
         val queryWidth = (width - horizontalPadding * 2) * 0.46f
-        val queryBounds = RectF(horizontalPadding, 0f, horizontalPadding + queryWidth, topArea)
+        val queryBounds = RectF(horizontalPadding, top, horizontalPadding + queryWidth, top + height)
         val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
         canvas.drawRoundRect(queryBounds, radius, radius, keyPaint)
         canvas.drawRoundRect(queryBounds, radius, radius, keyStrokePaint)
@@ -337,7 +425,7 @@ class KeyboardView @JvmOverloads constructor(
         val resultsWidth = width - horizontalPadding - resultsLeft
         if (visibleResults.isEmpty()) {
             val message = if (snapshot.query.isBlank()) "Type a name" else "No matches"
-            val bounds = RectF(resultsLeft, 0f, width - horizontalPadding, topArea)
+            val bounds = RectF(resultsLeft, top, width - horizontalPadding, top + height)
             val baseline = bounds.centerY() - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
             canvas.drawText(message, bounds.centerX(), baseline, suggestionHintPaint)
             return
@@ -346,7 +434,7 @@ class KeyboardView @JvmOverloads constructor(
         val cellWidth = (resultsWidth - gap * (visibleResults.size - 1)) / visibleResults.size
         visibleResults.forEachIndexed { index, result ->
             val left = resultsLeft + index * (cellWidth + gap)
-            val bounds = RectF(left, 0f, left + cellWidth, topArea)
+            val bounds = RectF(left, top, left + cellWidth, top + height)
             canvas.drawRoundRect(bounds, radius, radius, keyPaint)
             canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
             val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
@@ -355,7 +443,12 @@ class KeyboardView @JvmOverloads constructor(
         }
     }
 
-    private fun drawEmojiCategoryStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
+    private fun drawEmojiCategoryStrip(
+        canvas: Canvas,
+        horizontalPadding: Float,
+        top: Float,
+        height: Float,
+    ) {
         val entries = EmojiStripModel.entries(hasRecents = emojiRecents.values().isNotEmpty())
         val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
         val availableWidth = width - horizontalPadding * 2 - gap * (entries.size - 1)
@@ -363,7 +456,7 @@ class KeyboardView @JvmOverloads constructor(
         val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
         entries.forEachIndexed { index, entry ->
             val left = horizontalPadding + index * (cellWidth + gap)
-            val bounds = RectF(left, 0f, left + cellWidth, topArea)
+            val bounds = RectF(left, top, left + cellWidth, top + height)
             val selected = when {
                 entry.search -> false
                 entry.recent -> showingEmojiRecents
@@ -437,9 +530,10 @@ class KeyboardView @JvmOverloads constructor(
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 cancelAlternateInteraction()
+                val toolbarHit = hitToolbarActions.lastOrNull { it.bounds.contains(event.x, event.y) }
                 val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
-                pressedKeyBounds = hit?.let { RectF(it.bounds) }
-                if (hit != null && alternatesFor(hit).isNotEmpty()) {
+                pressedKeyBounds = toolbarHit?.let { RectF(it.bounds) } ?: hit?.let { RectF(it.bounds) }
+                if (toolbarHit == null && hit != null && alternatesFor(hit).isNotEmpty()) {
                     pendingAlternateHit = hit
                     postDelayed(showAlternatesRunnable, ViewConfiguration.getLongPressTimeout().toLong())
                 }
@@ -462,8 +556,9 @@ class KeyboardView @JvmOverloads constructor(
                         pendingAlternateHit = null
                     }
                 }
+                val toolbarHit = hitToolbarActions.lastOrNull { it.bounds.contains(event.x, event.y) }
                 val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
-                val nextBounds = hit?.let { RectF(it.bounds) }
+                val nextBounds = toolbarHit?.let { RectF(it.bounds) } ?: hit?.let { RectF(it.bounds) }
                 if (nextBounds != pressedKeyBounds) {
                     pressedKeyBounds = nextBounds
                     invalidate()
@@ -493,6 +588,10 @@ class KeyboardView @JvmOverloads constructor(
                 invalidate()
             }
             else -> return true
+        }
+
+        hitToolbarActions.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
+            return activateToolbarAction(hit)
         }
 
         hitEmojiSearchResults.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
@@ -555,6 +654,16 @@ class KeyboardView @JvmOverloads constructor(
                 )
             )
         }
+        hitToolbarActions.forEachIndexed { index, hit ->
+            add(
+                KeyboardAccessibilityTarget(
+                    id = ACCESSIBILITY_TOOLBAR_BASE + index,
+                    bounds = RectF(hit.bounds),
+                    label = toolbarAccessibilityLabel(hit.action),
+                    selected = isToolbarActionSelected(hit.action),
+                )
+            )
+        }
     }
 
     internal fun accessibilityTarget(id: Int): KeyboardAccessibilityTarget? =
@@ -569,8 +678,10 @@ class KeyboardView @JvmOverloads constructor(
                 hitSuggestions.getOrNull(id - ACCESSIBILITY_SUGGESTION_BASE)?.let(::activateSuggestion) ?: false
             id in ACCESSIBILITY_EMOJI_CATEGORY_BASE until ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE ->
                 hitEmojiCategories.getOrNull(id - ACCESSIBILITY_EMOJI_CATEGORY_BASE)?.let(::activateEmojiCategory) ?: false
-            id >= ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE ->
+            id in ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE until ACCESSIBILITY_TOOLBAR_BASE ->
                 hitEmojiSearchResults.getOrNull(id - ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE)?.let(::activateEmojiSearchResult) ?: false
+            id >= ACCESSIBILITY_TOOLBAR_BASE ->
+                hitToolbarActions.getOrNull(id - ACCESSIBILITY_TOOLBAR_BASE)?.let(::activateToolbarAction) ?: false
             else -> false
         }
     }
@@ -587,6 +698,23 @@ class KeyboardView @JvmOverloads constructor(
         Action.EMOJI -> "Emoji"
         Action.EMOJI_SEARCH_CLEAR -> "Clear emoji search"
         Action.EMOJI_SEARCH_CLOSE -> "Close emoji search"
+    }
+
+    private fun activateToolbarAction(hit: HitToolbarAction): Boolean {
+        when (hit.action) {
+            KeyboardToolbarAction.EMOJI -> {
+                emojiSearchSession.close()
+                switchLayer(KeyboardLayer.EMOJI)
+            }
+            KeyboardToolbarAction.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
+            KeyboardToolbarAction.SETTINGS -> {
+                listener?.onOpenSettings()
+                announceForAccessibility(toolbarAccessibilityLabel(hit.action))
+                invalidateStructure()
+            }
+        }
+        performClick()
+        return true
     }
 
     private fun activateEmojiSearchResult(hit: HitEmojiSearchResult): Boolean {
@@ -717,5 +845,6 @@ class KeyboardView @JvmOverloads constructor(
         const val ACCESSIBILITY_SUGGESTION_BASE = 2_000
         const val ACCESSIBILITY_EMOJI_CATEGORY_BASE = 3_000
         const val ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE = 4_000
+        const val ACCESSIBILITY_TOOLBAR_BASE = 5_000
     }
 }
