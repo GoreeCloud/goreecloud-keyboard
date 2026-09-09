@@ -4,7 +4,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VIEW = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 DELEGATE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt"
+EDITOR_ACTION_POLICY = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/EditorActionPolicy.kt"
 TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt"
+INPUT_SURFACE_TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt"
 GRADLE = ROOT / "android/app/build.gradle.kts"
 ACTION_IDS = ROOT / "android/app/src/main/res/values/accessibility_ids.xml"
 STRINGS = ROOT / "android/app/src/main/res/values/strings.xml"
@@ -21,13 +23,24 @@ def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
 
 
 def main() -> None:
-    for path in (VIEW, DELEGATE, TEST, GRADLE, ACTION_IDS, STRINGS):
+    for path in (
+        VIEW,
+        DELEGATE,
+        EDITOR_ACTION_POLICY,
+        TEST,
+        INPUT_SURFACE_TEST,
+        GRADLE,
+        ACTION_IDS,
+        STRINGS,
+    ):
         if not path.is_file():
             fail(f"missing required evidence: {path.relative_to(ROOT)}")
 
     view_text = VIEW.read_text(encoding="utf-8")
     delegate_text = DELEGATE.read_text(encoding="utf-8")
+    editor_action_text = EDITOR_ACTION_POLICY.read_text(encoding="utf-8")
     test_text = TEST.read_text(encoding="utf-8")
+    input_surface_test_text = INPUT_SURFACE_TEST.read_text(encoding="utf-8")
     gradle_text = GRADLE.read_text(encoding="utf-8")
     action_ids_text = ACTION_IDS.read_text(encoding="utf-8")
     strings_text = STRINGS.read_text(encoding="utf-8")
@@ -43,13 +56,30 @@ def main() -> None:
             "internal fun accessibilityTargets()",
             "internal fun accessibilityTarget(id: Int)",
             "internal fun performAccessibilityTarget(id: Int)",
+            "private var editorAction: EditorActionPresentation = EditorActionPolicy.Enter",
+            "fun setEditorAction(value: EditorActionPresentation)",
             'Action.SHIFT -> "Shift"',
             'Action.BACKSPACE -> "Backspace"',
             'Action.SPACE -> "Space"',
-            'Action.ENTER -> "Enter"',
+            "Action.ENTER -> editorAction.accessibilityLabel",
             "label = hit.entry.accessibilityLabel",
             'label = "Suggestion ${hit.value}"',
             "accessibilityDelegate.invalidateVirtualRoot()",
+        ),
+    )
+
+    require_all(
+        "adaptive editor action accessibility policy",
+        editor_action_text,
+        (
+            'accessibilityLabel = "Enter"',
+            "EditorInfo.IME_FLAG_NO_ENTER_ACTION",
+            'EditorInfo.IME_ACTION_GO -> EditorActionPresentation("Go", "Go", EditorInfo.IME_ACTION_GO)',
+            'EditorInfo.IME_ACTION_SEARCH -> EditorActionPresentation("⌕", "Search", EditorInfo.IME_ACTION_SEARCH)',
+            'EditorInfo.IME_ACTION_SEND -> EditorActionPresentation("Send", "Send", EditorInfo.IME_ACTION_SEND)',
+            'EditorInfo.IME_ACTION_NEXT -> EditorActionPresentation("Next", "Next", EditorInfo.IME_ACTION_NEXT)',
+            'EditorInfo.IME_ACTION_DONE -> EditorActionPresentation("Done", "Done", EditorInfo.IME_ACTION_DONE)',
+            'EditorInfo.IME_ACTION_PREVIOUS -> EditorActionPresentation("Prev", "Previous", EditorInfo.IME_ACTION_PREVIOUS)',
         ),
     )
 
@@ -124,6 +154,18 @@ def main() -> None:
     )
 
     require_all(
+        "adaptive editor action runtime evidence",
+        input_surface_test_text,
+        (
+            "adaptiveEditorActionChangesTheRenderedAccessibilityContract",
+            "EditorActionPolicy.resolve(EditorInfo.IME_ACTION_DONE)",
+            'it.label == "Done"',
+            "EditorActionPolicy.resolve(EditorInfo.IME_ACTION_SEARCH)",
+            'it.label == "Search"',
+        ),
+    )
+
+    require_all(
         "Android accessibility dependency",
         gradle_text,
         ('implementation("androidx.customview:customview:1.2.0")',),
@@ -147,12 +189,12 @@ def main() -> None:
             fail(f"accessibility delegate gained forbidden data authority `{forbidden}`")
 
     print(
-        "Keyboard virtual accessibility boundary passed: custom-drawn keys, suggestions, emoji categories, "
-        "local emoji-search results, and bounded local key alternates expose actionable native accessibility "
-        "semantics with resource-backed user-facing alternate actions and state descriptions, without editor, "
-        "clipboard, persistence, or network authority. Emoji-search query mode cannot gain alternate-commit "
-        "authority. Representative translated-resource, RTL, TalkBack, and Switch Access physical-device "
-        "acceptance remain separate."
+        "Keyboard virtual accessibility boundary passed: custom-drawn keys, semantic adaptive editor actions, "
+        "suggestions, emoji categories, local emoji-search results, and bounded local key alternates expose "
+        "actionable native accessibility semantics with resource-backed user-facing alternate actions and state "
+        "descriptions, without editor, clipboard, persistence, or network authority in the accessibility delegate. "
+        "Emoji-search query mode cannot gain alternate-commit authority. Representative translated-resource, RTL, "
+        "TalkBack, and Switch Access physical-device acceptance remain separate."
     )
 
 
