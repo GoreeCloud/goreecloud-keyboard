@@ -5,6 +5,9 @@ ROOT = Path(__file__).resolve().parents[1]
 VIEW = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 DELEGATE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt"
 EDITOR_ACTION_POLICY = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/EditorActionPolicy.kt"
+TOOLBAR_CONFIGURATION = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfiguration.kt"
+SETTINGS_STORE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/LocalKeyboardSettingsStore.kt"
+SERVICE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt"
 TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt"
 INPUT_SURFACE_TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt"
 GRADLE = ROOT / "android/app/build.gradle.kts"
@@ -27,6 +30,9 @@ def main() -> None:
         VIEW,
         DELEGATE,
         EDITOR_ACTION_POLICY,
+        TOOLBAR_CONFIGURATION,
+        SETTINGS_STORE,
+        SERVICE,
         TEST,
         INPUT_SURFACE_TEST,
         GRADLE,
@@ -39,6 +45,9 @@ def main() -> None:
     view_text = VIEW.read_text(encoding="utf-8")
     delegate_text = DELEGATE.read_text(encoding="utf-8")
     editor_action_text = EDITOR_ACTION_POLICY.read_text(encoding="utf-8")
+    toolbar_configuration_text = TOOLBAR_CONFIGURATION.read_text(encoding="utf-8")
+    settings_store_text = SETTINGS_STORE.read_text(encoding="utf-8")
+    service_text = SERVICE.read_text(encoding="utf-8")
     test_text = TEST.read_text(encoding="utf-8")
     input_surface_test_text = INPUT_SURFACE_TEST.read_text(encoding="utf-8")
     gradle_text = GRADLE.read_text(encoding="utf-8")
@@ -69,6 +78,25 @@ def main() -> None:
     )
 
     require_all(
+        "configurable utility toolbar virtual-control integration",
+        view_text,
+        (
+            "private data class HitToolbarAction",
+            "private val hitToolbarActions = mutableListOf<HitToolbarAction>()",
+            "fun setToolbarConfiguration(value: KeyboardToolbarConfiguration)",
+            "drawUtilityToolbar(canvas, horizontalPadding, toolbarActions, toolbarHeight)",
+            "KeyboardToolbarAction.EMOJI ->",
+            "KeyboardToolbarAction.SYMBOLS ->",
+            "KeyboardToolbarAction.SETTINGS ->",
+            "listener?.onOpenSettings()",
+            "id = ACCESSIBILITY_TOOLBAR_BASE + index",
+            "id in ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE until ACCESSIBILITY_TOOLBAR_BASE",
+            "id >= ACCESSIBILITY_TOOLBAR_BASE",
+            "const val ACCESSIBILITY_TOOLBAR_BASE = 5_000",
+        ),
+    )
+
+    require_all(
         "adaptive editor action accessibility policy",
         editor_action_text,
         (
@@ -80,6 +108,48 @@ def main() -> None:
             'EditorInfo.IME_ACTION_NEXT -> EditorActionPresentation("Next", "Next", EditorInfo.IME_ACTION_NEXT)',
             'EditorInfo.IME_ACTION_DONE -> EditorActionPresentation("Done", "Done", EditorInfo.IME_ACTION_DONE)',
             'EditorInfo.IME_ACTION_PREVIOUS -> EditorActionPresentation("Prev", "Previous", EditorInfo.IME_ACTION_PREVIOUS)',
+        ),
+    )
+
+    require_all(
+        "utility toolbar configuration boundary",
+        toolbar_configuration_text,
+        (
+            "enum class KeyboardToolbarAction",
+            "EMOJI",
+            "SYMBOLS",
+            "SETTINGS",
+            "data class KeyboardToolbarConfiguration",
+            "fun visibleActions(): List<KeyboardToolbarAction>",
+            "fun isVisible(): Boolean = visibleActions().isNotEmpty()",
+        ),
+    )
+
+    require_all(
+        "device-local toolbar preference boundary",
+        settings_store_text,
+        (
+            "fun toolbarConfiguration(): KeyboardToolbarConfiguration",
+            "fun setShowUtilityToolbar(value: Boolean)",
+            "fun setToolbarEmoji(value: Boolean)",
+            "fun setToolbarSymbols(value: Boolean)",
+            "fun setToolbarSettings(value: Boolean)",
+            'const val KEY_SHOW_UTILITY_TOOLBAR = "show_utility_toolbar"',
+            'const val KEY_TOOLBAR_EMOJI = "toolbar_emoji"',
+            'const val KEY_TOOLBAR_SYMBOLS = "toolbar_symbols"',
+            'const val KEY_TOOLBAR_SETTINGS = "toolbar_settings"',
+        ),
+    )
+
+    require_all(
+        "IME toolbar routing boundary",
+        service_text,
+        (
+            "view.setToolbarConfiguration(settingsStore.toolbarConfiguration())",
+            "keyboardView?.setToolbarConfiguration(settingsStore.toolbarConfiguration())",
+            "override fun onOpenSettings()",
+            "Intent(this, KeyboardPortablePreferencesActivity::class.java)",
+            "Intent.FLAG_ACTIVITY_NEW_TASK",
         ),
     )
 
@@ -126,6 +196,9 @@ def main() -> None:
             '<string name="accessibility_insert_alternate">',
             '<string name="accessibility_alternates_announcement">',
             '<string name="accessibility_inserted_alternate">',
+            '<string name="accessibility_toolbar_emoji">',
+            '<string name="accessibility_toolbar_symbols">',
+            '<string name="accessibility_toolbar_settings">',
         ),
     )
 
@@ -150,11 +223,14 @@ def main() -> None:
             "R.string.accessibility_state_off",
             "R.string.accessibility_state_on",
             "R.string.accessibility_state_selected",
+            "utilityToolbarSettingsActionIsAResourceBackedNativeVirtualControl",
+            "R.string.accessibility_toolbar_settings",
+            "onOpenSettings = { settingsRequests += 1 }",
         ),
     )
 
     require_all(
-        "adaptive editor action runtime evidence",
+        "input-surface runtime evidence",
         input_surface_test_text,
         (
             "adaptiveEditorActionChangesTheRenderedAccessibilityContract",
@@ -162,6 +238,13 @@ def main() -> None:
             'it.label == "Done"',
             "EditorActionPolicy.resolve(EditorInfo.IME_ACTION_SEARCH)",
             'it.label == "Search"',
+            "configurableUtilityToolbarExposesOnlyEnabledRealActions",
+            "utilityToolbarLayerActionsReuseExistingLayerRouting",
+            "utilityToolbarPreferencesRemainDeviceLocalAndExplicit",
+            "Keyboard settings",
+            "KeyboardToolbarAction.EMOJI",
+            "KeyboardToolbarAction.SYMBOLS",
+            "KeyboardToolbarAction.SETTINGS",
         ),
     )
 
@@ -190,11 +273,12 @@ def main() -> None:
 
     print(
         "Keyboard virtual accessibility boundary passed: custom-drawn keys, semantic adaptive editor actions, "
-        "suggestions, emoji categories, local emoji-search results, and bounded local key alternates expose "
-        "actionable native accessibility semantics with resource-backed user-facing alternate actions and state "
-        "descriptions, without editor, clipboard, persistence, or network authority in the accessibility delegate. "
-        "Emoji-search query mode cannot gain alternate-commit authority. Representative translated-resource, RTL, "
-        "TalkBack, and Switch Access physical-device acceptance remain separate."
+        "suggestions, emoji categories, local emoji-search results, configurable real-action utility-toolbar "
+        "controls, and bounded local key alternates expose actionable native accessibility semantics with "
+        "resource-backed user-facing toolbar/alternate actions and state descriptions, without editor, clipboard, "
+        "persistence, or network authority in the accessibility delegate. Emoji-search query mode cannot gain "
+        "alternate-commit authority. Representative translated-resource, RTL, TalkBack, and Switch Access "
+        "physical-device acceptance remain separate."
     )
 
 
