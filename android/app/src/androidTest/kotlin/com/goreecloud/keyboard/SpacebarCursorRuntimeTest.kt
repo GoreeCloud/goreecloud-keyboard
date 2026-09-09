@@ -18,7 +18,7 @@ class SpacebarCursorRuntimeTest {
         val view = createRenderedView()
         var spaces = 0
         val cursorSteps = mutableListOf<Int>()
-        view.listener = listener(onSpace = { spaces += 1 })
+        view.listener = listener(onSpaceAction = { spaces += 1 })
         view.setOnTouchListener(
             SpacebarCursorTouchListener(
                 keyboardView = view,
@@ -42,7 +42,7 @@ class SpacebarCursorRuntimeTest {
         val view = createRenderedView()
         var spaces = 0
         val cursorSteps = mutableListOf<Int>()
-        view.listener = listener(onSpace = { spaces += 1 })
+        view.listener = listener(onSpaceAction = { spaces += 1 })
         view.setOnTouchListener(
             SpacebarCursorTouchListener(
                 keyboardView = view,
@@ -69,7 +69,7 @@ class SpacebarCursorRuntimeTest {
         val view = createRenderedView()
         var spaces = 0
         val cursorSteps = mutableListOf<Int>()
-        view.listener = listener(onSpace = { spaces += 1 })
+        view.listener = listener(onSpaceAction = { spaces += 1 })
         view.setOnTouchListener(
             SpacebarCursorTouchListener(
                 keyboardView = view,
@@ -119,9 +119,9 @@ class SpacebarCursorRuntimeTest {
         }
     }
 
-    private fun listener(onSpace: () -> Unit) = object : KeyboardView.Listener {
+    private fun listener(onSpaceAction: () -> Unit) = object : KeyboardView.Listener {
         override fun onText(value: String) = Unit
-        override fun onSpace() = onSpace()
+        override fun onSpace() = onSpaceAction()
         override fun onBackspace() = Unit
         override fun onEnter() = Unit
         override fun onShift() = Unit
