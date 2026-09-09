@@ -16,6 +16,15 @@ class KeyboardLayoutTest {
     }
 
     @Test
+    fun dedicatedNumberRowIsDeterministicAndMatchesPrimaryDigits() {
+        val numberRow = KeyboardLayout.numberRow()
+        val symbolDigits = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)[0]
+
+        assertEquals("1234567890", numberRow.joinToString(""))
+        assertEquals(symbolDigits, numberRow)
+    }
+
+    @Test
     fun primarySymbolsExposeDigitsAndCommonPunctuationWithoutLetters() {
         val rows = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)
         val keys = rows.flatten()

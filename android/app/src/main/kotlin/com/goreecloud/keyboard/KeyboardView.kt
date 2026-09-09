@@ -91,6 +91,8 @@ class KeyboardView @JvmOverloads constructor(
     private val accessibilityDelegate = KeyboardAccessibilityDelegate(this)
     private var shifted = false
     private var suggestions: List<String> = emptyList()
+    private var numberRowEnabled = true
+    private var editorAction: EditorActionPresentation = EditorActionPolicy.Enter
     private var layer = KeyboardLayer.LETTERS
     private var emojiCategory = emojiCategoryStore.load()
     private var showingEmojiRecents = false
@@ -134,9 +136,23 @@ class KeyboardView @JvmOverloads constructor(
         invalidateStructure()
     }
 
+    fun setNumberRowEnabled(value: Boolean) {
+        if (numberRowEnabled == value) return
+        cancelAlternateInteraction()
+        numberRowEnabled = value
+        requestLayout()
+        invalidateStructure()
+    }
+
+    fun setEditorAction(value: EditorActionPresentation) {
+        editorAction = value
+        invalidateStructure()
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
-        val preferredHeight = (300f * resources.displayMetrics.density).toInt()
+        val preferredHeightDp = if (numberRowEnabled) 360f else 300f
+        val preferredHeight = (preferredHeightDp * resources.displayMetrics.density).toInt()
         val height = resolveSize(preferredHeight, heightMeasureSpec)
         setMeasuredDimension(width, height)
     }
@@ -156,7 +172,7 @@ class KeyboardView @JvmOverloads constructor(
         val gap = GlazeKeyboardTokens.Space1Dp * density
         val topArea = GlazeKeyboardTokens.SuggestionStripHeightDp * density
         val keyboardTop = topArea + GlazeKeyboardTokens.Space2Dp * density
-        val rowHeight = max(1f, (height - keyboardTop - gap * 5) / rows.size)
+        val rowHeight = max(1f, (height - keyboardTop - gap * (rows.size + 1)) / rows.size)
         val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density
 
         drawSuggestionStrip(canvas, horizontalPadding, topArea)
@@ -208,29 +224,30 @@ class KeyboardView @JvmOverloads constructor(
             KeyboardLayout.characterRows(layer)
         }
         return when (layer) {
-            KeyboardLayer.LETTERS -> listOf(
-                characterRows[0].map(::textKey),
-                characterRows[1].map(::textKey),
-                listOf(Key("⇧", 1.25f, Action.SHIFT)) + characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
-                listOf(Key("?123", 1.3f, Action.SYMBOLS), Key("☺", 1.05f, Action.EMOJI), Key("space", 4.65f, Action.SPACE), Key("↵", 1.3f, Action.ENTER)),
-            )
+            KeyboardLayer.LETTERS -> buildList {
+                if (numberRowEnabled) add(KeyboardLayout.numberRow().map(::textKey))
+                add(characterRows[0].map(::textKey))
+                add(characterRows[1].map(::textKey))
+                add(listOf(Key("⇧", 1.25f, Action.SHIFT)) + characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)))
+                add(listOf(Key("?123", 1.3f, Action.SYMBOLS), Key("☺", 1.05f, Action.EMOJI), Key("space", 4.65f, Action.SPACE), Key(editorAction.visibleLabel, 1.3f, Action.ENTER)))
+            }
             KeyboardLayer.SYMBOLS -> listOf(
                 characterRows[0].map(::textKey),
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
-                listOf(Key("ABC", 1.15f, Action.LETTERS), Key("=\\<", 1.15f, Action.SYMBOLS_MORE), Key("☺", 1.05f, Action.EMOJI), Key("space", 3.9f, Action.SPACE), Key("↵", 1.25f, Action.ENTER)),
+                listOf(Key("ABC", 1.15f, Action.LETTERS), Key("=\\<", 1.15f, Action.SYMBOLS_MORE), Key("☺", 1.05f, Action.EMOJI), Key("space", 3.9f, Action.SPACE), Key(editorAction.visibleLabel, 1.25f, Action.ENTER)),
             )
             KeyboardLayer.SYMBOLS_MORE -> listOf(
                 characterRows[0].map(::textKey),
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
-                listOf(Key("ABC", 1.15f, Action.LETTERS), Key("?123", 1.15f, Action.SYMBOLS), Key("☺", 1.05f, Action.EMOJI), Key("space", 3.9f, Action.SPACE), Key("↵", 1.25f, Action.ENTER)),
+                listOf(Key("ABC", 1.15f, Action.LETTERS), Key("?123", 1.15f, Action.SYMBOLS), Key("☺", 1.05f, Action.EMOJI), Key("space", 3.9f, Action.SPACE), Key(editorAction.visibleLabel, 1.25f, Action.ENTER)),
             )
             KeyboardLayer.EMOJI -> listOf(
                 characterRows[0].map(::textKey),
                 characterRows[1].map(::textKey),
                 characterRows[2].map(::textKey) + listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
-                listOf(Key("ABC", 1.1f, Action.LETTERS), Key("?123", 1.1f, Action.SYMBOLS), Key("space", 4.2f, Action.SPACE), Key("↵", 1.25f, Action.ENTER)),
+                listOf(Key("ABC", 1.1f, Action.LETTERS), Key("?123", 1.1f, Action.SYMBOLS), Key("space", 4.2f, Action.SPACE), Key(editorAction.visibleLabel, 1.25f, Action.ENTER)),
             )
         }
     }
@@ -563,7 +580,7 @@ class KeyboardView @JvmOverloads constructor(
         Action.SHIFT -> "Shift"
         Action.BACKSPACE -> "Backspace"
         Action.SPACE -> "Space"
-        Action.ENTER -> "Enter"
+        Action.ENTER -> editorAction.accessibilityLabel
         Action.LETTERS -> "Letters"
         Action.SYMBOLS -> "Symbols"
         Action.SYMBOLS_MORE -> "More symbols"

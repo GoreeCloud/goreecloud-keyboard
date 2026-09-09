@@ -6,35 +6,44 @@
 
 GoreeCloud Keyboard is an original GoreeCloud-owned keyboard implementation. The current implemented platform is Android through `InputMethodService` and a first-party rendering/input surface. Apple-platform support remains product direction and is not claimed as currently implemented.
 
-GoreeCloud Keyboard must be beautiful, polished, cohesive, responsive, feature-rich, fast, private, accessible, and dependable. It must be built and designed against the latest current Stable GLAZE UI release while preserving native platform semantics, privacy/security authority boundaries, and truthful implementation status.
+GoreeCloud Keyboard must be beautiful, polished, cohesive, responsive, feature-rich, fast, private, accessible, and dependable. It must be built and designed against the latest applicable Stable GLAZE UI authority while preserving native platform semantics, privacy/security authority boundaries, and truthful implementation status.
 
 ## Current implemented scope
 
 - Native Android `InputMethodService` integration and declarative/runtime input-method registration checks.
 - First-party `KeyboardView` rendering and pointer-input handling.
-- QWERTY letters with shift, backspace, space, and enter.
+- QWERTY letters with shift, backspace, space, and adaptive editor action.
+- A dedicated 1–0 number row above QWERTY on the letters layer. It is enabled by default and can be disabled/re-enabled from the Android IME settings surface through a device-local Boolean presentation preference.
+- Adaptive action-key presentation for ordinary Enter plus Android Go, Search, Send, Next, Done, and Previous editor semantics. Explicit host actions use `InputConnection.performEditorAction()`; ordinary Enter remains the fallback when no explicit action applies or the host does not handle it.
 - First-party letters/symbols mode switching with `?123`, `ABC`, and `=\\<` controls.
 - Primary symbol page with digits and common punctuation plus a secondary first-party page with brackets, operators, currency marks, and common typographic symbols.
-- Bounded first-party emoji input using complete Unicode `String` payloads, deterministic Smileys, People, Nature, Food, Symbols, and Travel categories, local Recent state, explicit Clear behavior, and bounded device-local private persistence.
-- Fully offline emoji search over only the packaged first-party catalog. Search query state is transient, bounded, cleared on close, cannot be mutated while closed, and is not sent through the active editor or Quill composing context.
-- Deterministic local long-press key alternates with viewport-bounded popup layout, exact shared render/hit-test geometry, pointer movement selection, cancellation, haptic feedback, and accessibility announcements.
-- Local-only GoreeCloud Quill suggestion boundary with deterministic prefix suggestions, bounded typo-correction candidates, Unicode-code-point-aware correction, bounded transient capture, and commit authority restricted to the exact candidates currently presented for the active editor session.
+- Bounded first-party emoji input using complete Unicode `String` payloads, deterministic Smileys, People, Nature, Food, Symbols, and Travel categories, local Recent state, explicit Clear behavior, bounded device-local private persistence, and fully offline emoji search over the packaged catalog.
+- Deterministic local long-press key alternates with viewport-bounded popup layout, exact shared render/hit-test geometry, pointer movement selection, cancellation, haptic feedback, and accessibility semantics.
+- Local-only GoreeCloud Quill suggestion boundary with deterministic prefix suggestions, bounded typo-correction candidates, Unicode-code-point-aware correction, bounded transient capture, and commit authority restricted to exact candidates presented for the active editor session.
 - Sensitive-editor classification, host no-suggestions policy, and fail-closed editor lifecycle handling that clear composing/suggestion state and prevent ordinary-field authority from leaking across editor transitions or no-active-editor states.
 - Bounded Unicode-aware backspace for common emoji modifiers, ZWJ-linked emoji, regional-indicator flags, keycaps, variation selectors, combining marks, and CRLF. Ambiguous truncated ordinary-field look-behind fails closed; sensitive editors retain one-code-point deletion without text look-behind.
 - No Android network permission in the current application foundation.
 - A privacy-minimized `goreecloud-keyboard-preferences/1` format containing exactly the last explicitly selected emoji category, with strict validation/checksum integrity, explicit user-controlled Storage Access Framework import/export, preview-before-write import, review/freeze-before-destination export, and no generic preference serialization.
-- GLAZE UI V1.2 (`1.2.0`) Development source/material mapping pinned to exact Stable release authority `f285b9145e27e6e7027b075c37299d101945c272`.
-- V1.2 Frosted Neutral key material is consumed by the native `KeyboardView`; neutral glass is the material and color remains an accent rather than a default substrate tint.
-- V1.2 Light/Dark/Deep Dark source palettes, 4/8 dp spacing, 12 dp control radius, 48/56 dp target floors, optical geometry references, and pressed/selected/focus state calibration are repository-local and unit-tested. Runtime appearance selection remains Light/Dark from Android night mode only.
-- A V1.2 non-semantic atmosphere/material boundary prohibits chromatic, brand, or semantic color from defining the keyboard substrate and enables no editor/content sampling, remote color derivation, persistent sample history, semantic inference, telemetry, network lookup, or animated atmosphere.
-- Experimental Glaze Motion evaluation remains historical/test-only and is not a production dependency or V1.2 acceptance source.
-- Android unit/build/governance and emulator validation infrastructure covers registration, native interaction, editor privacy lifecycle, emoji search, Unicode deletion, suggestion authority, portable preferences, Glaze UI mapping, and alternate-popup geometry/hit testing.
+- A separate device-local presentation store containing only the number-row Boolean. It is intentionally outside the portable preference format and must not contain typed text, composing context, suggestions, clipboard contents, credentials, editor content, or usage-derived history.
+- GLAZE UI V1.3 / `1.3.0` Development source/material mapping pinned to exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1` through the current stacked migration work.
+- Inherited Frosted Neutral Light/Dark/Deep Dark source palettes, 4/8 dp spacing, 12 dp control-radius role, 48/56 dp interaction floors, optical geometry references, and deterministic pressed/selected/focus behavior. Runtime appearance selection remains Android Light/Dark only until separately accepted policy exists for additional modes.
+- V1.3 Adaptive Resonance authority boundaries that keep typed/editor content outside color authority and enable no environmental memory, remote derivation, persistent sample history, semantic inference, telemetry, network lookup, or animated atmosphere.
+- Experimental Glaze Motion evaluation remains historical/test-only and is not a production dependency or current Stable acceptance source.
+- Android unit/build/governance and emulator validation infrastructure covers registration, native interaction, editor privacy lifecycle, emoji search, Unicode deletion, suggestion authority, portable preferences, accessibility semantics, Glaze UI mapping, alternate-popup geometry/hit testing, the dedicated number row, and adaptive action presentation.
 
 ## Native input behavior
 
 ### Letters layer
 
-The default layer exposes QWERTY alphabetic rows. Shift affects alphabetic output only and automatically returns to the unshifted state after a shifted character is committed.
+The default layer exposes an optional dedicated number row followed by QWERTY alphabetic rows. The number row defaults to enabled. Shift affects alphabetic output only and automatically returns to the unshifted state after a shifted alphabetic character is committed.
+
+The number-row preference is a presentation choice. It does not grant additional editor observation authority and is not included in the current portable preference format.
+
+### Editor action key
+
+The right-side action key reflects host `EditorInfo.imeOptions` when Android supplies a supported explicit action. Supported semantic presentations are Go, Search, Send, Next, Done, and Previous. Fields that do not supply an applicable explicit action use ordinary Enter.
+
+The visual label and accessibility label are separate where useful; for example, Search may use a compact search glyph while the virtual accessibility control is labeled “Search.” `IME_FLAG_NO_ENTER_ACTION` forces the ordinary Enter path rather than manufacturing an explicit action.
 
 ### Primary symbols layer
 
@@ -56,11 +65,28 @@ Eligible letter and punctuation keys expose deterministic local alternates after
 
 ### Editor transitions
 
-Authoritative Android editor-session start/finish callbacks reset transient privacy/suggestion state. Missing or no-active-editor metadata remains sensitive and suggestions-suppressed. Ordinary editors can relax that policy only through a concrete editor transition. Host `TYPE_TEXT_FLAG_NO_SUGGESTIONS` is honored without misclassifying the field as a password.
+Authoritative Android editor-session start/finish callbacks reset transient privacy/suggestion state and the adaptive action presentation. Missing or no-active-editor metadata remains sensitive and suggestions-suppressed. Ordinary editors can relax that policy only through a concrete editor transition. Host `TYPE_TEXT_FLAG_NO_SUGGESTIONS` is honored without misclassifying the field as a password.
 
 ### Suggestion authority
 
 Transient suggestion capture is bounded. A capture that becomes incomplete or ambiguous remains suppressed until a clean word/editor boundary rather than beginning a misleading mid-word context. Suggestion callbacks are not accepted by value alone: the selected value must be one of the exact candidates currently presented for the active editor and must still satisfy host-prefix validation before replacement.
+
+## Inspiration-driven product direction
+
+The Android-keyboard references supplied and approved on 2026-09-08 are inspiration inputs, not third-party designs to reproduce. GoreeCloud Keyboard must remain an original first-party Glaze-native experience.
+
+The approved direction includes:
+
+- spacious rounded keys and strong touch targets;
+- a suggestion strip above the key field;
+- optional dedicated number row;
+- adaptive action key;
+- direct symbols, emoji, and long-press alternates;
+- Light/Dark system-adaptive presentation;
+- a future configurable utility toolbar for only real, governed actions;
+- future Secure Paste/clipboard tools, GIF/sticker discovery, voice, translation, gesture typing, cursor/selection gestures, multilingual layouts, richer correction/dictionaries, manual appearance controls, one-handed/floating/split/adaptive form-factor layouts, broader Quill assistance, and governed GoreeCloud ecosystem actions.
+
+The dedicated number row and adaptive action key are implemented in the current Development tranche. Existing local suggestions, Glaze key geometry, Android Light/Dark adaptation, symbols, emoji, and long-press alternates already support the direction. The remaining items are active planned obligations and must not be represented as implemented through placeholder toolbar buttons or decorative surfaces.
 
 ## Privacy and security boundaries
 
@@ -68,7 +94,9 @@ Transient suggestion capture is bounded. A capture that becomes incomplete or am
 
 Keyboard input is highly sensitive. Current source minimizes observation, keeps ordinary suggestion work local, treats sensitive/no-active-editor contexts fail closed, and excludes typed text, composing/surrounding editor context, suggestions/learned input, emoji recents/frequency history, emoji search queries, clipboard data, key history, sensitive-editor contents, telemetry, Identity data, credentials, and cryptographic secrets from the portable preference format.
 
-GLAZE UI presentation adds no observation authority. No production claim is made for future cloud-assisted input, clipboard history, voice input, synchronization, or account-backed personalization until explicit Privacy Shield policy, consent, retention, user-control, implementation, and runtime acceptance exist.
+The number-row preference is low-sensitivity device-local presentation state. It adds no content observation and is not synchronized or exported by the current portability flow.
+
+GLAZE UI presentation adds no observation authority. No production claim is made for future cloud-assisted input, clipboard history, voice input, translation, GIF/sticker content, synchronization, or account-backed personalization until explicit Privacy Shield policy, consent, retention, user-control, implementation, and runtime acceptance exist.
 
 ### GoreeCloud Secure Paste — planned
 
@@ -78,15 +106,15 @@ Planned behavior includes a dedicated Paste action, per-application clipboard po
 
 ### Wardveil Security / Security Center
 
-The application does not treat UI state as security authority. Future downloadable dictionaries, models, themes, clipboard integrations, voice/input adapters, or other external content require explicit Wardveil validation appropriate to the object and execution boundary before production use. Secure Paste should allow context-aware protection against dangerous clipboard payloads without silently rewriting ordinary user text outside a documented security rule.
+The application does not treat UI state as security authority. Future downloadable dictionaries, models, themes, clipboard integrations, GIF/sticker providers, voice/input adapters, translation services, or other external content require explicit Wardveil validation appropriate to the object and execution boundary before production use.
 
 ### Everkeep / Continuity Center
 
-The current one-field portable preference codec plus bounded category-only local export/apply seams are Development portability primitives only. They are not complete Keyboard backup, clean-target recovery, synchronization, or Everkeep acceptance. Emoji recents and other usage-derived history are not silently included in portability or recovery scope.
+The current one-field portable preference codec plus bounded category-only local export/apply seams are Development portability primitives only. They are not complete Keyboard backup, clean-target recovery, synchronization, or Everkeep acceptance. The number-row preference, emoji recents, and other usage/presentation state are not silently included in portability or recovery scope.
 
 ### GoreeCloud Identity / Identity Center
 
-The current native keyboard foundation does not require a GoreeCloud account to type or use the local one-field transfer flow. Future account-backed personalization or synchronization must use GoreeCloud Identity for authentication/authorization and must not expose credential material to the input surface.
+The current native keyboard foundation does not require a GoreeCloud account to type, configure the number row, or use the local one-field transfer flow. Future account-backed personalization or synchronization must use GoreeCloud Identity for authentication/authorization and must not expose credential material to the input surface.
 
 ### GoreeCloud Mesh / Mesh Center
 
@@ -98,31 +126,32 @@ Keyboard may publish minimized operational/version/capability state to Manager w
 
 ## GLAZE UI / Design Center
 
-GLAZE UI V1.2 (`1.2.0`) is the current Stable GoreeCloud design-system target. This repository maps the applicable V1.2 foundation and Frosted Neutral material contract to the native Android keyboard at exact Stable release commit `f285b9145e27e6e7027b075c37299d101945c272`. GLAZE UI V1.1 / `1.1.0` remains the prior known-good Stable rollback anchor; earlier evidence is not inherited as V1.2 consumer acceptance.
+GLAZE UI V1.3 / `1.3.0` is the current Stable GoreeCloud design-system source target for this Development stack, pinned to exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1`. The repository's V1.3 migration remains Development until consumer acceptance is complete; the prior V1.2 baseline remains the rollback reference for this migration work.
 
-The governing V1.2 material rule is **Neutral glass is the material. Color is an accent.** `KeyboardView` now consumes neutral V1.2 base-glass surfaces for Light/Dark runtime rendering. Deep Dark is source-defined but not automatically selected from ordinary Android dark mode. The source also records V1.2 state calibration for pressed/selected/focus behavior without representing that source map as complete rendered conformance.
+The native `KeyboardView` consumes the inherited Frosted Neutral material foundation with Android Light/Dark runtime selection. V1.3 Adaptive Resonance does not authorize editor/typed-content color sampling. Environmental memory, remote color derivation, persistent sample history, semantic inference, telemetry, and animated atmosphere remain disabled in the Keyboard consumer.
 
-Accessibility directives outrank cosmetic material behavior. Reduced Transparency, Reduced Motion, Increased Contrast, forced-colors/native equivalents, focus visibility, content legibility, target size, and task completion must remain valid even when blur/translucency/advanced effects are unavailable. The keyboard must not become dependent on nested backdrop blur or atmosphere for input correctness.
+Accessibility directives outrank cosmetic material behavior. Reduced Transparency, Reduced Motion, Increased Contrast, forced-colors/native equivalents, focus visibility, content legibility, target size, and task completion must remain valid even when blur/translucency/advanced effects are unavailable. The five-row number-row layout must preserve usable interaction geometry rather than shrinking keys solely to fit the extra row.
 
 Local emoji search remains an application-local input-navigation capability and is not GoreeCloud Universal Search. Long-press alternates are transient application interaction, not Control Center. Glaze presentation semantics do not grant Universal Search, Control Center, security, privacy, identity, recovery, or other platform authority to Keyboard.
 
-Historical Glaze Motion 0.5 evaluation remains test-only and provides no current V1.2 production/conformance evidence.
+Historical Glaze Motion evaluation remains test-only and provides no current production/conformance evidence.
 
 ## Product-quality direction
 
-GoreeCloud Keyboard must evolve as a complete first-party input product rather than a minimal demo. Subject to separate implementation and acceptance, target capability families include:
+GoreeCloud Keyboard must evolve as a complete first-party input product rather than a minimal demo. Remaining active capability families include:
 
 - stronger local autocorrect, prediction, and user/language dictionaries;
 - multilingual layouts and explicit language switching;
-- gesture/swipe typing;
-- richer emoji, symbol, kaomoji, and specialized input discovery;
-- GoreeCloud Secure Paste and privacy-governed clipboard tools;
-- privacy-approved voice input/adapters;
-- one-handed and split layouts;
-- tablet/foldable/posture-aware layouts;
+- gesture/swipe typing and cursor/text-selection gestures;
+- configurable utility toolbar;
+- richer emoji, symbol, kaomoji, GIF, sticker, and specialized input discovery through approved boundaries;
+- GoreeCloud Secure Paste and privacy-governed clipboard history/pinned snippets;
+- privacy-approved voice input/adapters and translation;
+- one-handed, floating, split, tablet/foldable/posture-aware layouts;
 - hardware-keyboard and accessibility-aware workflows where applicable;
 - Quill-assisted writing through privacy-preserving boundaries;
-- user-controlled appearance and input preferences;
+- user-controlled manual appearance and input preferences beyond the currently implemented number-row choice;
+- governed Launcher/Search/other GoreeCloud ecosystem actions; and
 - explicitly governed portability, backup, recovery, and optional synchronization.
 
 Feature richness must remain substantive. Buttons, placeholders, labels, decorative surfaces, or roadmap statements are not implementation evidence. Each capability requires functional behavior, native lifecycle integration, privacy/security boundaries, accessibility, testing, and appropriate runtime/release acceptance.
@@ -132,11 +161,11 @@ Feature richness must remain substantive. Buttons, placeholders, labels, decorat
 Development source or passing CI is not equivalent to production acceptance or Stable qualification. Production promotion requires evidence appropriate to the shipped platform, including:
 
 - exact-revision source/build/test validation;
-- complete GLAZE UI V1.2 consumer mapping for applicable keyboard and settings surfaces;
+- complete GLAZE UI V1.3 consumer mapping for applicable keyboard and settings surfaces;
 - Reduced Transparency, Reduced Motion, Increased Contrast, forced-colors/native equivalents, large text/reflow, RTL/localization, and Touch Assistance behavior;
-- TalkBack, Switch Access, and other claimed assistive-input acceptance;
-- representative Android host-editor compatibility;
-- representative phone/tablet/foldable layout and ergonomics acceptance;
+- TalkBack, Switch Access, Voice Access, and other claimed assistive-input acceptance;
+- representative Android host-editor compatibility including adaptive action semantics;
+- representative phone/tablet/foldable layout and ergonomics acceptance, including the five-row number-row configuration;
 - representative physical-device typing, long-press/slide/release, latency, performance, power, and thermal acceptance;
 - Human Visual Excellence review of the actual Keyboard consumer;
 - Privacy Shield and Wardveil Security acceptance appropriate to a sensitive input surface;

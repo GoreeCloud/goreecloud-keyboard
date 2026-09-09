@@ -13,6 +13,7 @@ GoreeCloud Keyboard is a Development-stage Android input method. Typed content, 
 - Host editors that request no suggestions or no personalized learning are honored without weakening the stricter sensitive-editor policy.
 - Editor-start and editor-finish callbacks reset transient composing, suggestion, shift/layer, and presentation state so one editor session cannot silently lend policy or content context to another.
 - Current emoji recents and remembered emoji-category state are device-local. They are not network-backed or account-backed.
+- The number-row preference is a device-local Boolean presentation choice. It is not part of the current portable preference format and grants no editor-content, clipboard, network, account, telemetry, or synchronization authority.
 
 ## Text and editor-data handling
 

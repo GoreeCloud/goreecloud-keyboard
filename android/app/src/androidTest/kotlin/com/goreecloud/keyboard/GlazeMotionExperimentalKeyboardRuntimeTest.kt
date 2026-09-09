@@ -57,11 +57,9 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
         val events = mutableListOf<String>()
         view.listener = listener(onText = { events += it })
 
-        val density = view.resources.displayMetrics.density
-        val x = 6f * density + ((view.width - 12f * density - 45f * density) / 10f) / 2f
-        val keyboardTop = 46f * density
-        val rowHeight = (view.height - keyboardTop - 25f * density) / 4f
-        val y = keyboardTop + rowHeight / 2f
+        val qBounds = view.accessibilityTargets().first { it.label == "q" }.bounds
+        val x = qBounds.centerX()
+        val y = qBounds.centerY()
 
         dispatch(view, MotionEvent.ACTION_DOWN, x, y)
         assertTrue("Press-down must not commit semantic input", events.isEmpty())
