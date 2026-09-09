@@ -10,7 +10,7 @@
         <activity
             android:name=".KeyboardPortablePreferencesActivity"
             android:exported="true"
-            android:label="@string/portable_preferences_title" />
+            android:label="@string/keyboard_settings_title" />
 
         <service
             android:name=".KeyboardService"
