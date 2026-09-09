@@ -28,6 +28,29 @@ Open the Android settings entry for **GoreeCloud Keyboard settings** and change 
 
 The number-row choice is not included in the current portable preference export.
 
+## Configurable utility toolbar
+
+The current Development keyboard can show a dedicated utility toolbar above the suggestion/navigation strip. Unlike a placeholder toolbar, every visible current action is connected to implemented behavior:
+
+- **☺ / Emoji** opens the existing local emoji layer. If local emoji search is currently active, the toolbar Emoji action returns to normal emoji navigation rather than retaining the transient search query.
+- **?123 / Symbols** opens the existing primary symbols layer.
+- **⚙ / Keyboard settings** opens the existing GoreeCloud Keyboard settings activity.
+
+The Emoji or Symbols toolbar control exposes selected state when the corresponding layer is active. The controls are also exposed through the keyboard's native virtual accessibility-node surface with full spoken labels rather than relying on the compact visible glyph alone.
+
+### Configure toolbar visibility and actions
+
+Open **GoreeCloud Keyboard settings** and use the **Utility toolbar** section. You can:
+
+- turn the toolbar on or off;
+- show or hide the Emoji action;
+- show or hide the Symbols action; and
+- show or hide the Settings action.
+
+These choices are device-local presentation preferences. If the toolbar itself is enabled but all actions are hidden, GoreeCloud Keyboard collapses the row rather than showing empty or decorative controls. Toolbar choices are not included in the current portable preference export and do not record which toolbar actions you use.
+
+The current bounded toolbar does **not** include Secure Paste, clipboard history, GIF/sticker, voice, translation, Launcher, Search, or other controls whose underlying capability has not yet been implemented and accepted.
+
 ## Adaptive action key
 
 The right-side action key adapts to Android editor metadata when the host field requests a supported action. Depending on the field, it can represent:
@@ -44,7 +67,7 @@ The accessibility label follows the semantic action. When Android does not provi
 
 ## Type numbers and symbols
 
-Tap **?123** from the letters layer to open the primary symbols page. It includes digits and common punctuation even when the dedicated letters-layer number row is disabled.
+Tap **?123** from the letters layer, or use the utility toolbar's Symbols action when enabled, to open the primary symbols page. It includes digits and common punctuation even when the dedicated letters-layer number row is disabled.
 
 From the primary symbols page:
 
@@ -57,7 +80,7 @@ Changing layers clears the temporary word context used for local suggestions. Sy
 
 ## Emoji
 
-Tap **☺** from the letters or symbols layers to open the bounded local emoji surface. The compact category strip exposes Smileys, People, Nature, Food, Travel, and Symbols with spoken accessibility labels. Emoji keys commit their complete Unicode `String` value, including supported multi-code-point sequences such as skin-tone variants, ZWJ sequences, flags, and variation-selector forms.
+Tap **☺** from the letters or symbols layers, or use the toolbar Emoji action when enabled, to open the bounded local emoji surface. The compact category strip exposes Smileys, People, Nature, Food, Travel, and Symbols with spoken accessibility labels. Emoji keys commit their complete Unicode `String` value, including supported multi-code-point sequences such as skin-tone variants, ZWJ sequences, flags, and variation-selector forms.
 
 After you commit at least one emoji, a **Recent** control appears. Current recents behavior is intentionally privacy-bounded:
 
@@ -81,7 +104,7 @@ The current source also exposes alternate-character actions through the native v
 
 ## Local GoreeCloud Quill suggestions
 
-For ordinary text fields, the suggestion strip can show local candidates derived from the current composing word and the keyboard's local Development dictionary.
+For ordinary text fields, the suggestion strip can show local candidates derived from the current composing word and the keyboard's local Development dictionary. When the utility toolbar is enabled, suggestions remain a separate row directly below it rather than being replaced by toolbar controls.
 
 Tap a suggestion to replace the current composing prefix with that suggestion followed by a space.
 
@@ -91,17 +114,19 @@ The current suggestion engine is intentionally bounded. It provides deterministi
 
 For editor types classified as sensitive, GoreeCloud Keyboard suppresses suggestion collection, display, and acceptance and clears transient composing context at editor transitions. Backspace also avoids text look-behind in those sensitive editors.
 
+The utility toolbar does not relax this policy. Its current Emoji, Symbols, and Settings actions do not receive additional editor-content authority merely because the toolbar is visible in a sensitive field.
+
 This is a Development privacy boundary, not a claim that the keyboard can independently verify every application's semantic use of a text field. Android's editor metadata remains part of the classification signal.
 
 ## Portable emoji-category preference
 
 The Keyboard settings surface also contains the existing explicit import/export flow for the last emoji category you deliberately selected.
 
-That portable format contains only the selected emoji category. It does **not** include typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, or the number-row preference. Export and import use Android's Storage Access Framework so you explicitly choose the document source or destination; import is previewed before applying and export is reviewed/frozen before the destination is chosen.
+That portable format contains only the selected emoji category. It does **not** include typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, the number-row preference, or utility-toolbar settings. Export and import use Android's Storage Access Framework so you explicitly choose the document source or destination; import is previewed before applying and export is reviewed/frozen before the destination is chosen.
 
 ## Network behavior
 
-The current Android application foundation does **not** request Android network permission. Current Quill suggestions, emoji categories/recents/search, long-press alternates, and the number-row preference are local-only.
+The current Android application foundation does **not** request Android network permission. Current Quill suggestions, emoji categories/recents/search, long-press alternates, number-row behavior, and utility-toolbar settings/actions are local-only.
 
 Future network-backed capabilities, if implemented, require separate user-control, Privacy Shield, security, identity, and acceptance work and must be documented before they can be treated as current behavior.
 
@@ -109,7 +134,7 @@ Future network-backed capabilities, if implemented, require separate user-contro
 
 The current stacked Development work targets GLAZE UI V1.3 / `1.3.0` using exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1`. This mapping remains Development evidence rather than complete Keyboard Stable acceptance.
 
-The live keyboard currently follows Android Light/Dark night mode using the Glaze-derived material foundation. Deep Dark source values exist in the current migration stack, but the IME does not automatically select Deep Dark and this tranche does not add a manual appearance selector.
+The live keyboard currently follows Android Light/Dark night mode using the Glaze-derived material foundation. The utility toolbar reuses the current Frosted Neutral key surface, stroke, pressed-state treatment, and general interaction floor rather than introducing a separate visual system. Deep Dark source values exist in the current migration stack, but the IME does not automatically select Deep Dark and this tranche does not add a manual appearance selector.
 
 V1.3 Adaptive Resonance does not authorize typed/editor-content color sampling. Current Keyboard source does not add editor-driven color extraction, environmental memory, remote derivation, persistent sample history, semantic inference, telemetry, or animated atmosphere.
 
@@ -119,7 +144,6 @@ Complete rendered/accessibility GLAZE UI V1.3 acceptance, runtime Deep Dark poli
 
 The approved input-surface direction includes several features that are **not current implementation claims**:
 
-- configurable utility toolbar;
 - GoreeCloud Secure Paste, clipboard history, and pinned snippets;
 - GIF and sticker discovery;
 - voice input;
@@ -131,13 +155,15 @@ The approved input-surface direction includes several features that are **not cu
 - manual Light/Dark appearance overrides and broader themes;
 - one-handed, floating, split, tablet, foldable, and posture-aware layouts;
 - broader Quill-assisted writing; and
-- governed Launcher/Search/other GoreeCloud ecosystem actions.
+- additional governed Launcher/Search/other GoreeCloud ecosystem actions.
 
-Placeholder buttons or decorative icons do not count as those features being implemented.
+The configurable toolbar is now implemented in bounded Development form for Emoji, Symbols, and Settings. New toolbar actions remain planned until their underlying capability is actually functional and governed. Placeholder buttons or decorative icons do not count as those features being implemented.
 
 ## Current limitations
 
 The Development implementation does not yet claim complete gesture typing, multilingual input, clipboard/Secure Paste tools, voice or translation, GIF/sticker content, one-handed/floating/split layouts, full tablet/foldable adaptation, complete accessibility acceptance, user dictionary synchronization, complete Unicode grapheme segmentation for every script, signed production packaging, or Stable release acceptance.
+
+The current toolbar itself is not a production-acceptance claim: representative device ergonomics, TalkBack/Switch Access/Voice Access, Touch Assistance, large-text/reflow, RTL/localization, tablet/foldable behavior, Human Visual Excellence, and release acceptance remain separate gates.
 
 ## Privacy and security expectations
 
