@@ -5,6 +5,7 @@ import android.inputmethodservice.InputMethodService
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import kotlin.math.abs
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var shifted = false
@@ -14,6 +15,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var suggestionsSuppressed = true
     private var composingCaptureExhausted = false
     private var keyboardView: KeyboardView? = null
+    private var currentLayer = KeyboardLayer.LETTERS
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
     private var presentedSuggestions: List<String> = emptyList()
@@ -31,11 +33,19 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         return KeyboardView(this).also { view ->
             keyboardView = view
             view.listener = this
-            view.setLayer(KeyboardLayer.LETTERS)
+            currentLayer = KeyboardLayer.LETTERS
+            view.setLayer(currentLayer)
             view.setShifted(shifted)
             view.setNumberRowEnabled(settingsStore.showNumberRow())
             view.setToolbarConfiguration(settingsStore.toolbarConfiguration())
             view.setEditorAction(editorAction)
+            view.setOnTouchListener(
+                SpacebarCursorTouchListener(
+                    keyboardView = view,
+                    isEnabled = { currentLayer != KeyboardLayer.EMOJI },
+                    onCursorSteps = ::moveCursorFromSpacebar,
+                )
+            )
             updateSuggestions()
         }
     }
@@ -53,7 +63,8 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         // Android can show/restart the input view after onStartInput. Re-evaluate from the current
         // EditorInfo rather than trusting cached policy from a previous visible field.
         beginEditorSession(info)
-        keyboardView?.setLayer(KeyboardLayer.LETTERS)
+        currentLayer = KeyboardLayer.LETTERS
+        keyboardView?.setLayer(currentLayer)
         keyboardView?.setShifted(false)
         keyboardView?.setNumberRowEnabled(settingsStore.showNumberRow())
         keyboardView?.setToolbarConfiguration(settingsStore.toolbarConfiguration())
@@ -197,6 +208,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onLayerChanged(layer: KeyboardLayer) {
+        currentLayer = layer
         shifted = false
         clearComposingBoundary()
         keyboardView?.setShifted(false)
@@ -211,8 +223,31 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         )
     }
 
+    private fun moveCursorFromSpacebar(requestedSteps: Int) {
+        if (requestedSteps == 0) return
+        val connection = currentInputConnection ?: return
+        val steps = requestedSteps.coerceIn(
+            -MAX_CURSOR_STEPS_PER_CALLBACK,
+            MAX_CURSOR_STEPS_PER_CALLBACK,
+        )
+        val keyCode = if (steps < 0) KeyEvent.KEYCODE_DPAD_LEFT else KeyEvent.KEYCODE_DPAD_RIGHT
+        repeat(abs(steps)) {
+            connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
+            connection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+        }
+
+        // Cursor movement invalidates the locally observed prefix. Do not inspect surrounding text
+        // to reconstruct it; stay fail-closed until a space/enter/editor boundary starts a clean
+        // local suggestion observation window again. This applies equally to sensitive editors.
+        composingWord.clear()
+        composingCaptureExhausted = true
+        presentedSuggestions = emptyList()
+        keyboardView?.setSuggestions(emptyList())
+    }
+
     private fun beginEditorSession(info: EditorInfo?) {
         shifted = false
+        currentLayer = KeyboardLayer.LETTERS
         composingWord.clear()
         composingCaptureExhausted = false
         editorAction = if (info == null) EditorActionPolicy.Enter else EditorActionPolicy.resolve(info.imeOptions)
@@ -237,6 +272,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     private fun resetEditorSession() {
         shifted = false
+        currentLayer = KeyboardLayer.LETTERS
         editorAction = EditorActionPolicy.Enter
         // With no active editor, retain the most restrictive transient policy. A subsequent concrete
         // EditorInfo is the only authority that may enable ordinary-field composing/surrounding text.
@@ -280,5 +316,6 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
     private companion object {
         const val BACKSPACE_LOOKBEHIND_UTF16 = 64
+        const val MAX_CURSOR_STEPS_PER_CALLBACK = 24
     }
 }
