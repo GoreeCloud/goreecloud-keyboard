@@ -6,8 +6,8 @@ import android.content.Context
  * Device-local, low-sensitivity presentation preferences for GoreeCloud Keyboard.
  *
  * This store must not contain typed text, composing context, suggestions, clipboard contents,
- * credentials, editor content, or usage-derived history. Toolbar preferences select only which
- * already-implemented local controls are visible; they are intentionally outside the portable
+ * credentials, editor content, or usage-derived history. Toolbar and cursor-control preferences
+ * select only already-implemented local controls; they are intentionally outside the portable
  * preference format.
  */
 class LocalKeyboardSettingsStore(context: Context) {
@@ -18,6 +18,13 @@ class LocalKeyboardSettingsStore(context: Context) {
 
     fun setShowNumberRow(value: Boolean) {
         preferences.edit().putBoolean(KEY_SHOW_NUMBER_ROW, value).apply()
+    }
+
+    fun spacebarCursorControlEnabled(): Boolean =
+        preferences.getBoolean(KEY_SPACEBAR_CURSOR_CONTROL, DEFAULT_SPACEBAR_CURSOR_CONTROL)
+
+    fun setSpacebarCursorControlEnabled(value: Boolean) {
+        preferences.edit().putBoolean(KEY_SPACEBAR_CURSOR_CONTROL, value).apply()
     }
 
     fun toolbarConfiguration(): KeyboardToolbarConfiguration = KeyboardToolbarConfiguration(
@@ -46,12 +53,14 @@ class LocalKeyboardSettingsStore(context: Context) {
     private companion object {
         const val PREFERENCES_NAME = "goreecloud_keyboard_settings"
         const val KEY_SHOW_NUMBER_ROW = "show_number_row"
+        const val KEY_SPACEBAR_CURSOR_CONTROL = "spacebar_cursor_control"
         const val KEY_SHOW_UTILITY_TOOLBAR = "show_utility_toolbar"
         const val KEY_TOOLBAR_EMOJI = "toolbar_emoji"
         const val KEY_TOOLBAR_SYMBOLS = "toolbar_symbols"
         const val KEY_TOOLBAR_SETTINGS = "toolbar_settings"
 
         const val DEFAULT_SHOW_NUMBER_ROW = true
+        const val DEFAULT_SPACEBAR_CURSOR_CONTROL = true
         const val DEFAULT_SHOW_UTILITY_TOOLBAR = true
         const val DEFAULT_TOOLBAR_EMOJI = true
         const val DEFAULT_TOOLBAR_SYMBOLS = true
