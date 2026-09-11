@@ -132,10 +132,10 @@ external_dependencies:
 
 compatibility:
   platform_contract: "0.2"
-  glaze_ui_required: "1.1.0"
+  glaze_ui_required: "1.2.0"
   requires:
     - goreecloud-platform-contract==0.2
-    - glaze-ui==1.1.0
+    - glaze-ui==1.2.0
     - android-api>=26
   provides:
     - goreecloud-keyboard-preferences/1
@@ -165,7 +165,7 @@ conformance:
     - docs/development/portable-preference-import-preview.md
     - docs/development/portable-preference-export-review.md
   blockers:
-    - Repository-local Development source currently carries a V1.2-targeted Glaze material mapping, while the governed Stable application baseline remains V1.1 / 1.1.0; the known immutable 1.1.0 defect requires a corrected governed Stable release, explicit Keyboard source-authority reconciliation/re-pin, and complete application-specific rendered/accessibility/adaptive/representative-device/Human Visual Excellence acceptance.
+    - Repository-local Development source explicitly targets current Stable GLAZE UI V1.2 / 1.2.0 at the exact Stable authority; complete application-specific rendered/accessibility/adaptive/representative-device/Human Visual Excellence acceptance remains outstanding.
     - GoreeCloud Identity integration and acceptance are not established for any future identity-aware capability.
     - Wardveil Security integration and acceptance are not established.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
