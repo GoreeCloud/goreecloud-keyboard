@@ -17,12 +17,12 @@ import java.io.IOException
 /**
  * Explicit user-controlled Keyboard settings and bounded portable-preference surface.
  *
- * Layout and toolbar preferences are device-local and low sensitivity. Portable transfer uses
- * Android's Storage Access Framework so the user chooses every source or destination document.
- * Export is reviewed and frozen to one typed category before a destination document is requested.
- * Import selection validates and previews the one category before any local preference write. It
- * requests no broad storage or network permission and does not expose typed text, emoji recents,
- * clipboard state, search history, learned input, telemetry, Identity data, or credentials.
+ * Layout, cursor-control, and toolbar preferences are device-local and low sensitivity. Portable
+ * transfer uses Android's Storage Access Framework so the user chooses every source or destination
+ * document. Export is reviewed and frozen to one typed category before a destination document is
+ * requested. Import selection validates and previews the one category before any local preference
+ * write. It requests no broad storage or network permission and does not expose typed text, emoji
+ * recents, clipboard state, search history, learned input, telemetry, Identity data, or credentials.
  */
 class KeyboardPortablePreferencesActivity : Activity() {
     private lateinit var categoryStore: LocalEmojiCategoryStore
@@ -66,6 +66,20 @@ class KeyboardPortablePreferencesActivity : Activity() {
 
         content.addView(TextView(this).apply {
             text = getString(R.string.keyboard_settings_number_row_summary)
+            setPadding(0, 0, 0, dp(12))
+        }, matchWidth())
+
+        content.addView(CheckBox(this).apply {
+            text = getString(R.string.keyboard_settings_spacebar_cursor_control)
+            isChecked = settingsStore.spacebarCursorControlEnabled()
+            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
+            setOnCheckedChangeListener { _, checked ->
+                settingsStore.setSpacebarCursorControlEnabled(checked)
+            }
+        }, matchWidth())
+
+        content.addView(TextView(this).apply {
+            text = getString(R.string.keyboard_settings_spacebar_cursor_control_summary)
             setPadding(0, 0, 0, dp(20))
         }, matchWidth())
 

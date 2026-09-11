@@ -42,7 +42,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             view.setOnTouchListener(
                 SpacebarCursorTouchListener(
                     keyboardView = view,
-                    isEnabled = { currentLayer != KeyboardLayer.EMOJI },
+                    isEnabled = {
+                        settingsStore.spacebarCursorControlEnabled() &&
+                            currentLayer != KeyboardLayer.EMOJI
+                    },
                     onCursorSteps = ::moveCursorFromSpacebar,
                 )
             )

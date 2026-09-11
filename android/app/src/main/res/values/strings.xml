@@ -20,6 +20,8 @@
     <string name="keyboard_settings_typing_heading">Typing layout</string>
     <string name="keyboard_settings_number_row">Show number row</string>
     <string name="keyboard_settings_number_row_summary">Keep 1–0 visible above QWERTY. Changes apply the next time the keyboard opens.</string>
+    <string name="keyboard_settings_spacebar_cursor_control">Spacebar cursor control</string>
+    <string name="keyboard_settings_spacebar_cursor_control_summary">Slide horizontally on Space to move the text cursor. Turn this off to keep Space tap-only. This preference stays on this device.</string>
     <string name="keyboard_settings_toolbar_heading">Utility toolbar</string>
     <string name="keyboard_settings_toolbar_enabled">Show utility toolbar</string>
     <string name="keyboard_settings_toolbar_summary">Show a compact row of real local actions above suggestions on the letters layer. Changes apply the next time the keyboard opens.</string>
@@ -34,7 +36,7 @@
     <string name="portable_preferences_current_category">Current category: %1$s</string>
     <string name="portable_preferences_export">Export category preference</string>
     <string name="portable_preferences_import">Import category preference</string>
-    <string name="portable_preferences_privacy_note">Only this one category choice is portable. Typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, number-row state, and utility-toolbar choices are not included.</string>
+    <string name="portable_preferences_privacy_note">Only this one category choice is portable. Typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, number-row state, cursor-control state, and utility-toolbar choices are not included.</string>
     <string name="portable_preferences_export_preview_title">Review category export</string>
     <string name="portable_preferences_export_preview_message">This export will contain only the selected emoji category %1$s. The category is frozen now so the file cannot silently change while you choose its destination.</string>
     <string name="portable_preferences_export_continue">Choose file</string>
