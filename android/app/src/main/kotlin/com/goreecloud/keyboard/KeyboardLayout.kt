@@ -17,6 +17,9 @@ enum class EmojiCategory(val label: String) {
 }
 
 object KeyboardLayout {
+    @Volatile
+    private var activeLanguage = KeyboardLanguage.ENGLISH_US
+
     private val englishNumberRow = keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
     private val arabicNumberRow = keys("١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", "٠")
 
@@ -78,7 +81,13 @@ object KeyboardLayout {
         ),
     )
 
-    fun numberRow(language: KeyboardLanguage = KeyboardLanguage.ENGLISH_US): List<String> =
+    fun activateLanguage(language: KeyboardLanguage) {
+        activeLanguage = language
+    }
+
+    fun currentLanguage(): KeyboardLanguage = activeLanguage
+
+    fun numberRow(language: KeyboardLanguage = activeLanguage): List<String> =
         when (language) {
             KeyboardLanguage.ENGLISH_US -> englishNumberRow
             KeyboardLanguage.ARABIC -> arabicNumberRow
@@ -86,7 +95,7 @@ object KeyboardLayout {
 
     fun characterRows(
         layer: KeyboardLayer,
-        language: KeyboardLanguage = KeyboardLanguage.ENGLISH_US,
+        language: KeyboardLanguage = activeLanguage,
     ): List<List<String>> = when (layer) {
         KeyboardLayer.LETTERS -> when (language) {
             KeyboardLanguage.ENGLISH_US -> englishLetterRows
