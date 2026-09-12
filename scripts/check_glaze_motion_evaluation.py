@@ -11,16 +11,15 @@ KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 ATMOSPHERE = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt"
 MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-SOURCE_GLAZE_VERSION = "1.2.0"
-GOVERNED_GLAZE_BASELINE = "1.1.0"
-GLAZE_SOURCE_REVISION = "f285b9145e27e6e7027b075c37299d101945c272"
+STABLE_GLAZE_VERSION = "1.3.0"
+GLAZE_SOURCE_REVISION = "fc7cc91d2eace8da2371371c2855c24cbcb326a1"
+GLAZE_ADAPTIVE_CONTRACT = "contracts/v1.3/adaptive-resonance.plan.json"
+GLAZE_ROLLBACK_BASELINE = "1.2.0"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit(
-        "Keyboard Glaze Development source / governed consumer boundary failed: " + message
-    )
+    raise SystemExit("Keyboard Glaze V1.3 / Experimental Motion boundary failed: " + message)
 
 
 def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
@@ -51,9 +50,9 @@ def main() -> None:
             "Runtime compatibility baseline: **0.4.0**",
             "Evaluation mode: **native Android interaction mapping, test-only**",
             "Production dependency: **no**",
-            "V1.2 is **not** the governed Stable application-consumer baseline",
-            f"GLAZE UI V1.1 / `{GOVERNED_GLAZE_BASELINE}`",
-            "Motion remains separately Experimental",
+            f"GLAZE UI V1.3 / `{STABLE_GLAZE_VERSION}` Stable",
+            f"`{GLAZE_SOURCE_REVISION}`",
+            "Motion 0.5 is still Experimental/test-only",
             "insufficient for promotion by itself",
         ),
     )
@@ -62,27 +61,27 @@ def main() -> None:
         "Glaze adoption record",
         adoption_text,
         (
-            "# GLAZE UI V1.2 Development Source Mapping — GoreeCloud Keyboard",
-            "Status: **Migration in progress / Development**",
-            f"Repository-local source target: **GLAZE UI V1.2 (`{SOURCE_GLAZE_VERSION}`)**",
-            f"Governed Stable consumer baseline: **GLAZE UI V1.1 (`{GOVERNED_GLAZE_BASELINE}`)**",
-            f"Reviewed V1.2 source reference: `{GLAZE_SOURCE_REVISION}`",
+            "# GLAZE UI V1.3 Stable Adoption — GoreeCloud Keyboard",
+            f"Current design-system target: **GLAZE UI V1.3 (`{STABLE_GLAZE_VERSION}`) Stable**",
+            f"Exact Stable integration revision: `{GLAZE_SOURCE_REVISION}`",
             "Production eligible on the Glaze UI gate: **no**",
-            "applicable-migration-required",
             "Neutral glass is the material. Color is an accent.",
             "Deep Dark source material is explicitly defined",
-            "editor/content sampling",
-            "one-field `goreecloud-keyboard-preferences/1` portability boundary remains unchanged",
+            "no-personalized-learning",
+            "one-field `goreecloud-keyboard-preferences/1` portability boundary",
             "Glaze Motion 0.5 evaluation remains test-only",
+            "typed/editor content outside adaptive-color authority",
         ),
     )
 
     require_all(
-        "V1.2 source token mapping",
+        "V1.3 Stable token mapping",
         token_text,
         (
-            f'const val TargetVersion = "{SOURCE_GLAZE_VERSION}"',
+            f'const val TargetVersion = "{STABLE_GLAZE_VERSION}"',
             f'const val SourceRevision = "{GLAZE_SOURCE_REVISION}"',
+            f'const val AdaptiveContract = "{GLAZE_ADAPTIVE_CONTRACT}"',
+            f'const val RollbackBaselineVersion = "{GLAZE_ROLLBACK_BASELINE}"',
             "enum class Appearance { LIGHT, DARK, DEEP_DARK }",
             "const val GeneralInteractionFloorDp = 48f",
             "const val TouchAssistanceInteractionFloorDp = 56f",
@@ -95,7 +94,7 @@ def main() -> None:
     )
 
     require_all(
-        "V1.2 atmosphere/material boundary",
+        "V1.3 neutral material boundary",
         atmosphere_text,
         (
             "Neutral glass is the material. Color is an accent.",
@@ -121,12 +120,11 @@ def main() -> None:
         (
             'schema_version: "0.2"',
             "  id: goreecloud-keyboard",
-            f'  glaze_ui:\n    result: applicable-migration-required\n    version: "{SOURCE_GLAZE_VERSION}"',
-            f'  glaze_ui_required: "{GOVERNED_GLAZE_BASELINE}"',
+            f'  glaze_ui:\n    result: applicable-migration-required\n    version: "{STABLE_GLAZE_VERSION}"',
+            f'  glaze_ui_required: "{STABLE_GLAZE_VERSION}"',
             "goreecloud-platform-contract==0.2",
-            f"glaze-ui=={GOVERNED_GLAZE_BASELINE}",
+            f"glaze-ui=={STABLE_GLAZE_VERSION}",
             "conformance:\n  status: nonconformant",
-            "known immutable import-closure defect",
         ),
     )
 
@@ -149,9 +147,9 @@ def main() -> None:
     )
 
     if "Appearance.DEEP_DARK" in view_text:
-        fail("KeyboardView must not infer or auto-select Deep Dark in this source-mapping slice")
+        fail("KeyboardView must not silently infer or auto-select Deep Dark")
     if "GlazeKeyboardAtmosphere" in view_text:
-        fail("KeyboardView must not render optional atmosphere in this source-mapping slice")
+        fail("KeyboardView must not render optional atmosphere without separate acceptance")
 
     require_all(
         "native test-only Motion evidence",
@@ -172,32 +170,29 @@ def main() -> None:
         if MARKER in path.read_text(encoding="utf-8"):
             production_hits.append(str(path.relative_to(ROOT)))
     if production_hits:
-        fail(
-            "Experimental Motion escaped test quarantine into production source: "
-            + ", ".join(production_hits)
-        )
+        fail("Experimental Motion escaped test quarantine: " + ", ".join(production_hits))
 
     active_records = adoption_text + "\n" + doc_text + "\n" + platform_text
-    false_authority_claims = (
-        "GLAZE UI V1.2 (`1.2.0`) is the current Stable",
-        "GLAZE UI V1.2 / `1.2.0` is the current Stable",
-        "Exact Stable source authority",
+    stale_authority_claims = (
+        'Governed Stable consumer baseline: **GLAZE UI V1.1 (`1.1.0`)**',
+        '  glaze_ui_required: "1.1.0"',
+        "glaze-ui==1.1.0",
         '  glaze_ui_required: "1.2.0"',
         "glaze-ui==1.2.0",
-        "Glaze UI 2.2.0 Stable is the production design-system authority.",
+        "known immutable import-closure defect",
         "Required Stable baseline: **Glaze UI 2.2.0**",
         "stable_eligible: true",
     )
-    for stale in false_authority_claims:
+    for stale in stale_authority_claims:
         if stale in active_records:
-            fail(f"active evidence retains false or superseded authority claim `{stale}`")
+            fail(f"active evidence retains superseded authority claim `{stale}`")
 
     print(
-        "Keyboard Glaze boundary passed: repository-local source target "
-        f"{SOURCE_GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; governed consumer baseline "
-        f"{GOVERNED_GLAZE_BASELINE}; Platform Contract remains migration-required/nonconformant; "
-        "Android runtime remains Light/Dark only; Experimental Motion remains quarantined; "
-        "rendered/accessibility/device/release acceptance remains separate."
+        "Keyboard Glaze boundary passed: current Stable target "
+        f"{STABLE_GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; Platform Contract remains "
+        "migration-required/nonconformant pending application acceptance; Android runtime remains "
+        "Light/Dark only; typed/editor content remains outside adaptive color; Experimental Motion "
+        "remains quarantined."
     )
 
 
