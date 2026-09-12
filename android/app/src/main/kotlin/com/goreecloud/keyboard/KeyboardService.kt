@@ -5,6 +5,7 @@ import android.inputmethodservice.InputMethodService
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodSubtype
 import kotlin.math.abs
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
@@ -16,6 +17,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var composingCaptureExhausted = false
     private var keyboardView: KeyboardView? = null
     private var currentLayer = KeyboardLayer.LETTERS
+    private var activeLanguage = KeyboardLanguage.ENGLISH_US
     private val suggestionEngine = SuggestionEngine()
     private val composingWord = StringBuilder()
     private var presentedSuggestions: List<String> = emptyList()
@@ -30,12 +32,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     )
 
     override fun onCreateInputView(): View {
+        applyLanguage(resolveCurrentSubtypeLanguage(), resetTransientInput = false)
         return KeyboardView(this).also { view ->
             keyboardView = view
             view.listener = this
             currentLayer = KeyboardLayer.LETTERS
             view.setLayer(currentLayer)
-            view.setShifted(shifted)
+            view.setShifted(shifted && activeLanguage.supportsCaseShift)
             view.setNumberRowEnabled(settingsStore.showNumberRow())
             view.setToolbarConfiguration(settingsStore.toolbarConfiguration())
             view.setEditorAction(editorAction)
@@ -74,6 +77,17 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         updateSuggestions()
     }
 
+    override fun onCurrentInputMethodSubtypeChanged(newSubtype: InputMethodSubtype?) {
+        super.onCurrentInputMethodSubtypeChanged(newSubtype)
+        // Android's selected IME subtype is the layout-language authority. Do not infer language from
+        // the device UI locale, editor text, surrounding text, or application identity.
+        applyLanguage(
+            KeyboardLanguage.fromSubtypeLocale(newSubtype?.locale),
+            resetTransientInput = true,
+        )
+        updateSuggestions()
+    }
+
     override fun onFinishInput() {
         super.onFinishInput()
         // onFinishInput is Android's editor-session boundary. Do not rely only on the input view
@@ -99,9 +113,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onText(value: String) {
         if (value.isEmpty()) return
         val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
-        val output = if (shifted && isLetterText) value.uppercase() else value
+        val output = if (shifted && activeLanguage.supportsCaseShift && isLetterText) {
+            value.uppercase()
+        } else {
+            value
+        }
         currentInputConnection?.commitText(output, 1)
-        if (!suggestionsSuppressed) {
+        if (!suggestionsSuppressed && activeLanguage.supportsLocalBootstrapSuggestions) {
             if (isLetterText) {
                 val normalized = output.lowercase()
                 if (!composingCaptureExhausted &&
@@ -153,7 +171,11 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
         connection.deleteSurroundingTextInCodePoints(deleteCodePoints, 0)
 
-        if (!suggestionsSuppressed && !composingCaptureExhausted && composingWord.isNotEmpty()) {
+        if (!suggestionsSuppressed &&
+            activeLanguage.supportsLocalBootstrapSuggestions &&
+            !composingCaptureExhausted &&
+            composingWord.isNotEmpty()
+        ) {
             val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
             composingWord.delete(lastCodePointStart, composingWord.length)
         }
@@ -175,6 +197,11 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onShift() {
+        if (!activeLanguage.supportsCaseShift) {
+            shifted = false
+            keyboardView?.setShifted(false)
+            return
+        }
         shifted = !shifted
         keyboardView?.setShifted(shifted)
     }
@@ -182,7 +209,11 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     override fun onSuggestion(value: String) {
         // Keep a second sensitive-input check here so a future policy regression cannot turn
         // candidate acceptance into surrounding-text access for a protected editor.
-        if (suggestionsSuppressed || sensitiveInput || composingCaptureExhausted) return
+        if (suggestionsSuppressed ||
+            !activeLanguage.supportsLocalBootstrapSuggestions ||
+            sensitiveInput ||
+            composingCaptureExhausted
+        ) return
         // The callback value itself is not replacement authority. It must still be one of the exact
         // candidates presented for this editor session; a stale/forged callback cannot delete text.
         if (!SuggestionCommitPolicy.isPresentedCandidate(value, presentedSuggestions)) return
@@ -249,6 +280,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun beginEditorSession(info: EditorInfo?) {
+        applyLanguage(resolveCurrentSubtypeLanguage(), resetTransientInput = false)
         shifted = false
         currentLayer = KeyboardLayer.LETTERS
         composingWord.clear()
@@ -272,6 +304,30 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         sensitiveInput = InputPrivacyClassifier.isSensitive(inputType)
         suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType, info.imeOptions)
     }
+
+    private fun applyLanguage(
+        language: KeyboardLanguage,
+        resetTransientInput: Boolean,
+    ) {
+        activeLanguage = language
+        KeyboardLayout.activateLanguage(language)
+        if (!language.supportsCaseShift) {
+            shifted = false
+            keyboardView?.setShifted(false)
+        }
+        if (resetTransientInput) {
+            composingWord.clear()
+            composingCaptureExhausted = false
+            presentedSuggestions = emptyList()
+            keyboardView?.setSuggestions(emptyList())
+        }
+        // KeyboardView reads rows from KeyboardLayout. Re-applying the current layer invalidates its
+        // structure and accessibility nodes without adding a second source of language truth.
+        keyboardView?.setLayer(currentLayer)
+    }
+
+    private fun resolveCurrentSubtypeLanguage(): KeyboardLanguage =
+        KeyboardLanguage.fromSubtypeLocale(currentInputMethodSubtype?.locale)
 
     private fun resetEditorSession() {
         shifted = false
@@ -305,7 +361,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun updateSuggestions() {
-        if (suggestionsSuppressed || composingCaptureExhausted) {
+        if (suggestionsSuppressed ||
+            composingCaptureExhausted ||
+            !activeLanguage.supportsLocalBootstrapSuggestions
+        ) {
             presentedSuggestions = emptyList()
             keyboardView?.setSuggestions(emptyList())
             return
