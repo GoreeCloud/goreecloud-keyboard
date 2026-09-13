@@ -5,6 +5,7 @@ import android.inputmethodservice.InputMethodService
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodSubtype
 import kotlin.math.abs
 
@@ -326,8 +327,12 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         keyboardView?.setLayer(currentLayer)
     }
 
-    private fun resolveCurrentSubtypeLanguage(): KeyboardLanguage =
-        KeyboardLanguage.fromSubtypeLocale(currentInputMethodSubtype?.locale)
+    private fun resolveCurrentSubtypeLanguage(): KeyboardLanguage {
+        val inputMethodManager = getSystemService(InputMethodManager::class.java)
+        return KeyboardLanguage.fromSubtypeLocale(
+            inputMethodManager?.currentInputMethodSubtype?.locale,
+        )
+    }
 
     private fun resetEditorSession() {
         shifted = false
