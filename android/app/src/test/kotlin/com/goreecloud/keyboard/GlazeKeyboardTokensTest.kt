@@ -7,12 +7,14 @@ import org.junit.Test
 
 class GlazeKeyboardTokensTest {
     @Test
-    fun currentMappingPinsExactGlazeUiV12StableAuthority() {
-        assertEquals("1.2.0", GlazeKeyboardTokens.TargetVersion)
+    fun currentMappingPinsExactGlazeUiV14StableAuthority() {
+        assertEquals("1.4.0", GlazeKeyboardTokens.TargetVersion)
         assertEquals(
-            "f285b9145e27e6e7027b075c37299d101945c272",
+            "84cb3db4884042f0fa25ed6d475a127fb110f596",
             GlazeKeyboardTokens.SourceRevision
         )
+        assertEquals(GlazeKeyboardOptics.TargetVersion, GlazeKeyboardTokens.TargetVersion)
+        assertEquals(GlazeKeyboardOptics.StableSourceRevision, GlazeKeyboardTokens.SourceRevision)
     }
 
     @Test
@@ -29,7 +31,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun v12OpticalGeometryRemainsSeparateFromStructuralRadiusAndTargets() {
+    fun opticalGeometryRemainsSeparateFromStructuralRadiusAndTargets() {
         assertEquals(8f, GlazeKeyboardTokens.OpticalMicroDp)
         assertEquals(16f, GlazeKeyboardTokens.OpticalControlDp)
         assertEquals(24f, GlazeKeyboardTokens.OpticalContainerDp)
@@ -46,7 +48,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun v12InteractionStateCalibrationIsExplicit() {
+    fun inheritedInteractionStateCalibrationRemainsExplicit() {
         assertEquals(0.095f, GlazeKeyboardTokens.PressedOverlayOpacity)
         assertEquals(0.12f, GlazeKeyboardTokens.SelectedOverlayOpacity)
         assertEquals(3f, GlazeKeyboardTokens.FocusWidthDp)
@@ -61,7 +63,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun lightAndDarkUseV12NeutralFrostedMaterial() {
+    fun lightAndDarkUseInheritedNeutralFrostedMaterial() {
         val light = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.LIGHT)
         assertEquals(0xFFF5F7FA.toInt(), light.canvasArgb)
         assertEquals(0x94FFFFFF.toInt(), light.surfaceArgb)
@@ -79,7 +81,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun deepDarkUsesExplicitV12NeutralMaterialValues() {
+    fun deepDarkUsesExplicitNeutralMaterialValues() {
         val deepDark = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.DEEP_DARK)
         assertEquals(0xFF05070A.toInt(), deepDark.canvasArgb)
         assertEquals(0xB80E0E10.toInt(), deepDark.surfaceArgb)
@@ -89,7 +91,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun v12AtmosphereCannotTintSubstrateOrEnableObservation() {
+    fun v14AtmosphereCannotTintSubstrateOrEnableSensitiveObservation() {
         assertEquals(0f, GlazeKeyboardAtmosphere.DefaultMaterialTintContribution)
         assertFalse(GlazeKeyboardAtmosphere.TealAsBaseMaterialAllowed)
         assertFalse(GlazeKeyboardAtmosphere.GreenAsBaseMaterialAllowed)
@@ -97,7 +99,14 @@ class GlazeKeyboardTokensTest {
         assertFalse(GlazeKeyboardAtmosphere.AmberAsBaseMaterialAllowed)
         assertFalse(GlazeKeyboardAtmosphere.BrandColorMayDefineSubstrate)
         assertFalse(GlazeKeyboardAtmosphere.SemanticColorMayDefineSubstrate)
+        assertFalse(GlazeKeyboardAtmosphere.EnvironmentalAuraOptional)
+        assertFalse(GlazeKeyboardAtmosphere.EnvironmentalAuraMayPassThroughBackdrop)
         assertFalse(GlazeKeyboardAtmosphere.EnvironmentalColorMemoryEnabled)
+        assertEquals(0f, GlazeKeyboardAtmosphere.EnvironmentalColorMemoryMaxInfluence)
+        assertFalse(GlazeKeyboardAtmosphere.EditorContentSamplingAllowed)
+        assertFalse(GlazeKeyboardAtmosphere.SuggestionContentSamplingAllowed)
+        assertFalse(GlazeKeyboardAtmosphere.ClipboardSamplingAllowed)
+        assertFalse(GlazeKeyboardAtmosphere.ApplicationIdentitySamplingAllowed)
         assertFalse(GlazeKeyboardAtmosphere.RemoteColorDerivationAllowed)
         assertFalse(GlazeKeyboardAtmosphere.PersistentSampleHistoryAllowed)
         assertFalse(GlazeKeyboardAtmosphere.SemanticInferenceAllowed)
