@@ -3,34 +3,28 @@ package com.goreecloud.keyboard
 import kotlin.math.roundToInt
 
 /**
- * Bounded native mapping of the current GLAZE UI V1.3 Adaptive Resonance foundation
- * consumed by GoreeCloud Keyboard's first-party Android surface.
+ * Bounded native mapping of the current GLAZE UI V1.4 foundation, inherited
+ * Frosted Neutral material, appearance, geometry, target-size, and interaction-
+ * state subset consumed by GoreeCloud Keyboard's first-party Android surface.
  *
- * V1.3 inherits the V1.2 Frosted Neutral material, appearance, geometry, target-size,
- * and interaction-state foundation while adding bounded adaptive expression,
- * ergonomic composition, and resilience requirements. Current authority is machine
- * version 1.3.0 at exact Stable integration revision
- * fc7cc91d2eace8da2371371c2855c24cbcb326a1.
+ * Current authority is machine version 1.4.0 at exact merged Stable source
+ * revision 84cb3db4884042f0fa25ed6d475a127fb110f596. V1.4 is additive over the
+ * existing neutral material contract and introduces Optical Intelligence through
+ * the separate [GlazeKeyboardOptics] resolver.
  *
  * Governing rule: Neutral glass is the material. Color is an accent.
  *
- * Android night mode remains a binary Light/Dark signal in KeyboardView. Deep Dark is
- * defined here but is not inferred from ordinary Android dark mode. Environmental
- * adaptation remains disabled unless separately implemented and accepted; the IME must
- * never derive material color from typed/editor content.
+ * Keyboard is a highly sensitive input surface. Typed/editor content, suggestions,
+ * clipboard state, application identity, and surrounding text are never visual-
+ * context inputs to the Glaze mapping.
  *
- * This mapping does not by itself establish complete rendered, accessibility,
- * representative-device, rollback, release, or production acceptance.
+ * The existing [RadiusMediumDp] property name remains a source-compatible alias
+ * for the 12 dp control role. Optical geometry references remain separate from
+ * structural radii and interaction hit targets.
  */
 internal object GlazeKeyboardTokens {
-    const val TargetVersion = "1.3.0"
-    const val ReleaseTheme = "Adaptive Resonance"
-    const val SourceRevision = "fc7cc91d2eace8da2371371c2855c24cbcb326a1"
-    const val OpticalContract = "tokens/glaze-v1.2-optical-foundation.candidate.json"
-    const val AdaptiveContract = "contracts/v1.3/adaptive-resonance.plan.json"
-    const val StableWebEntrypoint = "css/glaze-v1.3.0.css"
-    const val StableRuntimeEntrypoint = "js/glaze-v1.3.0.mjs"
-    const val RollbackBaselineVersion = "1.2.0"
+    const val TargetVersion = "1.4.0"
+    const val SourceRevision = "84cb3db4884042f0fa25ed6d475a127fb110f596"
 
     enum class Appearance { LIGHT, DARK, DEEP_DARK }
 
@@ -49,25 +43,17 @@ internal object GlazeKeyboardTokens {
     const val TouchAssistanceInteractionFloorDp = 56f
     const val SuggestionStripHeightDp = GeneralInteractionFloorDp
 
-    // V1.3 inherits these V1.2 optical geometry references; they remain separate from
-    // structural radii and interaction hit targets.
     const val OpticalMicroDp = 8f
     const val OpticalControlDp = 16f
     const val OpticalContainerDp = 24f
     const val OpticalHeroDp = 32f
     const val OpticalCapsuleDp = 999f
 
-    // Inherited interaction-state calibration remains deterministic in the IME.
     const val PressedOverlayOpacity = 0.095f
     const val SelectedOverlayOpacity = 0.12f
     const val FocusWidthDp = 3f
     const val IncreasedContrastFocusWidthDp = 4f
 
-    /**
-     * Frosted Neutral base-glass mapping inherited by V1.3. Canvas/text roles remain
-     * structural while the interactive key substrate stays neutral rather than becoming
-     * semantic, brand, or environmentally sampled color.
-     */
     val LightPalette = Palette(
         canvasArgb = 0xFFF5F7FA.toInt(),
         surfaceArgb = 0x94FFFFFF.toInt(),

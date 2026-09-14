@@ -22,8 +22,10 @@ The bounded evaluation checks actual key and suggestion activation behavior unde
 
 ## Boundary
 
-Keyboard targets the current **GLAZE UI V1.3 / `1.3.0` Stable** consumer line at exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1`. V1.3 Adaptive Resonance inherits the Frosted Neutral material foundation while adding bounded adaptive expression, ergonomic composition, and resilience requirements. The Keyboard mapping deliberately keeps typed/editor content outside adaptive-color authority.
+Keyboard now targets the current governed Stable **GLAZE UI V1.4 / `1.4.0`** design-system authority at merged source revision `84cb3db4884042f0fa25ed6d475a127fb110f596`. Motion remains separately Experimental and is not incorporated into Stable Glaze merely because the visual design-system target advanced.
 
-This Glaze Motion document remains separate: Motion 0.5 is still Experimental/test-only and supplies no production Motion authority, no additional V1.3 conformance evidence, and no Release Candidate evidence. A Stable Glaze UI design-system target does not promote an independently Experimental Motion subsystem.
+The Keyboard V1.4 mapping is still application-level Development evidence. This Glaze Motion evaluation provides no V1.4 consumer-conformance, production, Stable, accessibility, or physical-device evidence and cannot promote the Motion subsystem.
 
-This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or Switch Access acceptance, representative performance/power acceptance, rollback acceptance, or production Glaze Motion activation. It remains insufficient for promotion by itself and does not establish adoption of a later Glaze Motion revision.
+Human/manual/physical-device/subjective optical validation assigned to Glaze UI V1.4.1 remains separate from this Motion evaluation.
+
+This emulator evidence is not physical-device certification, full rendered acceptance, TalkBack or Switch Access acceptance, representative performance/power acceptance, or production Glaze Motion activation. It remains insufficient for promotion by itself and does not establish adoption of a later Glaze Motion revision.
