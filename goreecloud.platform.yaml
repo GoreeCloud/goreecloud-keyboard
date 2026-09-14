@@ -1,4 +1,4 @@
-schema_version: "0.2"
+schema_version: "0.3"
 
 component:
   type: application
@@ -83,7 +83,8 @@ platform_systems:
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
       - docs/glaze-motion-evaluation.md
-    notes: Repository-local Development source now explicitly targets current governed Stable GLAZE UI V1.4 / 1.4.0 at exact merged source revision 84cb3db4884042f0fa25ed6d475a127fb110f596. Keyboard preserves neutral Frosted material and adds a stricter V1.4 optical policy: semantic protection is maximal, Reduced Transparency and Forced Colors fail closed to solid treatment, decorative tint is disabled, Environmental Color Memory influence is 0%, and sensitive editor/suggestion/clipboard/application-identity data cannot drive optics. Complete rendered/accessibility/adaptive/representative-device/application acceptance and applicable V1.4.1 human validation remain outstanding.
+    notes: >-
+      Repository-local Development source now explicitly targets current governed Stable GLAZE UI V1.4 / 1.4.0 at exact merged source revision 84cb3db4884042f0fa25ed6d475a127fb110f596. Keyboard preserves neutral Frosted material and adds a stricter V1.4 optical policy: semantic protection is maximal, Reduced Transparency and Forced Colors fail closed to solid treatment, decorative tint is disabled, Environmental Color Memory influence is 0%, and sensitive editor/suggestion/clipboard/application-identity data cannot drive optics. Complete rendered/accessibility/adaptive/representative-device/application acceptance and applicable V1.4.1 human validation remain outstanding.
   mesh:
     result: applicable-blocked
     version: null
@@ -99,6 +100,14 @@ platform_systems:
     evidence:
       - SPECIFICATIONS.md
     notes: Core typing and the local category-only transfer flow require no GoreeCloud account, but accepted Identity integration for any future account-backed personalization or synchronization is not established.
+  sync:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - docs/development/portable-preference-snapshot.md
+      - docs/development/portable-preference-user-transfer.md
+    notes: Keyboard currently has no accepted GoreeCloud Sync integration. The explicit one-field user-controlled file-transfer flow is portability only and does not establish change tracking, authorized replication, conflict reconciliation, offline resume, background synchronization, or cross-device continuity. Typed text, editor context, suggestions, clipboard data, usage history, and sensitive-editor content remain outside any Sync authority.
 
 health:
   health_endpoint: null
@@ -128,7 +137,7 @@ continuity:
     required: true
     requirements:
       - Keep schema expansion explicit and separately reviewed for privacy, retention, user control, and recovery authority.
-      - Preserve the category-only reader, codec, writer, explicit file-transfer, import-preview/confirmation, export-review/freeze, and minimized lifecycle-restoration boundaries without adding editor, clipboard, local-history, network, Identity, or Mesh observation authority.
+      - Preserve the category-only reader, codec, writer, explicit file-transfer, import-preview/confirmation, export-review/freeze, and minimized lifecycle-restoration boundaries without adding editor, clipboard, local-history, network, Identity, Mesh, or Sync observation authority.
 
 external_dependencies:
   - name: Android platform
@@ -137,10 +146,10 @@ external_dependencies:
     version_constraint: ">=26"
 
 compatibility:
-  platform_contract: "0.2"
+  platform_contract: "0.3"
   glaze_ui_required: "1.4.0"
   requires:
-    - goreecloud-platform-contract==0.2
+    - goreecloud-platform-contract==0.3
     - glaze-ui==1.4.0
     - android-api>=26
   provides:
@@ -183,6 +192,7 @@ conformance:
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface.
     - Everkeep integration plus approved product backup and clean-target restore acceptance remain incomplete; the explicit user file flow is only one-field portability.
     - GoreeCloud Mesh registration, capability publication, and runtime acceptance are not established.
+    - GoreeCloud Sync change tracking, authorized replication, conflict reconciliation, offline resume, background synchronization, and cross-device continuity are not established.
     - Manager platform visibility and administrative integration acceptance are not established.
     - Current portability covers only one explicit emoji-category preference and does not include product-wide Keyboard state.
     - Production signing, distribution, representative-device acceptance, release approval, and Stable qualification remain outstanding.
