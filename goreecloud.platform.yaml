@@ -100,14 +100,6 @@ platform_systems:
     evidence:
       - SPECIFICATIONS.md
     notes: Core typing and the local category-only transfer flow require no GoreeCloud account, but accepted Identity integration for any future account-backed personalization or synchronization is not established.
-  sync:
-    result: applicable-blocked
-    version: null
-    evidence:
-      - SPECIFICATIONS.md
-      - docs/development/portable-preference-snapshot.md
-      - docs/development/portable-preference-user-transfer.md
-    notes: Keyboard currently has no accepted GoreeCloud Sync integration. The explicit one-field user-controlled file-transfer flow is portability only and does not establish change tracking, authorized replication, conflict reconciliation, offline resume, background synchronization, or cross-device continuity. Typed text, editor context, suggestions, clipboard data, usage history, and sensitive-editor content remain outside any Sync authority.
 
 health:
   health_endpoint: null
