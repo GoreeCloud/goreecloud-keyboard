@@ -178,13 +178,16 @@ def main() -> None:
     )
 
     require_all(
-        "Platform Contract v0.2",
+        "Platform Contract v0.3",
         platform_text,
         (
-            'schema_version: "0.2"',
+            'schema_version: "0.3"',
             "  id: goreecloud-keyboard",
             f'  glaze_ui:\n    result: applicable-migration-required\n    version: "{GLAZE_VERSION}"',
+            "  sync:\n    result: applicable-blocked",
+            '  platform_contract: "0.3"',
             f'  glaze_ui_required: "{GLAZE_VERSION}"',
+            "goreecloud-platform-contract==0.3",
             f"glaze-ui=={GLAZE_VERSION}",
             "GlazeKeyboardOptics.kt",
             "GlazeKeyboardOpticsTest.kt",
@@ -262,6 +265,9 @@ def main() -> None:
     for stale in (
         "Repository-local source target: **GLAZE UI V1.2 (`1.2.0`)**",
         "Governed Stable consumer baseline: **GLAZE UI V1.1 (`1.1.0`)**",
+        'schema_version: "0.2"',
+        '  platform_contract: "0.2"',
+        "goreecloud-platform-contract==0.2",
         '  glaze_ui_required: "1.1.0"',
         "glaze-ui==1.1.0",
         '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.2.0"',
@@ -274,10 +280,11 @@ def main() -> None:
 
     print(
         "Keyboard GLAZE UI V1.4 boundary passed: "
-        f"target {GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; Platform Contract remains "
-        "migration-required/nonconformant; Android runtime remains Light/Dark only; "
-        "sensitive content cannot drive optics; Environmental Color Memory remains 0%; "
-        "Experimental Motion remains quarantined; application acceptance stays separate."
+        f"target {GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; Platform Contract 0.3 remains "
+        "migration-required/nonconformant; GoreeCloud Sync remains independently blocked; "
+        "Android runtime remains Light/Dark only; sensitive content cannot drive optics; "
+        "Environmental Color Memory remains 0%; Experimental Motion remains quarantined; "
+        "application acceptance stays separate."
     )
 
 
