@@ -184,13 +184,13 @@ def main() -> None:
             'schema_version: "0.3"',
             "  id: goreecloud-keyboard",
             f'  glaze_ui:\n    result: applicable-migration-required\n    version: "{GLAZE_VERSION}"',
-            "  sync:\n    result: applicable-blocked",
             '  platform_contract: "0.3"',
             f'  glaze_ui_required: "{GLAZE_VERSION}"',
             "goreecloud-platform-contract==0.3",
             f"glaze-ui=={GLAZE_VERSION}",
             "GlazeKeyboardOptics.kt",
             "GlazeKeyboardOpticsTest.kt",
+            "GoreeCloud Sync change tracking, authorized replication, conflict reconciliation",
             "conformance:\n  status: nonconformant",
         ),
     )
@@ -281,7 +281,7 @@ def main() -> None:
     print(
         "Keyboard GLAZE UI V1.4 boundary passed: "
         f"target {GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; Platform Contract 0.3 remains "
-        "migration-required/nonconformant; GoreeCloud Sync remains independently blocked; "
+        "migration-required/nonconformant; GoreeCloud Sync remains separately blocked; "
         "Android runtime remains Light/Dark only; sensitive content cannot drive optics; "
         "Environmental Color Memory remains 0%; Experimental Motion remains quarantined; "
         "application acceptance stays separate."
