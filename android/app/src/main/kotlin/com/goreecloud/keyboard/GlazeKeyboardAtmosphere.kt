@@ -1,18 +1,18 @@
 package com.goreecloud.keyboard
 
 /**
- * Non-semantic GLAZE UI V1.2 Frosted Optical atmosphere/material boundary for
- * GoreeCloud Keyboard.
+ * Non-semantic GLAZE UI V1.4 atmosphere/material boundary for GoreeCloud
+ * Keyboard.
  *
- * V1.2's governing rule is: Neutral glass is the material. Color is an accent.
- * KeyboardView consumes the neutral material palette from [GlazeKeyboardTokens]. This
- * object records the additional V1.2 authority boundary so future visual work cannot
- * silently restore V1.1 chromatic substrate tinting or turn atmosphere into privacy,
- * security, identity, selection, focus, recovery, availability, or input meaning.
+ * Governing material rule: Neutral glass is the material. Color is an accent.
+ * KeyboardView consumes the neutral material palette from [GlazeKeyboardTokens].
+ * [GlazeKeyboardOptics] adds the bounded V1.4 optical resolver while keeping the
+ * IME stricter than ordinary application surfaces.
  *
- * Environmental aura remains optional and external to the substrate. No editor/content
- * sampling, remote color derivation, persistent sample history, semantic inference,
- * telemetry, network lookup, or animated atmosphere is authorized by this mapping.
+ * Keyboard never uses editor/content sampling, suggestion text, clipboard state,
+ * application identity, key history, emoji history, remote color derivation,
+ * persistent sample history, semantic inference, telemetry, or network lookup to
+ * drive optical presentation.
  */
 internal object GlazeKeyboardAtmosphere {
     const val DefaultMaterialTintContribution = 0f
@@ -24,11 +24,18 @@ internal object GlazeKeyboardAtmosphere {
     const val BrandColorMayDefineSubstrate = false
     const val SemanticColorMayDefineSubstrate = false
 
-    const val EnvironmentalAuraOptional = true
-    const val EnvironmentalAuraMayPassThroughBackdrop = true
+    // Keyboard intentionally declines decorative environment tinting/memory even
+    // though the generic V1.4 engine permits a bounded form on less-sensitive UI.
+    const val EnvironmentalAuraOptional = false
+    const val EnvironmentalAuraMayPassThroughBackdrop = false
     const val EnvironmentalAuraMustRemainOutsideSubstrate = true
-
     const val EnvironmentalColorMemoryEnabled = false
+    const val EnvironmentalColorMemoryMaxInfluence = 0f
+
+    const val EditorContentSamplingAllowed = false
+    const val SuggestionContentSamplingAllowed = false
+    const val ClipboardSamplingAllowed = false
+    const val ApplicationIdentitySamplingAllowed = false
     const val RemoteColorDerivationAllowed = false
     const val PersistentSampleHistoryAllowed = false
     const val SemanticInferenceAllowed = false

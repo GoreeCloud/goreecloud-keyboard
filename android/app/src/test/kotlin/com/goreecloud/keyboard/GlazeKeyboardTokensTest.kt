@@ -7,24 +7,14 @@ import org.junit.Test
 
 class GlazeKeyboardTokensTest {
     @Test
-    fun currentMappingPinsExactGlazeUiV13StableAuthority() {
-        assertEquals("1.3.0", GlazeKeyboardTokens.TargetVersion)
-        assertEquals("Adaptive Resonance", GlazeKeyboardTokens.ReleaseTheme)
+    fun currentMappingPinsExactGlazeUiV14StableAuthority() {
+        assertEquals("1.4.0", GlazeKeyboardTokens.TargetVersion)
         assertEquals(
-            "fc7cc91d2eace8da2371371c2855c24cbcb326a1",
+            "84cb3db4884042f0fa25ed6d475a127fb110f596",
             GlazeKeyboardTokens.SourceRevision
         )
-        assertEquals(
-            "tokens/glaze-v1.2-optical-foundation.candidate.json",
-            GlazeKeyboardTokens.OpticalContract
-        )
-        assertEquals(
-            "contracts/v1.3/adaptive-resonance.plan.json",
-            GlazeKeyboardTokens.AdaptiveContract
-        )
-        assertEquals("css/glaze-v1.3.0.css", GlazeKeyboardTokens.StableWebEntrypoint)
-        assertEquals("js/glaze-v1.3.0.mjs", GlazeKeyboardTokens.StableRuntimeEntrypoint)
-        assertEquals("1.2.0", GlazeKeyboardTokens.RollbackBaselineVersion)
+        assertEquals(GlazeKeyboardOptics.TargetVersion, GlazeKeyboardTokens.TargetVersion)
+        assertEquals(GlazeKeyboardOptics.StableSourceRevision, GlazeKeyboardTokens.SourceRevision)
     }
 
     @Test
@@ -41,7 +31,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun inheritedOpticalGeometryRemainsSeparateFromStructuralRadiusAndTargets() {
+    fun opticalGeometryRemainsSeparateFromStructuralRadiusAndTargets() {
         assertEquals(8f, GlazeKeyboardTokens.OpticalMicroDp)
         assertEquals(16f, GlazeKeyboardTokens.OpticalControlDp)
         assertEquals(24f, GlazeKeyboardTokens.OpticalContainerDp)
@@ -58,7 +48,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun inheritedInteractionStateCalibrationIsExplicit() {
+    fun inheritedInteractionStateCalibrationRemainsExplicit() {
         assertEquals(0.095f, GlazeKeyboardTokens.PressedOverlayOpacity)
         assertEquals(0.12f, GlazeKeyboardTokens.SelectedOverlayOpacity)
         assertEquals(3f, GlazeKeyboardTokens.FocusWidthDp)
@@ -91,7 +81,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun deepDarkUsesExplicitInheritedNeutralMaterialValues() {
+    fun deepDarkUsesExplicitNeutralMaterialValues() {
         val deepDark = GlazeKeyboardTokens.palette(GlazeKeyboardTokens.Appearance.DEEP_DARK)
         assertEquals(0xFF05070A.toInt(), deepDark.canvasArgb)
         assertEquals(0xB80E0E10.toInt(), deepDark.surfaceArgb)
@@ -101,7 +91,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun v13AdaptiveExpressionCannotTintSubstrateOrEnableEditorObservation() {
+    fun v14AtmosphereCannotTintSubstrateOrEnableSensitiveObservation() {
         assertEquals(0f, GlazeKeyboardAtmosphere.DefaultMaterialTintContribution)
         assertFalse(GlazeKeyboardAtmosphere.TealAsBaseMaterialAllowed)
         assertFalse(GlazeKeyboardAtmosphere.GreenAsBaseMaterialAllowed)
@@ -109,7 +99,14 @@ class GlazeKeyboardTokensTest {
         assertFalse(GlazeKeyboardAtmosphere.AmberAsBaseMaterialAllowed)
         assertFalse(GlazeKeyboardAtmosphere.BrandColorMayDefineSubstrate)
         assertFalse(GlazeKeyboardAtmosphere.SemanticColorMayDefineSubstrate)
+        assertFalse(GlazeKeyboardAtmosphere.EnvironmentalAuraOptional)
+        assertFalse(GlazeKeyboardAtmosphere.EnvironmentalAuraMayPassThroughBackdrop)
         assertFalse(GlazeKeyboardAtmosphere.EnvironmentalColorMemoryEnabled)
+        assertEquals(0f, GlazeKeyboardAtmosphere.EnvironmentalColorMemoryMaxInfluence)
+        assertFalse(GlazeKeyboardAtmosphere.EditorContentSamplingAllowed)
+        assertFalse(GlazeKeyboardAtmosphere.SuggestionContentSamplingAllowed)
+        assertFalse(GlazeKeyboardAtmosphere.ClipboardSamplingAllowed)
+        assertFalse(GlazeKeyboardAtmosphere.ApplicationIdentitySamplingAllowed)
         assertFalse(GlazeKeyboardAtmosphere.RemoteColorDerivationAllowed)
         assertFalse(GlazeKeyboardAtmosphere.PersistentSampleHistoryAllowed)
         assertFalse(GlazeKeyboardAtmosphere.SemanticInferenceAllowed)
