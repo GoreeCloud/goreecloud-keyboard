@@ -1,0 +1,7 @@
+glaze_stable_version=1.5.0
+glaze_stable_revision=b7fa8164bfdeaa1dc0acb21b770e7601120da04e
+glaze_reviewed_implementation_anchor=ee1032a0822ab8e103f8afe48e5c1859fde65cc9
+optical_baseline_version=1.4.1
+optical_baseline_revision=4fab9da0fad2e5c974e0e66ec88632c61745751c
+lifecycle=development
+conformance=nonconformant

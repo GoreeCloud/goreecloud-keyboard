@@ -10,17 +10,25 @@ MAIN = ROOT / "android/app/src/main"
 KEYBOARD_VIEW = MAIN / "kotlin/com/goreecloud/keyboard/KeyboardView.kt"
 TOKENS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt"
 OPTICS = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardOptics.kt"
+CAPABILITY = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardCapabilityV15.kt"
 ATMOSPHERE = MAIN / "kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt"
 OPTICS_TEST = ROOT / "android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardOpticsTest.kt"
 TOKENS_TEST = ROOT / "android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokensTest.kt"
+CAPABILITY_TEST = ROOT / "android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardCapabilityV15Test.kt"
+
 MOTION_REFERENCE_REVISION = "b386c793c047e2f5d5d92125732f142e7fdf32dc"
-GLAZE_VERSION = "1.4.0"
-GLAZE_SOURCE_REVISION = "84cb3db4884042f0fa25ed6d475a127fb110f596"
+MOTION_GLAZE_VERSION = "1.4.0"
+MOTION_GLAZE_REVISION = "84cb3db4884042f0fa25ed6d475a127fb110f596"
+GLAZE_VERSION = "1.5.0"
+GLAZE_SOURCE_REVISION = "b7fa8164bfdeaa1dc0acb21b770e7601120da04e"
+GLAZE_REVIEWED_ANCHOR = "ee1032a0822ab8e103f8afe48e5c1859fde65cc9"
+OPTICAL_BASELINE_VERSION = "1.4.1"
+OPTICAL_BASELINE_REVISION = "4fab9da0fad2e5c974e0e66ec88632c61745751c"
 MARKER = "GlazeMotionExperimental"
 
 
 def fail(message: str) -> None:
-    raise SystemExit("Keyboard GLAZE UI V1.4 / Motion boundary failed: " + message)
+    raise SystemExit("Keyboard GLAZE UI V1.5 / Motion boundary failed: " + message)
 
 
 def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
@@ -38,9 +46,11 @@ def main() -> None:
         KEYBOARD_VIEW,
         TOKENS,
         OPTICS,
+        CAPABILITY,
         ATMOSPHERE,
         OPTICS_TEST,
         TOKENS_TEST,
+        CAPABILITY_TEST,
     ):
         if not path.is_file():
             fail(f"missing required evidence: {path.relative_to(ROOT)}")
@@ -52,10 +62,14 @@ def main() -> None:
     view_text = KEYBOARD_VIEW.read_text(encoding="utf-8")
     token_text = TOKENS.read_text(encoding="utf-8")
     optics_text = OPTICS.read_text(encoding="utf-8")
+    capability_text = CAPABILITY.read_text(encoding="utf-8")
     atmosphere_text = ATMOSPHERE.read_text(encoding="utf-8")
     optics_test_text = OPTICS_TEST.read_text(encoding="utf-8")
     tokens_test_text = TOKENS_TEST.read_text(encoding="utf-8")
+    capability_test_text = CAPABILITY_TEST.read_text(encoding="utf-8")
 
+    # The historical Experimental Motion evaluation keeps its original reviewed
+    # Glaze context as provenance. It is not current Stable design-system authority.
     require_all(
         "Motion boundary",
         doc_text,
@@ -65,8 +79,8 @@ def main() -> None:
             "Runtime compatibility baseline: **0.4.0**",
             "Evaluation mode: **native Android interaction mapping, test-only**",
             "Production dependency: **no**",
-            f"GLAZE UI V1.4 / `{GLAZE_VERSION}`",
-            f"`{GLAZE_SOURCE_REVISION}`",
+            f"GLAZE UI V1.4 / `{MOTION_GLAZE_VERSION}`",
+            f"`{MOTION_GLAZE_REVISION}`",
             "Motion remains separately Experimental",
             "insufficient for promotion by itself",
         ),
@@ -76,25 +90,27 @@ def main() -> None:
         "Glaze adoption record",
         adoption_text,
         (
-            "# GLAZE UI V1.4 Development Mapping — GoreeCloud Keyboard",
+            "# GLAZE UI V1.5 Development Mapping — GoreeCloud Keyboard",
             "Status: **Migration in progress / Development**",
-            f"Current Stable target: **GLAZE UI V1.4 (`{GLAZE_VERSION}`)**",
+            f"Current Stable target: **GLAZE UI V1.5 (`{GLAZE_VERSION}`)**",
             f"Exact Stable merged source authority: `{GLAZE_SOURCE_REVISION}`",
+            f"Reviewed V1.5 implementation anchor: `{GLAZE_REVIEWED_ANCHOR}`",
+            f"Inherited optical/material baseline: **GLAZE UI V1.4.1 (`{OPTICAL_BASELINE_VERSION}`)** at `{OPTICAL_BASELINE_REVISION}`",
             "Production eligible on the Glaze UI gate: **no**",
             "Neutral glass is the material. Color is an accent.",
-            "Environmental Color Memory influence is intentionally **0%**",
-            "Editor text, composing text, surrounding text, suggestion content, clipboard state, application identity",
-            "V1.4.1 human-validation boundary",
+            "Environmental Color Memory influence remains intentionally **0%**",
+            "Typed text, composing text, surrounding text, suggestion content, clipboard state, application identity",
+            "V1.5 shared-scope and V1.5.1 follow-up boundary",
             "Source/build/emulator success remains Development evidence only",
         ),
     )
 
     require_all(
-        "V1.4 source token mapping",
+        "V1.4.1 optical token baseline",
         token_text,
         (
-            f'const val TargetVersion = "{GLAZE_VERSION}"',
-            f'const val SourceRevision = "{GLAZE_SOURCE_REVISION}"',
+            f'const val TargetVersion = "{OPTICAL_BASELINE_VERSION}"',
+            f'const val SourceRevision = "{OPTICAL_BASELINE_REVISION}"',
             "enum class Appearance { LIGHT, DARK, DEEP_DARK }",
             "const val GeneralInteractionFloorDp = 48f",
             "const val TouchAssistanceInteractionFloorDp = 56f",
@@ -108,11 +124,11 @@ def main() -> None:
     )
 
     require_all(
-        "V1.4 Keyboard optical policy",
+        "V1.4.1 Keyboard optical policy",
         optics_text,
         (
-            f'const val TargetVersion = "{GLAZE_VERSION}"',
-            f'const val StableSourceRevision = "{GLAZE_SOURCE_REVISION}"',
+            f'const val TargetVersion = "{OPTICAL_BASELINE_VERSION}"',
+            f'const val StableSourceRevision = "{OPTICAL_BASELINE_REVISION}"',
             "const val MaxEnvironmentalColorMemoryInfluence = 0f",
             "const val EditorContentMayDriveOptics = false",
             "const val ClipboardMayDriveOptics = false",
@@ -128,7 +144,31 @@ def main() -> None:
     )
 
     require_all(
-        "V1.4 atmosphere/material boundary",
+        "V1.5 capability presentation",
+        capability_text,
+        (
+            f'const val TargetVersion = "{GLAZE_VERSION}"',
+            f'const val StableSourceRevision = "{GLAZE_SOURCE_REVISION}"',
+            f'const val ReviewedImplementationAnchor = "{GLAZE_REVIEWED_ANCHOR}"',
+            f'const val OpticalBaselineVersion = "{OPTICAL_BASELINE_VERSION}"',
+            f'const val OpticalBaselineRevision = "{OPTICAL_BASELINE_REVISION}"',
+            "const val TypedContentMayDriveCapabilityPresentation = false",
+            "const val ComposingContentMayDriveCapabilityPresentation = false",
+            "const val SurroundingTextMayDriveCapabilityPresentation = false",
+            "const val SuggestionContentMayDriveCapabilityPresentation = false",
+            "const val ClipboardMayDriveCapabilityPresentation = false",
+            "const val AppIdentityMayDriveCapabilityPresentation = false",
+            "const val RemoteContextAllowed = false",
+            "const val TelemetryRequired = false",
+            "CapabilityState.CONFLICT",
+            "automaticExecutionAllowed: Boolean = false",
+            "authorizationInferred: Boolean = false",
+            "providerPrecedenceInferred: Boolean = false",
+        ),
+    )
+
+    require_all(
+        "inherited atmosphere/material boundary",
         atmosphere_text,
         (
             "Neutral glass is the material. Color is an accent.",
@@ -155,7 +195,7 @@ def main() -> None:
     )
 
     require_all(
-        "V1.4 optical tests",
+        "optical tests",
         optics_test_text,
         (
             "ordinaryKeyboardOpticsRemainNeutralAndSemanticFirst",
@@ -167,13 +207,27 @@ def main() -> None:
     )
 
     require_all(
-        "V1.4 token tests",
+        "token tests",
         tokens_test_text,
         (
-            "currentMappingPinsExactGlazeUiV14StableAuthority",
-            "v14AtmosphereCannotTintSubstrateOrEnableSensitiveObservation",
-            f'assertEquals("{GLAZE_VERSION}", GlazeKeyboardTokens.TargetVersion)',
-            f'"{GLAZE_SOURCE_REVISION}"',
+            "currentOpticalMappingPinsExactGlazeUiV141StableAuthority",
+            "inheritedAtmosphereCannotTintSubstrateOrEnableSensitiveObservation",
+            f'assertEquals("{OPTICAL_BASELINE_VERSION}", GlazeKeyboardTokens.TargetVersion)',
+            f'"{OPTICAL_BASELINE_REVISION}"',
+            f'assertEquals("{GLAZE_VERSION}", GlazeKeyboardCapabilityV15.TargetVersion)',
+        ),
+    )
+
+    require_all(
+        "capability tests",
+        capability_test_text,
+        (
+            "exactStableAuthorityAndInheritedOpticalBaselineArePinned",
+            "sensitiveImeStateCannotDriveCapabilityPresentation",
+            "availableCapabilityDoesNotAuthorizeAutomaticExecution",
+            "missingCapabilityFailsClosed",
+            "duplicateCapabilityOwnershipFailsClosedWithoutInventedPrecedence",
+            "privacyRestrictedCapabilityRemainsDisabled",
         ),
     )
 
@@ -188,8 +242,8 @@ def main() -> None:
             f'  glaze_ui_required: "{GLAZE_VERSION}"',
             "goreecloud-platform-contract==0.3",
             f"glaze-ui=={GLAZE_VERSION}",
-            "GlazeKeyboardOptics.kt",
-            "GlazeKeyboardOpticsTest.kt",
+            "GlazeKeyboardCapabilityV15.kt",
+            "GlazeKeyboardCapabilityV15Test.kt",
             "GoreeCloud Sync change tracking, authorized replication, conflict reconciliation",
             "conformance:\n  status: nonconformant",
         ),
@@ -215,8 +269,8 @@ def main() -> None:
 
     if "Appearance.DEEP_DARK" in view_text:
         fail("KeyboardView must not infer or auto-select Deep Dark until a governed runtime policy exists")
-    if "GlazeKeyboardAtmosphere" in view_text or "GlazeKeyboardOptics" in view_text:
-        fail("KeyboardView must not gain implicit optical/environment observation in this migration slice")
+    if "GlazeKeyboardAtmosphere" in view_text or "GlazeKeyboardOptics" in view_text or "GlazeKeyboardCapabilityV15" in view_text:
+        fail("KeyboardView must not gain implicit optical/capability/environment observation in this migration slice")
 
     require_all(
         "native test-only Motion evidence",
@@ -232,9 +286,9 @@ def main() -> None:
         ),
     )
 
-    # Sensitive-input visual policy stays non-collecting. Keep direct collection/
-    # network primitives out of the optical and atmosphere files entirely.
-    optical_authority = optics_text + "\n" + atmosphere_text
+    # Sensitive-input presentation policy stays non-collecting. Keep direct
+    # collection/network primitives out of optical, capability, and atmosphere files.
+    presentation_authority = optics_text + "\n" + capability_text + "\n" + atmosphere_text
     for forbidden in (
         "InputConnection",
         "ClipboardManager",
@@ -248,8 +302,8 @@ def main() -> None:
         "WallpaperManager",
         "Camera",
     ):
-        if forbidden in optical_authority:
-            fail(f"sensitive optical boundary contains forbidden observation/network primitive `{forbidden}`")
+        if forbidden in presentation_authority:
+            fail(f"sensitive Glaze boundary contains forbidden observation/network primitive `{forbidden}`")
 
     production_hits = []
     for path in MAIN.rglob("*.kt"):
@@ -261,16 +315,17 @@ def main() -> None:
             + ", ".join(production_hits)
         )
 
-    active_records = adoption_text + "\n" + doc_text + "\n" + platform_text + "\n" + token_text
+    # Historical Motion evidence may retain its original V1.4 context. Active
+    # current-authority records must not retain superseded target declarations.
+    active_records = adoption_text + "\n" + platform_text + "\n" + token_text + "\n" + optics_text + "\n" + capability_text
     for stale in (
-        "Repository-local source target: **GLAZE UI V1.2 (`1.2.0`)**",
-        "Governed Stable consumer baseline: **GLAZE UI V1.1 (`1.1.0`)**",
+        "Current Stable target: **GLAZE UI V1.4 (`1.4.0`)**",
+        '  glaze_ui_required: "1.4.0"',
+        "glaze-ui==1.4.0",
+        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.4.0"',
         'schema_version: "0.2"',
         '  platform_contract: "0.2"',
         "goreecloud-platform-contract==0.2",
-        '  glaze_ui_required: "1.1.0"',
-        "glaze-ui==1.1.0",
-        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.2.0"',
         "known immutable import-closure defect",
         "Glaze UI 2.2.0 Stable is the production design-system authority.",
         "stable_eligible: true",
@@ -279,10 +334,11 @@ def main() -> None:
             fail(f"active evidence retains stale/superseded Glaze authority `{stale}`")
 
     print(
-        "Keyboard GLAZE UI V1.4 boundary passed: "
-        f"target {GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; Platform Contract 0.3 remains "
+        "Keyboard GLAZE UI V1.5 boundary passed: "
+        f"target {GLAZE_VERSION} at {GLAZE_SOURCE_REVISION}; inherited optical baseline "
+        f"{OPTICAL_BASELINE_VERSION} at {OPTICAL_BASELINE_REVISION}; Platform Contract 0.3 remains "
         "migration-required/nonconformant; GoreeCloud Sync remains separately blocked; "
-        "Android runtime remains Light/Dark only; sensitive content cannot drive optics; "
+        "Android runtime remains Light/Dark only; sensitive content cannot drive Glaze; "
         "Environmental Color Memory remains 0%; Experimental Motion remains quarantined; "
         "application acceptance stays separate."
     )

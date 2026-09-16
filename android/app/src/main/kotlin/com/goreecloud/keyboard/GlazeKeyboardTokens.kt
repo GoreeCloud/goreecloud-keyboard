@@ -3,14 +3,12 @@ package com.goreecloud.keyboard
 import kotlin.math.roundToInt
 
 /**
- * Bounded native mapping of the current GLAZE UI V1.4 foundation, inherited
- * Frosted Neutral material, appearance, geometry, target-size, and interaction-
- * state subset consumed by GoreeCloud Keyboard's first-party Android surface.
+ * Bounded native mapping of the GLAZE UI V1.4.1 optical/material baseline
+ * inherited by the current GLAZE UI V1.5.0 presentation contract.
  *
- * Current authority is machine version 1.4.0 at exact merged Stable source
- * revision 84cb3db4884042f0fa25ed6d475a127fb110f596. V1.4 is additive over the
- * existing neutral material contract and introduces Optical Intelligence through
- * the separate [GlazeKeyboardOptics] resolver.
+ * The Keyboard mapping preserves Frosted Neutral material, appearance, geometry,
+ * target-size, and interaction-state values. V1.5 capability/context semantics are
+ * handled separately by [GlazeKeyboardCapabilityV15].
  *
  * Governing rule: Neutral glass is the material. Color is an accent.
  *
@@ -23,8 +21,8 @@ import kotlin.math.roundToInt
  * structural radii and interaction hit targets.
  */
 internal object GlazeKeyboardTokens {
-    const val TargetVersion = "1.4.0"
-    const val SourceRevision = "84cb3db4884042f0fa25ed6d475a127fb110f596"
+    const val TargetVersion = "1.4.1"
+    const val SourceRevision = "4fab9da0fad2e5c974e0e66ec88632c61745751c"
 
     enum class Appearance { LIGHT, DARK, DEEP_DARK }
 
