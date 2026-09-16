@@ -1,7 +1,8 @@
 package com.goreecloud.keyboard
 
 /**
- * Keyboard-specific GLAZE UI V1.4 Optical Intelligence resolver.
+ * Keyboard-specific GLAZE UI V1.4.1 Optical Hardening resolver used as the
+ * inherited optical/material baseline for GLAZE UI V1.5.0.
  *
  * This resolver is intentionally stricter than the generic Glaze optical engine:
  * editor text, composing text, suggestions, clipboard state, application identity,
@@ -9,8 +10,8 @@ package com.goreecloud.keyboard
  * Keyboard uses only non-content local presentation/accessibility state.
  */
 internal object GlazeKeyboardOptics {
-    const val TargetVersion = "1.4.0"
-    const val StableSourceRevision = "84cb3db4884042f0fa25ed6d475a127fb110f596"
+    const val TargetVersion = "1.4.1"
+    const val StableSourceRevision = "4fab9da0fad2e5c974e0e66ec88632c61745751c"
     const val MaxEnvironmentalColorMemoryInfluence = 0f
     const val EditorContentMayDriveOptics = false
     const val ClipboardMayDriveOptics = false
