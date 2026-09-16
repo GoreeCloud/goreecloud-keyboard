@@ -7,14 +7,20 @@ import org.junit.Test
 
 class GlazeKeyboardTokensTest {
     @Test
-    fun currentMappingPinsExactGlazeUiV14StableAuthority() {
-        assertEquals("1.4.0", GlazeKeyboardTokens.TargetVersion)
+    fun currentOpticalMappingPinsExactGlazeUiV141StableAuthority() {
+        assertEquals("1.4.1", GlazeKeyboardTokens.TargetVersion)
         assertEquals(
-            "84cb3db4884042f0fa25ed6d475a127fb110f596",
+            "4fab9da0fad2e5c974e0e66ec88632c61745751c",
             GlazeKeyboardTokens.SourceRevision
         )
         assertEquals(GlazeKeyboardOptics.TargetVersion, GlazeKeyboardTokens.TargetVersion)
         assertEquals(GlazeKeyboardOptics.StableSourceRevision, GlazeKeyboardTokens.SourceRevision)
+        assertEquals("1.5.0", GlazeKeyboardCapabilityV15.TargetVersion)
+        assertEquals("1.4.1", GlazeKeyboardCapabilityV15.OpticalBaselineVersion)
+        assertEquals(
+            GlazeKeyboardTokens.SourceRevision,
+            GlazeKeyboardCapabilityV15.OpticalBaselineRevision,
+        )
     }
 
     @Test
@@ -91,7 +97,7 @@ class GlazeKeyboardTokensTest {
     }
 
     @Test
-    fun v14AtmosphereCannotTintSubstrateOrEnableSensitiveObservation() {
+    fun inheritedAtmosphereCannotTintSubstrateOrEnableSensitiveObservation() {
         assertEquals(0f, GlazeKeyboardAtmosphere.DefaultMaterialTintContribution)
         assertFalse(GlazeKeyboardAtmosphere.TealAsBaseMaterialAllowed)
         assertFalse(GlazeKeyboardAtmosphere.GreenAsBaseMaterialAllowed)
